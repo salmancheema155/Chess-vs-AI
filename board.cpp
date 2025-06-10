@@ -24,19 +24,19 @@ Chess::PieceColour Board::getTurn() {
 }
 
 bool Board::getKingsideCastle(Chess::PieceColour colour) {
-    return kingsideCastle[toIndex(colour)];
+    return kingsideCastle[Chess::toIndex(colour)];
 }
 
 bool Board::getQueensideCastle(Chess::PieceColour colour) {
-    return queensideCastle[toIndex(colour)];
+    return queensideCastle[Chess::toIndex(colour)];
 }
 
 void Board::nullifyKingsideCastle(Chess::PieceColour colour) {
-    kingsideCastle[toIndex(colour)] = false;
+    kingsideCastle[Chess::toIndex(colour)] = false;
 }
 
 void Board::nullifyQueensideCastle(Chess::PieceColour colour) {
-    queensideCastle[toIndex(colour)] = false;
+    queensideCastle[Chess::toIndex(colour)] = false;
 }
 
 void Board::switchTurn() {
@@ -45,14 +45,10 @@ void Board::switchTurn() {
               : Chess::PieceColour::WHITE;
 }
 
-void Board::addPiece(Chess::PieceType type, Chess::PieceColour colour, uint8_t square) {
-
+void Board::addPiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square) {
+    pieceBitboards[Chess::toIndex(colour)][Chess::toIndex(piece)] |= (1ULL << square);
 }
 
-void Board::removePiece(Chess::PieceType type, Chess::PieceColour colour, uint8_t square) {
-
-}
-
-void Board::clearBoard() {
-
+void Board::removePiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square) {
+    pieceBitboards[Chess::toIndex(colour)][Chess::toIndex(piece)] &= ~((1ULL) << square);
 }

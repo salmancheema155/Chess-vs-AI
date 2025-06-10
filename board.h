@@ -59,7 +59,7 @@ public:
      * @param colour Colour of piece
      * @param square Square to add the piece to (0-63)
      */
-    void addPiece(Chess::PieceType type, Chess::PieceColour colour, uint8_t square);
+    void addPiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square);
 
     /**
      * Remove a piece from the board
@@ -67,7 +67,7 @@ public:
      * @param colour Colour of piece
      * @param square Square to remove the piece from (0-63)
      */
-    void removePiece(Chess::PieceType type, Chess::PieceColour colour, uint8_t square);
+    void removePiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square);
 
 private:
     Chess::PieceColour currTurn;
@@ -76,8 +76,6 @@ private:
 
     // Indexed as [colour][pieceType]
     std::array<std::array<Bitboard, toIndex(Chess::PieceType::COUNT)>, 2> pieceBitboards;
-
-    void clearBoard();
 };
 
 #endif // BOARD_H
