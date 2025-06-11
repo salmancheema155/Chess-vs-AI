@@ -5,8 +5,6 @@
 #include <array>
 #include "chess_types.h"
 
-using Bitboard = uint64_t;
-
 /**
  * Class representing current board state
  * Stores positions of each existing piece, current player turn and castling rights
@@ -14,39 +12,43 @@ using Bitboard = uint64_t;
  */
 class Board {
 public:
+    using Bitboard = Chess::Bitboard;
+    using Piece = Chess::PieceType;
+    using Colour = Chess::PieceColour;
+    
     Board();
 
     /**
      * @brief Gets current player's turn
      * @return PieceColour enum representing player's turn
     */
-    Chess::PieceColour getTurn();
+    Colour getTurn() const;
 
     /**
      * @brief Returns if can kingside castle
      * @param colour Player colour
      * @return True if can kingside castle else False
     */
-    bool getKingsideCastle(Chess::PieceColour colour);
+    bool getKingsideCastle(Colour colour) const;
 
     /**
      * @brief Checks if can queenside castle
      * @param colour Player colour
      * @return True if can queenside castle else False
     */
-    bool getQueensideCastle(Chess::PieceColour colour);
+    bool getQueensideCastle(Colour colour) const;
 
     /**
      * @brief Prevents king's side castling
      * @param colour Player colour
     */
-    void nullifyKingsideCastle(Chess::PieceColour colour);
+    void nullifyKingsideCastle(Colour colour);
 
     /**
      * @brief Prevents queen's side castling
      * @param colour Player colour
     */
-    void nullifyQueensideCastle(Chess::PieceColour colour);
+    void nullifyQueensideCastle(Colour colour);
 
     /**
      * @brief Switches the current player turn to opposing player
@@ -59,7 +61,7 @@ public:
      * @param colour Colour of piece
      * @param square Square to add the piece to (0-63)
      */
-    void addPiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square);
+    void addPiece(Piece piece, Colour colour, uint8_t square);
 
     /**
      * Remove a piece from the board
@@ -67,15 +69,20 @@ public:
      * @param colour Colour of piece
      * @param square Square to remove the piece from (0-63)
      */
-    void removePiece(Chess::PieceType piece, Chess::PieceColour colour, uint8_t square);
+    void removePiece(Piece piece, Colour colour, uint8_t square);
 
 private:
-    Chess::PieceColour currTurn;
+    Colour currTurn;
     std::array<bool, 2> kingsideCastle;
     std::array<bool, 2> queensideCastle;
+    Bitboard whitePiecesBitboard;
+    Bitboard blackPiecesBitboard;
+    Bitboard piecesBitboard;
 
     // Indexed as [colour][pieceType]
-    std::array<std::array<Bitboard, toIndex(Chess::PieceType::COUNT)>, 2> pieceBitboards;
+    std::array<std::array<Bitboard, Chess::toIndex(Piece::COUNT)>, 2> pieceBitboards;
+
+    void resetPieces();
 };
 
 #endif // BOARD_H
