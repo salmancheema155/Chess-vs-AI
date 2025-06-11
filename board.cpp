@@ -16,6 +16,18 @@ Colour Board::getTurn() const {
     return currTurn;
 }
 
+Bitboard Board::getPiecesBitboard() const {
+    return piecesBitboard;
+}
+
+Bitboard Board::getWhitePiecesBitboard() const {
+    return whitePiecesBitboard;
+}
+
+Bitboard Board::getBlackPiecesBitboard() const {
+    return blackPiecesBitboard;
+}
+
 bool Board::getKingsideCastle(Colour colour) const {
     return kingsideCastle[toIndex(colour)];
 }
@@ -37,11 +49,22 @@ void Board::switchTurn() {
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
-    pieceBitboards[toIndex(colour)][toIndex(piece)] |= (1ULL << square);
+    Bitboard& board = (colour == Colour::WHITE) ? whitePiecesBitboard : blackPiecesBitboard;
+    uint64_t mask = 1ULL << square;
+    board |= mask;
+    pieceBitboards[toIndex(colour)][toIndex(piece)] |= mask;
 }
 
 void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
-    pieceBitboards[toIndex(colour)][toIndex(piece)] &= ~((1ULL) << square);
+    Bitboard& board = (colour == Colour::WHITE) ? whitePiecesBitboard : blackPiecesBitboard;
+    uint64_t mask = ~(1ULL << square);
+    board &= mask;
+    pieceBitboards[toIndex(colour)][toIndex(piece)] &= mask;
+}
+
+void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare) {
+    removePiece(piece, colour, fromSquare);
+    addPiece(piece, colour, toSquare);
 }
 
 void Board::resetPieces() {

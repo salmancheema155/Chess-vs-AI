@@ -5,7 +5,9 @@
 #include <type_traits>
 
 namespace Chess {
-    enum class PieceType : int {
+    using Bitboard = uint64_t;
+
+    enum class PieceType : uint8_t {
         PAWN = 0,
         KNIGHT = 1,
         BISHOP = 2,
@@ -24,8 +26,8 @@ namespace Chess {
      * Convert an enum value to its corresponding integer value
      * @param item Enum value to convert
      * @return Corresponding integer value for the enum
-     * The enum value must have a corresponding integer value and integer values
-     * must be contiguous start from 0
+     * @warning The enum value must have a corresponding integer value and 
+     * integer values must be contiguous start from 0
      */
     template <typename Enum>
     inline constexpr std::underlying_type_t<Enum> toIndex(Enum item) {

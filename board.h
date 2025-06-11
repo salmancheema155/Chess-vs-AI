@@ -15,7 +15,7 @@ public:
     using Bitboard = Chess::Bitboard;
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
-    
+
     Board();
 
     /**
@@ -23,6 +23,24 @@ public:
      * @return PieceColour enum representing player's turn
     */
     Colour getTurn() const;
+
+    /**
+     * @brief Gets bitboard representing current board state
+     * @return Bitboard of current board
+     */
+    Bitboard getPiecesBitboard() const;
+
+    /**
+     * @brief Gets bitboard representing white pieces current board state
+     * @return Bitboard of white pieces
+     */
+    Bitboard getWhitePiecesBitboard() const;
+
+    /**
+     * @brief Gets bitboard representing black pieces current board state
+     * @return Bitboard of black pieces
+     */
+    Bitboard getBlackPiecesBitboard() const;
 
     /**
      * @brief Returns if can kingside castle
@@ -57,7 +75,7 @@ public:
 
     /**
      * Adds a piece to the board
-     * @param type Type of piece e.g. PAWN
+     * @param piece Type of piece e.g. PAWN
      * @param colour Colour of piece
      * @param square Square to add the piece to (0-63)
      */
@@ -65,11 +83,22 @@ public:
 
     /**
      * Remove a piece from the board
-     * @param type Type of piece e.g. PAWN
+     * @param piece Type of piece e.g. PAWN
      * @param colour Colour of piece
      * @param square Square to remove the piece from (0-63)
      */
     void removePiece(Piece piece, Colour colour, uint8_t square);
+
+    /**
+     * Moves a piece from a square to another
+     * @param piece Type of piece e.g. PAWN
+     * @param colour Colour of piece
+     * @param fromSquare Square to move the piece from (0-63)
+     * @param toSquare Square to move the piece to (0-63)
+     * @attention This function moves a piece and updates it on the board without 
+     * checking if the move is valid
+     */
+    void movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare);
 
 private:
     Colour currTurn;
