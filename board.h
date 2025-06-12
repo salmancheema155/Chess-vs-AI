@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <array>
+#include <optional>
 #include "chess_types.h"
 
 /**
@@ -43,6 +44,13 @@ public:
     Bitboard getBlackPiecesBitboard() const;
 
     /**
+     * @brief Gets the square of the pawn that just moved 2 steps forward
+     * @return Square of the pawn that just moved 2 steps forward if it exists
+     * else std::nullopt if the last move was not a pawn 2 forward
+     */
+    std::optional<uint8_t> getEnPassantSquare() const;
+
+    /**
      * @brief Returns if can kingside castle
      * @param colour Player colour
      * @return True if can kingside castle else False
@@ -72,6 +80,12 @@ public:
      * @brief Switches the current player turn to opposing player
     */
     void switchTurn();
+
+    /**
+     * @brief Updates the square of the pawn that just moved 2 forward
+     * if it exists otherwise updates with std::nullopt
+     */
+    void setEnPassantSquare(std::optional<uint8_t> square);
 
     /**
      * Adds a piece to the board
@@ -104,6 +118,7 @@ private:
     Colour currTurn;
     std::array<bool, 2> kingsideCastle;
     std::array<bool, 2> queensideCastle;
+    std::optional<uint8_t> enPassantSquare;
     Bitboard whitePiecesBitboard;
     Bitboard blackPiecesBitboard;
     Bitboard piecesBitboard;

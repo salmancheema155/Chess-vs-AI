@@ -40,12 +40,12 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
     std::vector<Move> moves;
     Bitboard piecesBitboard = board.getPiecesBitboard();
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
-    uint8_t nextSquare = currSquare += 8 * direction;
+    uint8_t nextSquare = currSquare + 8 * direction;
 
     if ((piecesBitboard & (1ULL << nextSquare)) == 0) {
         moves.push_back(makeMove(piece, colour, currSquare, nextSquare));
 
-        nextSquare += direction * 8;
+        nextSquare += 8 * direction;
         if (nextSquare < 64) {
             uint8_t firstUnmovedPawnSquare = 28 - 20 * direction;
             bool isUnmoved = firstUnmovedPawnSquare <= currSquare && currSquare < firstUnmovedPawnSquare + 8;
@@ -58,10 +58,16 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
     Bitboard opposingBitboard = (colour == Colour::WHITE) ?
                                 board.getBlackPiecesBitboard() :
                                 board.getWhitePiecesBitboard();
+
     if ((currSquare & 0x7) != 0) {
         uint8_t nextLeftSquare = currSquare + 8 * direction - 1;
         if ((opposingBitboard & (1ULL << nextLeftSquare)) != 0) {
             moves.push_back(makeMove(piece, colour, currSquare, nextLeftSquare, true));
+        }
+
+        const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
+        if (enPassantSquare && currSquare == (*enPassantSquare) + 1) {
+            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, true));
         }
     }
 
@@ -69,6 +75,11 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
         uint8_t nextRightSquare = currSquare + 8 * direction + 1;
         if ((opposingBitboard & (1ULL << nextRightSquare)) != 0) {
             moves.push_back(makeMove(piece, colour, currSquare, nextRightSquare, true));
+        }
+
+        const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
+        if (enPassantSquare && currSquare == (*enPassantSquare) - 1) {
+            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, true));
         }
     }
 
