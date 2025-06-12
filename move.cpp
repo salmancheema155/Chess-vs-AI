@@ -1,13 +1,35 @@
 #include <vector>
+#include <array>
+#include <optional>
 #include <cstdint>
 #include <cassert>
-#include <chess_types.h>
+#include "chess_types.h"
 #include "board.h"
 #include "move.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
+
+static constexpr std::array<Bitboard, 64> knightMoveTable = []() {
+    std::array<Bitboard, 64> table {};
+    constexpr int offsets[8][2] = {{1, 2}, {2, 1}, {2, -1}, {1, -2},
+                                    {-1, -2}, {-2, -1}, {-2, 1}, {-1 , 2}};
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            Bitboard moves = 0ULL;
+            for (auto& offset : offsets) {
+                int row = i + offset[0];
+                int col = j + offset[1];
+                if (0 <= row && row < 8 && 0 <= col && col < 8) {
+                    moves |= (1ULL << (8 * row + col));                    
+                }
+            }
+            table[8 * i + j] = moves;
+        }
+    }
+    return table;
+}();
 
 std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece, 
                                             Colour colour, uint8_t currSquare) {
@@ -88,12 +110,28 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
 
 std::vector<Move> MoveGenerator::legalKnightMoves(const Board& board, Piece piece, 
                                                   Colour colour, uint8_t currSquare) {
+    std::vector<Move> moves;
+    Bitboard precomputedMoveBitboard = knightMoveTable[currSquare];
+    precomputedMoveBitboard &= ~board.getBitBoard(colour);
+    Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour);
 
+    uint8_t bitIndex = 0;
+    while (precomputedMoveBitboard) {
+        if (precomputedMoveBitboard & 0x1) {
+            std::optional<uint8_t> capture = (captureBitboard & 0x1) ? std::optional<uint8_t>(bitIndex) : std::nullopt;
+            moves.push_back(makeMove(piece, colour, currSquare, bitIndex, capture));
+        }
+        precomputedMoveBitboard >>= 1;
+        captureBitboard >>= 1;
+        bitIndex++;
+    }
+
+    return moves;
 }
 
 std::vector<Move> MoveGenerator::legalBishopMoves(const Board& board, Piece piece, 
                                                   Colour colour, uint8_t currSquare) {
-
+                                                    
 }
 
 std::vector<Move> MoveGenerator::legalRookMoves(const Board& board, Piece piece, 

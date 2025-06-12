@@ -32,6 +32,12 @@ Bitboard Board::getBlackPiecesBitboard() const {
     return blackPiecesBitboard;
 }
 
+Bitboard Board::getBitBoard(Colour colour) const {
+    return (colour == Colour::WHITE) ?
+            whitePiecesBitboard :
+            blackPiecesBitboard;
+}
+
 Bitboard Board::getOpposingBitboard(Colour colour) const {
     return (colour == Colour::WHITE) ?
             blackPiecesBitboard :

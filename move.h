@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <optional>
 #include "chess_types.h"
 #include "board.h"
 
@@ -14,7 +15,7 @@ struct Move {
     Chess::PieceColour colour;
     uint8_t fromSquare;
     uint8_t toSquare;
-    bool capture = false;
+    std::optional<uint8_t> captureSquare = std::nullopt;
 };
 
 /**
@@ -36,7 +37,8 @@ private:
     static std::vector<Move> legalKingMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
 
     static inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
-                                uint8_t fromSquare, uint8_t toSquare, bool capture);
+                                uint8_t fromSquare, uint8_t toSquare, 
+                                std::optional<uint8_t> captureSquare = std::nullopt);
 };
 
 #endif // MOVE_H
