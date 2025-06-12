@@ -44,6 +44,14 @@ public:
     Bitboard getBlackPiecesBitboard() const;
 
     /**
+     * @brief Gets the bitboard of the opposing colour's pieces
+     * @param colour Colour of player
+     * @return Bitboard of oppposing colour's pieces, e.g. if colour == WHITE,
+     * returns black pieces bitboard
+     */
+    Bitboard getOpposingBitboard(Colour colour) const;
+
+    /**
      * @brief Gets the square of the pawn that just moved 2 steps forward
      * @return Square of the pawn that just moved 2 steps forward if it exists
      * else std::nullopt if the last move was not a pawn 2 forward

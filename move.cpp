@@ -33,6 +33,8 @@ std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece,
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
     }
+
+    return {};
 }
 
 std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece, 
@@ -55,31 +57,29 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
         }
     }
 
-    Bitboard opposingBitboard = (colour == Colour::WHITE) ?
-                                board.getBlackPiecesBitboard() :
-                                board.getWhitePiecesBitboard();
+    Bitboard opposingBitboard = board.getOpposingBitboard(colour);
 
     if ((currSquare & 0x7) != 0) {
         uint8_t nextLeftSquare = currSquare + 8 * direction - 1;
         if ((opposingBitboard & (1ULL << nextLeftSquare)) != 0) {
-            moves.push_back(makeMove(piece, colour, currSquare, nextLeftSquare, true));
+            moves.push_back(makeMove(piece, colour, currSquare, nextLeftSquare, nextLeftSquare));
         }
 
         const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
         if (enPassantSquare && currSquare == (*enPassantSquare) + 1) {
-            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, true));
+            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
         }
     }
 
     if ((currSquare & 0x7) != 7) {
         uint8_t nextRightSquare = currSquare + 8 * direction + 1;
         if ((opposingBitboard & (1ULL << nextRightSquare)) != 0) {
-            moves.push_back(makeMove(piece, colour, currSquare, nextRightSquare, true));
+            moves.push_back(makeMove(piece, colour, currSquare, nextRightSquare, nextRightSquare));
         }
 
         const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
         if (enPassantSquare && currSquare == (*enPassantSquare) - 1) {
-            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, true));
+            moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
         }
     }
 
@@ -112,12 +112,13 @@ std::vector<Move> MoveGenerator::legalKingMoves(const Board& board, Piece piece,
 }
 
 Move MoveGenerator::makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
-                             uint8_t fromSquare, uint8_t toSquare, bool capture = false) {
+                             uint8_t fromSquare, uint8_t toSquare, 
+                             std::optional<uint8_t> captureSquare) {
     return {
         .piece = piece,
         .colour = colour,
         .fromSquare = fromSquare,
         .toSquare = toSquare,
-        .capture = capture
+        .captureSquare = captureSquare
     };
 }
