@@ -5,7 +5,7 @@
 #include <cassert>
 #include "chess_types.h"
 #include "board.h"
-#include "move.h"
+#include "move_generator.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
