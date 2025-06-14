@@ -242,6 +242,10 @@ private:
     // Indexed as [colour][pieceType]
     std::array<std::array<Bitboard, Chess::toIndex(Piece::COUNT)>, 2> pieceBitboards;
 
+    /**
+     * @brief Resets the pieces back to their original starting position
+     * @warning Does not reset en passant information, castling rights or turn control
+     */
     void resetPieces();
 };
 
