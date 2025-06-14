@@ -23,47 +23,66 @@ public:
      * @brief Gets current player's turn
      * @return PieceColour enum representing player's turn
     */
-    Colour getTurn() const;
+    inline Colour getTurn() const {
+        return currTurn;
+    }
 
     /**
      * @brief Gets bitboard representing current board state
      * @return Bitboard of current board
      */
-    Bitboard getPiecesBitboard() const;
+    inline Bitboard getPiecesBitboard() const {
+        return piecesBitboard;
+    }
 
     /**
      * @brief Gets bitboard representing white pieces current board state
      * @return Bitboard of white pieces
      */
-    Bitboard getWhitePiecesBitboard() const;
+    inline Bitboard getWhitePiecesBitboard() const {
+        return whitePiecesBitboard;
+    }
 
     /**
      * @brief Gets bitboard representing black pieces current board state
      * @return Bitboard of black pieces
      */
-    Bitboard getBlackPiecesBitboard() const;
+    inline Bitboard getBlackPiecesBitboard() const {
+        return blackPiecesBitboard;
+    }
 
     /**
      * @brief Gets bitboard for specified colour
      * @param colour Colour of player
      * @return Bitboard representation of player's pieces
      */
-    Bitboard getBitBoard(Colour colour) const;
+    inline Bitboard getBitBoard(Colour colour) const {
+        return (colour == Colour::WHITE) ?
+            whitePiecesBitboard :
+            blackPiecesBitboard;
+    }
 
     /**
      * @brief Gets the bitboard of the opposing colour's pieces
      * @param colour Colour of player
      * @return Bitboard of oppposing colour's pieces, e.g. if colour == WHITE,
      * returns black pieces bitboard
+     * @note colour is the colour of the player, not the opponent
      */
-    Bitboard getOpposingBitboard(Colour colour) const;
+    inline Bitboard getOpposingBitboard(Colour colour) const {
+        return (colour == Colour::WHITE) ?
+            blackPiecesBitboard :
+            whitePiecesBitboard;
+    }
 
     /**
      * @brief Gets the square of the pawn that just moved 2 steps forward
      * @return Square of the pawn that just moved 2 steps forward if it exists
      * else std::nullopt if the last move was not a pawn 2 forward
      */
-    std::optional<uint8_t> getEnPassantSquare() const;
+    inline std::optional<uint8_t> getEnPassantSquare() const {
+        return enPassantSquare;
+    }
 
     /**
      * @brief Gets the colour of the piece that occupies the square
@@ -74,41 +93,92 @@ public:
     std::optional<Colour> getColour(uint8_t square) const;
 
     /**
+     * @brief Checks if a square is empty
+     * @param square Square to check if it is empty (0-63)
+     * @return True if square is empty, otherwise false
+     */
+    inline bool isEmpty(uint8_t square) const {
+        return !(piecesBitboard & (1ULL << square));
+    }
+
+    /**
+     * @brief Checks if a square is occupied
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied, otherwise false
+     */
+    inline bool isOccupied(uint8_t square) const {
+        return piecesBitboard & (1ULL << square);
+    }
+
+    /**
+     * @brief Checks if a player occupies a square
+     * @param colour Colour of player
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied by player, otherwise false
+     */
+    inline bool isSelfOccupied(Colour colour, uint8_t square) const {
+        return getBitBoard(colour) & (1ULL << square);
+    }
+
+    /**
+     * @brief Checks if opponent occupies a square
+     * @param colour Colour of player
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied by opponent, otherwise false
+     * @note colour is the colour of the player, not the opponent
+     */
+    inline bool isOpponentOccupied(Colour colour, uint8_t square) const {
+        return getOpposingBitboard(colour) & (1ULL << square);
+    }
+
+    /**
      * @brief Returns if can kingside castle
      * @param colour Player colour
      * @return True if can kingside castle else False
     */
-    bool getKingsideCastle(Colour colour) const;
+    inline bool getKingsideCastle(Colour colour) const {
+        return kingsideCastle[toIndex(colour)];
+    }
 
     /**
      * @brief Checks if can queenside castle
      * @param colour Player colour
      * @return True if can queenside castle else False
     */
-    bool getQueensideCastle(Colour colour) const;
+    inline bool getQueensideCastle(Colour colour) const {
+        return queensideCastle[toIndex(colour)];
+    }
 
     /**
      * @brief Prevents king's side castling
      * @param colour Player colour
     */
-    void nullifyKingsideCastle(Colour colour);
+    inline void nullifyKingsideCastle(Colour colour) {
+        kingsideCastle[toIndex(colour)] = false;
+    }
 
     /**
      * @brief Prevents queen's side castling
      * @param colour Player colour
     */
-    void nullifyQueensideCastle(Colour colour);
+    inline void nullifyQueensideCastle(Colour colour) {
+        queensideCastle[toIndex(colour)] = false;
+    }
 
     /**
      * @brief Switches the current player turn to opposing player
     */
-    void switchTurn();
+    inline void switchTurn() {
+        currTurn = (currTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+    }
 
     /**
      * @brief Updates the square of the pawn that just moved 2 forward
      * if it exists otherwise updates with std::nullopt
      */
-    void setEnPassantSquare(std::optional<uint8_t> square);
+    inline void setEnPassantSquare(std::optional<uint8_t> square) {
+        enPassantSquare = square;
+    }
 
     /**
      * Adds a piece to the board
@@ -138,18 +208,27 @@ public:
     void movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare);
 
     /**
+     * @brief Resets board back to initial state
+     */
+    void resetBoard();
+
+    /**
      * @brief Gets the rank that a square is located in
      * @param square Square to find the rank of (0-63)
      * @return Rank of the square
      */
-    static inline uint8_t getRank(uint8_t square);
+    static inline uint8_t getRank(uint8_t square) {
+        return square >> 3;
+    }
 
     /**
      * @brief Gets the file that the square is located in (as an integer)
      * @param square Square to find the file of (0-63)
      * @return File of the square
      */
-    static inline uint8_t getFile(uint8_t square);
+    static inline uint8_t getFile(uint8_t square) {
+        return square & 0x7;
+    }
 
 private:
     Colour currTurn;

@@ -16,38 +16,6 @@ Board::Board() : currTurn(Colour::WHITE),
     resetPieces();
 }
 
-Colour Board::getTurn() const {
-    return currTurn;
-}
-
-Bitboard Board::getPiecesBitboard() const {
-    return piecesBitboard;
-}
-
-Bitboard Board::getWhitePiecesBitboard() const {
-    return whitePiecesBitboard;
-}
-
-Bitboard Board::getBlackPiecesBitboard() const {
-    return blackPiecesBitboard;
-}
-
-Bitboard Board::getBitBoard(Colour colour) const {
-    return (colour == Colour::WHITE) ?
-            whitePiecesBitboard :
-            blackPiecesBitboard;
-}
-
-Bitboard Board::getOpposingBitboard(Colour colour) const {
-    return (colour == Colour::WHITE) ?
-            blackPiecesBitboard :
-            whitePiecesBitboard;
-}
-
-std::optional<uint8_t> Board::getEnPassantSquare() const {
-    return enPassantSquare;
-}
-
 std::optional<Colour> Board::getColour(uint8_t square) const {
     if (whitePiecesBitboard & (1ULL << square)) {
         return std::optional<Colour>(Colour::WHITE);
@@ -55,38 +23,6 @@ std::optional<Colour> Board::getColour(uint8_t square) const {
         return std::optional<Colour>(Colour::BLACK);
     }
     return std::nullopt;
-}
-
-uint8_t Board::getRank(uint8_t square) {
-    return square >> 3;
-}
-
-uint8_t Board::getFile(uint8_t square) {
-    return square & 0x7;
-}
-
-bool Board::getKingsideCastle(Colour colour) const {
-    return kingsideCastle[toIndex(colour)];
-}
-
-bool Board::getQueensideCastle(Colour colour) const {
-    return queensideCastle[toIndex(colour)];
-}
-
-void Board::nullifyKingsideCastle(Colour colour) {
-    kingsideCastle[toIndex(colour)] = false;
-}
-
-void Board::nullifyQueensideCastle(Colour colour) {
-    queensideCastle[toIndex(colour)] = false;
-}
-
-void Board::switchTurn() {
-    currTurn = (currTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-}
-
-void Board::setEnPassantSquare(std::optional<uint8_t> square) {
-    enPassantSquare = square;
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
@@ -108,6 +44,14 @@ void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
 void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare) {
     removePiece(piece, colour, fromSquare);
     addPiece(piece, colour, toSquare);
+}
+
+void Board::resetBoard() {
+    currTurn = Colour::WHITE;
+    kingsideCastle[0] = true, kingsideCastle[1] = true;
+    queensideCastle[0] = true, queensideCastle[1] = true;
+    enPassantSquare = std::nullopt;
+    resetPieces();
 }
 
 void Board::resetPieces() {

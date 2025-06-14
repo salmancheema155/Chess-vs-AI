@@ -19,7 +19,7 @@ struct Move {
 };
 
 /**
- * Class which provides provides functions to obtain
+ * Class which provides functions to obtain
  * legal moves
  */
 class MoveGenerator {
@@ -27,9 +27,6 @@ public:
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
     static std::vector<Move> legalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
-                                uint8_t fromSquare, uint8_t toSquare, 
-                                std::optional<uint8_t> captureSquare = std::nullopt);
 
 private:
     static void legalPawnMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
