@@ -11,11 +11,11 @@
  * Struct holding data to represent a move
  */
 struct Move {
-    Chess::PieceType piece;
-    Chess::PieceColour colour;
-    uint8_t fromSquare;
-    uint8_t toSquare;
-    std::optional<uint8_t> captureSquare = std::nullopt;
+    Chess::PieceType piece; ///< Piece that is moving
+    Chess::PieceColour colour; ///< Colour of piece
+    uint8_t fromSquare; ///< Square the piece is moving from
+    uint8_t toSquare; ///< Square the piece is moving to
+    std::optional<uint8_t> captureSquare = std::nullopt; ///< Piece that is captured from this move
 };
 
 /**
@@ -55,9 +55,13 @@ private:
     /// \copydoc MoveGenerator::legalPawnMoves
     static void legalBishopMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 
-
+    /// \copydoc MoveGenerator::legalPawnMoves
     static void legalRookMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::legalPawnMoves
     static void legalQueenMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::legalPawnMoves
     static void legalKingMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 };
 

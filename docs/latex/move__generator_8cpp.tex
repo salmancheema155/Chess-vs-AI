@@ -1,0 +1,42 @@
+\doxysection{backend/src/move\+\_\+generator.cpp File Reference}
+\hypertarget{move__generator_8cpp}{}\label{move__generator_8cpp}\index{backend/src/move\_generator.cpp@{backend/src/move\_generator.cpp}}
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$array$>$}\newline
+{\ttfamily \#include $<$optional$>$}\newline
+{\ttfamily \#include $<$cstdint$>$}\newline
+{\ttfamily \#include $<$cassert$>$}\newline
+{\ttfamily \#include "{}chess\+\_\+types.\+h"{}}\newline
+{\ttfamily \#include "{}board.\+h"{}}\newline
+{\ttfamily \#include "{}move\+\_\+generator.\+h"{}}\newline
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{move__generator_8cpp_a4de554c940fc3363d5105580364050bd}{Bitboard}} = \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess\+::\+Bitboard}}
+\item 
+using \mbox{\hyperlink{move__generator_8cpp_adce465eaf40a62772dd20a382f2ce663}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}
+\item 
+using \mbox{\hyperlink{move__generator_8cpp_a89c1fbc82b77a9ef75e31789afede1ef}{Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}
+\end{DoxyCompactItemize}
+
+
+\label{doc-typedef-members}
+\Hypertarget{move__generator_8cpp_doc-typedef-members}
+\doxysubsection{Typedef Documentation}
+\Hypertarget{move__generator_8cpp_a4de554c940fc3363d5105580364050bd}\index{move\_generator.cpp@{move\_generator.cpp}!Bitboard@{Bitboard}}
+\index{Bitboard@{Bitboard}!move\_generator.cpp@{move\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{Bitboard}{Bitboard}}
+{\footnotesize\ttfamily \label{move__generator_8cpp_a4de554c940fc3363d5105580364050bd} 
+using \mbox{\hyperlink{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}{Bitboard}} = \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess\+::\+Bitboard}}}
+
+\Hypertarget{move__generator_8cpp_a89c1fbc82b77a9ef75e31789afede1ef}\index{move\_generator.cpp@{move\_generator.cpp}!Colour@{Colour}}
+\index{Colour@{Colour}!move\_generator.cpp@{move\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{Colour}{Colour}}
+{\footnotesize\ttfamily \label{move__generator_8cpp_a89c1fbc82b77a9ef75e31789afede1ef} 
+using \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}}
+
+\Hypertarget{move__generator_8cpp_adce465eaf40a62772dd20a382f2ce663}\index{move\_generator.cpp@{move\_generator.cpp}!Piece@{Piece}}
+\index{Piece@{Piece}!move\_generator.cpp@{move\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{Piece}{Piece}}
+{\footnotesize\ttfamily \label{move__generator_8cpp_adce465eaf40a62772dd20a382f2ce663} 
+using \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}}
+

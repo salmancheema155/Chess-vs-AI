@@ -12,6 +12,15 @@ using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
 namespace {
+    /**
+     * @brief Creates instance of Move struct
+     * @param piece Piece to move
+     * @param colour Colour of piece
+     * @param fromSquare Square that the piece moves from
+     * @param toSquare Square that the piece moves to
+     * @param captureSquare Piece that is captured from this move
+     * @return Move instance representing the move
+     */
     inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
                             uint8_t fromSquare, uint8_t toSquare, 
                             std::optional<uint8_t> captureSquare = std::nullopt) {
@@ -23,6 +32,11 @@ namespace {
         .captureSquare = captureSquare
     };
 }
+    /**
+     * @brief Given an array of offsets, generates a table of possible moves
+     * @param offsets An array of offset values where each offset value is represented as [offsetX, offsetY]
+     * @return Array of bitboard representations of possible moves
+     */
     template <size_t N>
     constexpr std::array<Bitboard, 64> generateMoveTable(const std::array<std::array<int, 2>, N>& offsets) {
         std::array<Bitboard, 64> table {};
@@ -43,26 +57,52 @@ namespace {
         return table;
     }
 
+    /**
+     * @brief Generates a possible move table for knights
+     */
     constexpr std::array<Bitboard, 64> generateKnightMoveTable() {
         std::array<std::array<int, 2>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2},
                                                     {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
         return generateMoveTable(offsets);
     }
 
+    /**
+     * @brief Generates a possible move table for a king
+     */
     constexpr std::array<Bitboard, 64> generateKingMoveTable() {
         std::array<std::array<int, 2>, 8> offsets = {{{0, 1}, {1, 1}, {1, 0}, {1, -1},
                                                     {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
         return generateMoveTable(offsets);
     }
 
+    /**
+     * @brief Gets bit index of least significant set bit
+     */
     inline int bitScan(Bitboard bitboard) {
         return __builtin_ctzll(bitboard);
     }
 
+    /**
+     * @brief Checks if a bit is set
+     * @param num Number to check for the set bit
+     * @param shift Bit index to check for the set bit starting from least significant bit
+     */
     inline bool bitSet(uint64_t num, uint8_t shift) {
         return num & (1ULL << shift);
     }
 
+    /**
+     * @brief Generates legal moves for a piece using a precomputed table of moves
+     * @param board Board object representing current board state
+     * @param piece Piece to find legal moves for
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Vector to append legal moves to
+     * @param precomputedMoveBitboard Bitboard representation of possible moves for that piece (from table lookup)
+     * @warning This function does not take into account king safety
+     * It is possible that the moves generated from this function can put the king in direct danger
+     * Use MoveGenerator::legalMoves instead to take into account king safety
+     */
     void legalMovesFromTable(const Board& board, Piece piece, Colour colour, uint8_t currSquare, 
                             std::vector<Move>& moves, Bitboard precomputedMoveBitboard) {
 

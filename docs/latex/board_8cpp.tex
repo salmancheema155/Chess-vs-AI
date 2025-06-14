@@ -1,0 +1,67 @@
+\doxysection{backend/src/board.cpp File Reference}
+\hypertarget{board_8cpp}{}\label{board_8cpp}\index{backend/src/board.cpp@{backend/src/board.cpp}}
+{\ttfamily \#include $<$cstdint$>$}\newline
+{\ttfamily \#include $<$optional$>$}\newline
+{\ttfamily \#include $<$array$>$}\newline
+{\ttfamily \#include "{}board.\+h"{}}\newline
+{\ttfamily \#include "{}chess\+\_\+types.\+h"{}}\newline
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}{Bitboard}} = \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Board\+::\+Bitboard}}
+\item 
+using \mbox{\hyperlink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Board\+::\+Piece}}
+\item 
+using \mbox{\hyperlink{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}{Colour}} = \mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Board\+::\+Colour}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename Enum$>$ }\\constexpr std\+::underlying\+\_\+type\+\_\+t$<$ Enum $>$ \mbox{\hyperlink{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}{to\+Index}} (Enum item)
+\end{DoxyCompactItemize}
+
+
+\label{doc-typedef-members}
+\Hypertarget{board_8cpp_doc-typedef-members}
+\doxysubsection{Typedef Documentation}
+\Hypertarget{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}\index{board.cpp@{board.cpp}!Bitboard@{Bitboard}}
+\index{Bitboard@{Bitboard}!board.cpp@{board.cpp}}
+\doxysubsubsection{\texorpdfstring{Bitboard}{Bitboard}}
+{\footnotesize\ttfamily \label{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0} 
+using \mbox{\hyperlink{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}{Bitboard}} = \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Board\+::\+Bitboard}}}
+
+\Hypertarget{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}\index{board.cpp@{board.cpp}!Colour@{Colour}}
+\index{Colour@{Colour}!board.cpp@{board.cpp}}
+\doxysubsubsection{\texorpdfstring{Colour}{Colour}}
+{\footnotesize\ttfamily \label{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26} 
+using \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} = \mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Board\+::\+Colour}}}
+
+\Hypertarget{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}\index{board.cpp@{board.cpp}!Piece@{Piece}}
+\index{Piece@{Piece}!board.cpp@{board.cpp}}
+\doxysubsubsection{\texorpdfstring{Piece}{Piece}}
+{\footnotesize\ttfamily \label{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c} 
+using \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Board\+::\+Piece}}}
+
+
+
+\label{doc-func-members}
+\Hypertarget{board_8cpp_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}\index{board.cpp@{board.cpp}!toIndex@{toIndex}}
+\index{toIndex@{toIndex}!board.cpp@{board.cpp}}
+\doxysubsubsection{\texorpdfstring{toIndex()}{toIndex()}}
+{\footnotesize\ttfamily \label{board_8cpp_a6262d972b405ab71204f1171c2ed02cc} 
+template$<$typename Enum$>$ \\
+std\+::underlying\+\_\+type\+\_\+t$<$ Enum $>$ Chess\+::to\+Index (\begin{DoxyParamCaption}\item[{Enum}]{item}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [constexpr]}}
+
+Convert an enum value to its corresponding integer value 
+\begin{DoxyParams}{Parameters}
+{\em item} & Enum value to convert \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding integer value for the enum 
+\end{DoxyReturn}
+\begin{DoxyWarning}{Warning}
+The enum value must have a corresponding integer value and integer values must be contiguous start from 0 
+\end{DoxyWarning}

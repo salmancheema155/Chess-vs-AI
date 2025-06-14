@@ -7,6 +7,9 @@
 namespace Chess {
     using Bitboard = uint64_t;
 
+    /**
+     * Enum representing different types of pieces
+     */
     enum class PieceType : uint8_t {
         PAWN = 0,
         KNIGHT = 1,
@@ -14,9 +17,12 @@ namespace Chess {
         ROOK = 3,
         QUEEN = 4,
         KING = 5,
-        COUNT
+        COUNT ///< Number of pieces
     };
 
+    /**
+     * Enum representing different colours of pieces
+     */
     enum class PieceColour : uint8_t {
         WHITE = 0,
         BLACK = 1
@@ -27,7 +33,7 @@ namespace Chess {
      * @param item Enum value to convert
      * @return Corresponding integer value for the enum
      * @warning The enum value must have a corresponding integer value and 
-     * integer values must be contiguous start from 0
+     * integer values must be contiguous starting from 0
      */
     template <typename Enum>
     inline constexpr std::underlying_type_t<Enum> toIndex(Enum item) {

@@ -1,0 +1,38 @@
+\doxysection{chess\+\_\+types.\+h}
+\hypertarget{chess__types_8h_source}{}\label{chess__types_8h_source}\index{backend/include/chess\_types.h@{backend/include/chess\_types.h}}
+\mbox{\hyperlink{chess__types_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ CHESS\_TYPES\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ CHESS\_TYPES\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <type\_traits>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_chess}{Chess}}\ \{}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Bitboard}}\ =\ uint64\_t;}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{PieceType}}\ :\ uint8\_t\ \{}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a3acd2a53aca11e0f883236ea27a3b627}{PAWN}}\ =\ 0,}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446af7f210da15dbb4283299b2affd9bb238}{KNIGHT}}\ =\ 1,}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a1834d375f684613c725d039a10db1976}{BISHOP}}\ =\ 2,}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a97c60a3a4e61ee21e3f38a2f950fe293}{ROOK}}\ =\ 3,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a02d144e18eda99bcb94f3a764756805e}{QUEEN}}\ =\ 4,}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a123b28961dd0f97d91bcb55d7a3b7c1c}{KING}}\ =\ 5,}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446a4905ac9d6a22bdfc1ae096094ce6248d}{COUNT}}}
+\DoxyCodeLine{00018\ \ \ \ \ \};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{PieceColour}}\ :\ uint8\_t\ \{}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767ab5bf627e448384cf3a4c35121ca6008d}{WHITE}}\ =\ 0,}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767a08d0012388564e95c3b4a7407cf04965}{BLACK}}\ =\ 1}
+\DoxyCodeLine{00023\ \ \ \ \ \};}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Enum>}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{constexpr}\ std::underlying\_type\_t<Enum>\ \mbox{\hyperlink{namespace_chess_a6262d972b405ab71204f1171c2ed02cc}{toIndex}}(Enum\ item)\ \{}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_assert}(std::is\_enum\_v<Enum>,\ \textcolor{stringliteral}{"{}toIndex\ requires\ item\ of\ type\ Enum"{}});}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}std::underlying\_type\_t<Enum>\textcolor{keyword}{>}(item);}
+\DoxyCodeLine{00036\ \ \ \ \ \}}
+\DoxyCodeLine{00037\ \}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ CHESS\_TYPES\_H}}
+
+\end{DoxyCode}

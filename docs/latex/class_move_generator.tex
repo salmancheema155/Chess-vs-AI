@@ -1,0 +1,241 @@
+\doxysection{Move\+Generator Class Reference}
+\hypertarget{class_move_generator}{}\label{class_move_generator}\index{MoveGenerator@{MoveGenerator}}
+
+
+{\ttfamily \#include $<$move\+\_\+generator.\+h$>$}
+
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}
+\item 
+using \mbox{\hyperlink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \mbox{\hyperlink{class_move_generator_a1e533f5e348edd8ebc031c87401a053c}{legal\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square)
+\begin{DoxyCompactList}\small\item\em Gets the legal moves for a given piece. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{class_move_generator_a06a4bd51481212bdb49c925bbde80a87}{legal\+Pawn\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves. \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_move_generator_ae6b95fa7eab80342f64902dff7b65385}{legal\+Knight\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves.    \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_move_generator_ad1f980868a2036c408da599a7534eec1}{legal\+Bishop\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves.    \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_move_generator_a4fe03b3bbf525f91892cae7f6491a157}{legal\+Rook\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves.    \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_move_generator_a92eb11dfc6b980676e73d5b6ce26f5c9}{legal\+Queen\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves.    \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_move_generator_a0d03b4b6ca5135f4272a57d88b8fbdd4}{legal\+King\+Moves}} (const \mbox{\hyperlink{class_board}{Board}} \&board, \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t curr\+Square, std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&moves)
+\begin{DoxyCompactList}\small\item\em Adds legal moves for a given piece to the given vector moves.    \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class which provides functions to obtain legal moves given a current board position 
+
+\label{doc-typedef-members}
+\Hypertarget{class_move_generator_doc-typedef-members}
+\doxysubsection{Member Typedef Documentation}
+\Hypertarget{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}\index{MoveGenerator@{MoveGenerator}!Colour@{Colour}}
+\index{Colour@{Colour}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{Colour}{Colour}}
+{\footnotesize\ttfamily \label{class_move_generator_aa4fb2590318146e85d52e8f780a9011c} 
+using \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Move\+Generator\+::\+Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}}
+
+\Hypertarget{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}\index{MoveGenerator@{MoveGenerator}!Piece@{Piece}}
+\index{Piece@{Piece}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{Piece}{Piece}}
+{\footnotesize\ttfamily \label{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b} 
+using \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Move\+Generator\+::\+Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}}
+
+
+
+\label{doc-func-members}
+\Hypertarget{class_move_generator_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_move_generator_ad1f980868a2036c408da599a7534eec1}\index{MoveGenerator@{MoveGenerator}!legalBishopMoves@{legalBishopMoves}}
+\index{legalBishopMoves@{legalBishopMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalBishopMoves()}{legalBishopMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_ad1f980868a2036c408da599a7534eec1} 
+void Move\+Generator\+::legal\+Bishop\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves.    
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves    
+\end{DoxyWarning}
+\Hypertarget{class_move_generator_a0d03b4b6ca5135f4272a57d88b8fbdd4}\index{MoveGenerator@{MoveGenerator}!legalKingMoves@{legalKingMoves}}
+\index{legalKingMoves@{legalKingMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalKingMoves()}{legalKingMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_a0d03b4b6ca5135f4272a57d88b8fbdd4} 
+void Move\+Generator\+::legal\+King\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves.    
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves    
+\end{DoxyWarning}
+\Hypertarget{class_move_generator_ae6b95fa7eab80342f64902dff7b65385}\index{MoveGenerator@{MoveGenerator}!legalKnightMoves@{legalKnightMoves}}
+\index{legalKnightMoves@{legalKnightMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalKnightMoves()}{legalKnightMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_ae6b95fa7eab80342f64902dff7b65385} 
+void Move\+Generator\+::legal\+Knight\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves.    
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves    
+\end{DoxyWarning}
+\Hypertarget{class_move_generator_a1e533f5e348edd8ebc031c87401a053c}\index{MoveGenerator@{MoveGenerator}!legalMoves@{legalMoves}}
+\index{legalMoves@{legalMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalMoves()}{legalMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_a1e533f5e348edd8ebc031c87401a053c} 
+std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ Move\+Generator\+::legal\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Gets the legal moves for a given piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_move_generator_a06a4bd51481212bdb49c925bbde80a87}\index{MoveGenerator@{MoveGenerator}!legalPawnMoves@{legalPawnMoves}}
+\index{legalPawnMoves@{legalPawnMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalPawnMoves()}{legalPawnMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_a06a4bd51481212bdb49c925bbde80a87} 
+void Move\+Generator\+::legal\+Pawn\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves 
+\end{DoxyWarning}
+\Hypertarget{class_move_generator_a92eb11dfc6b980676e73d5b6ce26f5c9}\index{MoveGenerator@{MoveGenerator}!legalQueenMoves@{legalQueenMoves}}
+\index{legalQueenMoves@{legalQueenMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalQueenMoves()}{legalQueenMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_a92eb11dfc6b980676e73d5b6ce26f5c9} 
+void Move\+Generator\+::legal\+Queen\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves.    
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves    
+\end{DoxyWarning}
+\Hypertarget{class_move_generator_a4fe03b3bbf525f91892cae7f6491a157}\index{MoveGenerator@{MoveGenerator}!legalRookMoves@{legalRookMoves}}
+\index{legalRookMoves@{legalRookMoves}!MoveGenerator@{MoveGenerator}}
+\doxysubsubsection{\texorpdfstring{legalRookMoves()}{legalRookMoves()}}
+{\footnotesize\ttfamily \label{class_move_generator_a4fe03b3bbf525f91892cae7f6491a157} 
+void Move\+Generator\+::legal\+Rook\+Moves (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_board}{Board}} \&}]{board}{, }\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{curr\+Square}{, }\item[{std\+::vector$<$ \mbox{\hyperlink{struct_move}{Move}} $>$ \&}]{moves}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [private]}}
+
+
+
+Adds legal moves for a given piece to the given vector moves.    
+
+
+\begin{DoxyParams}{Parameters}
+{\em board} & \doxylink{class_board}{Board} object representing the current board state \\
+\hline
+{\em piece} & \doxylink{class_move_generator_aa2af91ef391fc0b3922e56b1a805287b}{Piece} to find legal moves for \\
+\hline
+{\em colour} & \doxylink{class_move_generator_aa4fb2590318146e85d52e8f780a9011c}{Colour} of piece \\
+\hline
+{\em curr\+Square} & Square that the piece is located on (0-\/63) \\
+\hline
+{\em moves} & Vector to append legal moves to \\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+This function does not take into account moves where the king will be placed in a check The vector moves will still be appended with moves where the king will be in direct danger Use legal\+Moves function instead for exact list of legal moves    
+\end{DoxyWarning}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+backend/include/\mbox{\hyperlink{move__generator_8h}{move\+\_\+generator.\+h}}\item 
+backend/src/\mbox{\hyperlink{move__generator_8cpp}{move\+\_\+generator.\+cpp}}\end{DoxyCompactItemize}

@@ -1,0 +1,128 @@
+\doxysection{board.\+h}
+\hypertarget{board_8h_source}{}\label{board_8h_source}\index{backend/include/board.h@{backend/include/board.h}}
+\mbox{\hyperlink{board_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ BOARD\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ BOARD\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <array>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{chess__types_8h}{chess\_types.h}}"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_board_a9ee491d4fea680cf69b033374a9fdfcb}{Board}}\ \{}
+\DoxyCodeLine{00015\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ =\ \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess::Bitboard}};}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece}}\ =\ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess::PieceType}};}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ =\ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess::PieceColour}};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \mbox{\hyperlink{class_board_a9ee491d4fea680cf69b033374a9fdfcb}{Board}}();}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ \mbox{\hyperlink{class_board_a592edaf33dfe7e6ad40e9cff2b3473a3}{getTurn}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_a7b580943036247e493297d079b8cc0e6}{currTurn}};}
+\DoxyCodeLine{00028\ \ \ \ \ \}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a6d3d2769522489c50d90b5ded080a42a}{getPiecesBitboard}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_acf8d9792ceddd8c055566f65af49e0a1}{piecesBitboard}};}
+\DoxyCodeLine{00036\ \ \ \ \ \}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a2d73600b4d78ecda615f8d9f67dcc0c1}{getWhitePiecesBitboard}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_a88d5b7a3990806bf24479dc5a0c44dfb}{whitePiecesBitboard}};}
+\DoxyCodeLine{00044\ \ \ \ \ \}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a89249a430c330e08b18efd03b77f2e3f}{getBlackPiecesBitboard}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_a3eea05998cb8941abcee09dc5ffcd9f5}{blackPiecesBitboard}};}
+\DoxyCodeLine{00052\ \ \ \ \ \}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a8f283bbba5c28e91497d8ead2b24a4f2}{getBitBoard}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (colour\ ==\ Colour::WHITE)\ ?}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a88d5b7a3990806bf24479dc5a0c44dfb}{whitePiecesBitboard}}\ :}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a3eea05998cb8941abcee09dc5ffcd9f5}{blackPiecesBitboard}};}
+\DoxyCodeLine{00063\ \ \ \ \ \}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_ad1a8450c0343b953d3585186b979b283}{getOpposingBitboard}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (colour\ ==\ Colour::WHITE)\ ?}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a3eea05998cb8941abcee09dc5ffcd9f5}{blackPiecesBitboard}}\ :}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a88d5b7a3990806bf24479dc5a0c44dfb}{whitePiecesBitboard}};}
+\DoxyCodeLine{00076\ \ \ \ \ \}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keyword}{inline}\ std::optional<uint8\_t>\ \mbox{\hyperlink{class_board_a578a10dc4a407a46bce86651a0a04065}{getEnPassantSquare}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_ac21e73609f9bef0f31d1d47029656bff}{enPassantSquare}};}
+\DoxyCodeLine{00085\ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00093\ \ \ \ \ std::optional<Colour>\ \mbox{\hyperlink{class_board_a956d1a1a75f0d395add34affe91495ae}{getColour}}(uint8\_t\ square)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_af6f063c35de7ea5f45a3322baa996f7c}{isEmpty}}(uint8\_t\ square)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ !(\mbox{\hyperlink{class_board_acf8d9792ceddd8c055566f65af49e0a1}{piecesBitboard}}\ \&\ (1ULL\ <<\ square));}
+\DoxyCodeLine{00102\ \ \ \ \ \}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_acdd72c2e3f4a247863f7738b45455069}{isOccupied}}(uint8\_t\ square)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_acf8d9792ceddd8c055566f65af49e0a1}{piecesBitboard}}\ \&\ (1ULL\ <<\ square);}
+\DoxyCodeLine{00111\ \ \ \ \ \}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_a119014689bffe29c7089d6c6e6bbc1b7}{isSelfOccupied}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour,\ uint8\_t\ square)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_a8f283bbba5c28e91497d8ead2b24a4f2}{getBitBoard}}(colour)\ \&\ (1ULL\ <<\ square);}
+\DoxyCodeLine{00121\ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_a9d80e50f34216850dc6ccaa03f71781c}{isOpponentOccupied}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour,\ uint8\_t\ square)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_ad1a8450c0343b953d3585186b979b283}{getOpposingBitboard}}(colour)\ \&\ (1ULL\ <<\ square);}
+\DoxyCodeLine{00132\ \ \ \ \ \}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_aea1af316e362338569094a60c24d4955}{getKingsideCastle}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_a0fa3d0c7cce2ebfc4bd1df7b8ad37dc5}{kingsideCastle}}[\mbox{\hyperlink{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}{toIndex}}(colour)];}
+\DoxyCodeLine{00141\ \ \ \ \ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_board_ae1803bf5e315a94f5c5be1df077eb371}{getQueensideCastle}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_board_ae9670bc16247d36c80ac53dd3062fa51}{queensideCastle}}[\mbox{\hyperlink{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}{toIndex}}(colour)];}
+\DoxyCodeLine{00150\ \ \ \ \ \}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a32f54e1b9092c3c6bb8f35d7a1675550}{nullifyKingsideCastle}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\ \{}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a0fa3d0c7cce2ebfc4bd1df7b8ad37dc5}{kingsideCastle}}[\mbox{\hyperlink{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}{toIndex}}(colour)]\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00158\ \ \ \ \ \}}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00164\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a67cabfedb1e4b74e1cf0de95206d517d}{nullifyQueensideCastle}}(\mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ colour)\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_ae9670bc16247d36c80ac53dd3062fa51}{queensideCastle}}[\mbox{\hyperlink{board_8cpp_a6262d972b405ab71204f1171c2ed02cc}{toIndex}}(colour)]\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00166\ \ \ \ \ \}}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a1821a1fa85ba29f8bd68c0c7d9b1c1ef}{switchTurn}}()\ \{}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_a7b580943036247e493297d079b8cc0e6}{currTurn}}\ =\ (\mbox{\hyperlink{class_board_a7b580943036247e493297d079b8cc0e6}{currTurn}}\ ==\ Colour::WHITE)\ ?\ Colour::BLACK\ :\ Colour::WHITE;}
+\DoxyCodeLine{00173\ \ \ \ \ \}}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a6b46debe164e78f0762d6baf24c9c08d}{setEnPassantSquare}}(std::optional<uint8\_t>\ square)\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_board_ac21e73609f9bef0f31d1d47029656bff}{enPassantSquare}}\ =\ square;}
+\DoxyCodeLine{00181\ \ \ \ \ \}}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a08c1256f4b3dd8686464f3050a26ecda}{addPiece}}(\mbox{\hyperlink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece}}\ piece,\ \mbox{\hyperlink{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}{Colour}}\ colour,\ uint8\_t\ square);}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a121fdfc69df9aec8ec3e79fc772075ab}{removePiece}}(\mbox{\hyperlink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece}}\ piece,\ \mbox{\hyperlink{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}{Colour}}\ colour,\ uint8\_t\ square);}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a6e1a4787d3e58762c0bfacdb72a4ddb2}{movePiece}}(\mbox{\hyperlink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece}}\ piece,\ \mbox{\hyperlink{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}{Colour}}\ colour,\ uint8\_t\ fromSquare,\ uint8\_t\ toSquare);}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_a7cef7a9ca499d64c71cb170d67f76ad0}{resetBoard}}();}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ uint8\_t\ \mbox{\hyperlink{class_board_ae4b19f8a48319e0e2be5c7847a03983b}{getRank}}(uint8\_t\ square)\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ square\ >>\ 3;}
+\DoxyCodeLine{00222\ \ \ \ \ \}}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ uint8\_t\ \mbox{\hyperlink{class_board_ae2387768de2f631ea88953ecf082c4a5}{getFile}}(uint8\_t\ square)\ \{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ square\ \&\ 0x7;}
+\DoxyCodeLine{00231\ \ \ \ \ \}}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00234\ \ \ \ \ \mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}}\ \mbox{\hyperlink{class_board_a7b580943036247e493297d079b8cc0e6}{currTurn}};}
+\DoxyCodeLine{00235\ \ \ \ \ std::array<bool,\ 2>\ \mbox{\hyperlink{class_board_a0fa3d0c7cce2ebfc4bd1df7b8ad37dc5}{kingsideCastle}};}
+\DoxyCodeLine{00236\ \ \ \ \ std::array<bool,\ 2>\ \mbox{\hyperlink{class_board_ae9670bc16247d36c80ac53dd3062fa51}{queensideCastle}};}
+\DoxyCodeLine{00237\ \ \ \ \ std::optional<uint8\_t>\ \mbox{\hyperlink{class_board_ac21e73609f9bef0f31d1d47029656bff}{enPassantSquare}};}
+\DoxyCodeLine{00238\ \ \ \ \ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a88d5b7a3990806bf24479dc5a0c44dfb}{whitePiecesBitboard}};}
+\DoxyCodeLine{00239\ \ \ \ \ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_a3eea05998cb8941abcee09dc5ffcd9f5}{blackPiecesBitboard}};}
+\DoxyCodeLine{00240\ \ \ \ \ \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}}\ \mbox{\hyperlink{class_board_acf8d9792ceddd8c055566f65af49e0a1}{piecesBitboard}};}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{comment}{//\ Indexed\ as\ [colour][pieceType]}}
+\DoxyCodeLine{00243\ \ \ \ \ std::array<std::array<\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}},\ \mbox{\hyperlink{namespace_chess_a6262d972b405ab71204f1171c2ed02cc}{Chess::toIndex}}(Piece::COUNT)>,\ 2>\ \mbox{\hyperlink{class_board_a17f34af6fe1cf94f65018574a4f67767}{pieceBitboards}};}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00249\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_board_ac686998ba5b1f7f53430b373e0fcc2b2}{resetPieces}}();}
+\DoxyCodeLine{00250\ \};}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ BOARD\_H}}
+
+\end{DoxyCode}
