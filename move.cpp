@@ -11,7 +11,7 @@ using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
-static constexpr std::array<Bitboard, 64> knightMoveTable = []() {
+constexpr std::array<Bitboard, 64> knightMoveTable = []() {
     std::array<Bitboard, 64> table {};
     constexpr int offsets[8][2] = {{1, 2}, {2, 1}, {2, -1}, {1, -2},
                                     {-1, -2}, {-2, -1}, {-2, 1}, {-1 , 2}};
@@ -66,9 +66,11 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
     uint8_t nextSquare = currSquare + 8 * direction;
 
+    // One square forward
     if ((piecesBitboard & (1ULL << nextSquare)) == 0) {
         moves.push_back(makeMove(piece, colour, currSquare, nextSquare));
 
+        // Two squares forward
         nextSquare += 8 * direction;
         if (nextSquare < 64) {
             uint8_t firstUnmovedPawnSquare = 28 - 20 * direction;
@@ -81,24 +83,28 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
 
     Bitboard opposingBitboard = board.getOpposingBitboard(colour);
 
-    if ((currSquare & 0x7) != 0) {
+    // Left side pawn capture
+    if (Board::getFile(currSquare) != 0) {
         uint8_t nextLeftSquare = currSquare + 8 * direction - 1;
         if ((opposingBitboard & (1ULL << nextLeftSquare)) != 0) {
             moves.push_back(makeMove(piece, colour, currSquare, nextLeftSquare, nextLeftSquare));
         }
 
+        // En passant
         const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
         if (enPassantSquare && currSquare == (*enPassantSquare) + 1) {
             moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
         }
     }
 
-    if ((currSquare & 0x7) != 7) {
+    // Right side pawn capture
+    if (Board::getFile(currSquare) != 7) {
         uint8_t nextRightSquare = currSquare + 8 * direction + 1;
         if ((opposingBitboard & (1ULL << nextRightSquare)) != 0) {
             moves.push_back(makeMove(piece, colour, currSquare, nextRightSquare, nextRightSquare));
         }
 
+        // En passant
         const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
         if (enPassantSquare && currSquare == (*enPassantSquare) - 1) {
             moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
@@ -131,17 +137,70 @@ std::vector<Move> MoveGenerator::legalKnightMoves(const Board& board, Piece piec
 
 std::vector<Move> MoveGenerator::legalBishopMoves(const Board& board, Piece piece, 
                                                   Colour colour, uint8_t currSquare) {
-                                                    
+    std::vector<Move> moves;
+    Colour opposingColour = (colour == Colour::WHITE) ?
+                            Colour::BLACK :
+                            Colour::WHITE;
+    
+    constexpr int directions[4] = {7, 9, -9, -7}; // ↖, ↗, ↙, ↘
+    constexpr uint8_t rankChecks[4] = {7, 7, 0, 0};
+    constexpr uint8_t fileChecks[4] = {0, 7, 0, 7};
+
+    for (int i = 0; i < 4; i++) {
+        if (Board::getFile(currSquare) != fileChecks[i]) {
+            uint8_t square = currSquare + directions[i];
+            while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && !board.getColour(square)) {
+                moves.push_back(makeMove(piece, colour, currSquare, square));
+                square += directions[i];
+            }
+            std::optional<Colour> finalSquareColour = board.getColour(square);
+            if (!finalSquareColour || finalSquareColour == opposingColour) {
+                std::optional<uint8_t> capture = (finalSquareColour == opposingColour) ?
+                                                std::optional<uint8_t>(square) :
+                                                std::nullopt;
+                moves.push_back(makeMove(piece, colour, currSquare, square, capture));
+            }
+        }
+    }
+
+    return moves;
 }
 
 std::vector<Move> MoveGenerator::legalRookMoves(const Board& board, Piece piece, 
                                                 Colour colour, uint8_t currSquare) {
+    using Function = uint8_t(*)(uint8_t);
+    std::vector<Move> moves;
+    Colour opposingColour = (colour == Colour::WHITE) ?
+                        Colour::BLACK :
+                        Colour::WHITE;
+    
+    constexpr int directions[4] = {-1, 8, 1, -8}; // ←, ↑, →, ↓
+    constexpr uint8_t boundaryChecks[4] = {0, 7, 7, 0}; // file, rank, file, rank
+    Function functions[2] = {Board::getFile, Board::getRank};
 
+    for (int i = 0; i < 4; i++) {
+        if (functions[i & 0x1](currSquare) != boundaryChecks[i]) { // toggle between checking file and rank
+            uint8_t square = currSquare + directions[i];
+            while (functions[i & 0x1](square) != boundaryChecks[i] && !board.getColour(square)) {
+                moves.push_back(makeMove(piece, colour, currSquare, square));
+                square += directions[i];
+            }
+            std::optional<Colour> finalSquareColour = board.getColour(square);
+            if (!finalSquareColour || finalSquareColour == opposingColour) {
+                std::optional<uint8_t> capture = (finalSquareColour == opposingColour) ?
+                                                std::optional<uint8_t>(square) :
+                                                std::nullopt;
+                moves.push_back(makeMove(piece, colour, currSquare, square, capture));
+            }
+        }
+    }
+
+    return moves;
 }
 
 std::vector<Move> MoveGenerator::legalQueenMoves(const Board& board, Piece piece, 
                                                  Colour colour, uint8_t currSquare) {
-
+    
 }
 
 std::vector<Move> MoveGenerator::legalKingMoves(const Board& board, Piece piece, 

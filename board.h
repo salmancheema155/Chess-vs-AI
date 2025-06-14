@@ -44,6 +44,13 @@ public:
     Bitboard getBlackPiecesBitboard() const;
 
     /**
+     * @brief Gets bitboard for specified colour
+     * @param colour Colour of player
+     * @return Bitboard representation of player's pieces
+     */
+    Bitboard getBitBoard(Colour colour) const;
+
+    /**
      * @brief Gets the bitboard of the opposing colour's pieces
      * @param colour Colour of player
      * @return Bitboard of oppposing colour's pieces, e.g. if colour == WHITE,
@@ -57,6 +64,14 @@ public:
      * else std::nullopt if the last move was not a pawn 2 forward
      */
     std::optional<uint8_t> getEnPassantSquare() const;
+
+    /**
+     * @brief Gets the colour of the piece that occupies the square
+     * @param square Square of the piece (0-63)
+     * @return Colour of piece that occupies that square if it exists
+     * else returns std::nullopt
+     */
+    std::optional<Colour> getColour(uint8_t square) const;
 
     /**
      * @brief Returns if can kingside castle
@@ -121,6 +136,20 @@ public:
      * checking if the move is valid
      */
     void movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare);
+
+    /**
+     * @brief Gets the rank that a square is located in
+     * @param square Square to find the rank of (0-63)
+     * @return Rank of the square
+     */
+    static inline uint8_t getRank(uint8_t square);
+
+    /**
+     * @brief Gets the file that the square is located in (as an integer)
+     * @param square Square to find the file of (0-63)
+     * @return File of the square
+     */
+    static inline uint8_t getFile(uint8_t square);
 
 private:
     Colour currTurn;
