@@ -48,6 +48,23 @@ std::optional<uint8_t> Board::getEnPassantSquare() const {
     return enPassantSquare;
 }
 
+std::optional<Colour> Board::getColour(uint8_t square) const {
+    if (whitePiecesBitboard & (1ULL << square)) {
+        return std::optional<Colour>(Colour::WHITE);
+    } else if (blackPiecesBitboard & (1ULL << square)) {
+        return std::optional<Colour>(Colour::BLACK);
+    }
+    return std::nullopt;
+}
+
+uint8_t Board::getRank(uint8_t square) {
+    return square >> 3;
+}
+
+uint8_t Board::getFile(uint8_t square) {
+    return square & 0x7;
+}
+
 bool Board::getKingsideCastle(Colour colour) const {
     return kingsideCastle[toIndex(colour)];
 }
@@ -97,7 +114,7 @@ void Board::resetPieces() {
     constexpr uint8_t white = toIndex(Colour::WHITE);
     constexpr uint8_t black = toIndex(Colour::BLACK);
 
-    std::array<std::array<Bitboard, toIndex(Piece::COUNT)>, 2> initialBitboards = 
+    constexpr std::array<std::array<Bitboard, toIndex(Piece::COUNT)>, 2> initialBitboards = 
         {{{0x000000000000FF00ULL, 0x0000000000000042ULL, 0x0000000000000024ULL, 
           0x0000000000000081ULL, 0x0000000000000008ULL, 0x0000000000000010ULL}, 
          {0x00FF000000000000ULL, 0x4200000000000000ULL, 0x2400000000000000ULL, 

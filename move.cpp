@@ -33,35 +33,36 @@ constexpr std::array<Bitboard, 64> knightMoveTable = []() {
 
 std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece, 
                                             Colour colour, uint8_t currSquare) {
+    std::vector<Move> moves;
     switch (piece) {
         case Piece::PAWN:
-            return legalPawnMoves(board, piece, colour, currSquare);
+            legalPawnMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::KNIGHT:
-            return legalKnightMoves(board, piece, colour, currSquare);
+            legalKnightMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::BISHOP:
-            return legalBishopMoves(board, piece, colour, currSquare);
+            legalBishopMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::ROOK:
-            return legalRookMoves(board, piece, colour, currSquare);
+            legalRookMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::QUEEN:
-            return legalQueenMoves(board, piece, colour, currSquare);
+            legalQueenMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::KING:
-            return legalKingMoves(board, piece, colour, currSquare);
+            legalKingMoves(board, piece, colour, currSquare, moves);
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
     }
 
-    return {};
+    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece, 
-                                                Colour colour, uint8_t currSquare) {
-    std::vector<Move> moves;
+void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colour, 
+                                   uint8_t currSquare, std::vector<Move>& moves) {
+
     Bitboard piecesBitboard = board.getPiecesBitboard();
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
     uint8_t nextSquare = currSquare + 8 * direction;
@@ -110,13 +111,11 @@ std::vector<Move> MoveGenerator::legalPawnMoves(const Board& board, Piece piece,
             moves.push_back(makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
         }
     }
-
-    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalKnightMoves(const Board& board, Piece piece, 
-                                                  Colour colour, uint8_t currSquare) {
-    std::vector<Move> moves;
+void MoveGenerator::legalKnightMoves(const Board& board, Piece piece, Colour colour, 
+                                     uint8_t currSquare, std::vector<Move>& moves) {
+
     Bitboard precomputedMoveBitboard = knightMoveTable[currSquare];
     precomputedMoveBitboard &= ~board.getBitBoard(colour);
     Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour);
@@ -131,13 +130,11 @@ std::vector<Move> MoveGenerator::legalKnightMoves(const Board& board, Piece piec
         captureBitboard >>= 1;
         bitIndex++;
     }
-
-    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalBishopMoves(const Board& board, Piece piece, 
-                                                  Colour colour, uint8_t currSquare) {
-    std::vector<Move> moves;
+void MoveGenerator::legalBishopMoves(const Board& board, Piece piece, Colour colour, 
+                                     uint8_t currSquare, std::vector<Move>& moves) {
+
     Colour opposingColour = (colour == Colour::WHITE) ?
                             Colour::BLACK :
                             Colour::WHITE;
@@ -162,14 +159,12 @@ std::vector<Move> MoveGenerator::legalBishopMoves(const Board& board, Piece piec
             }
         }
     }
-
-    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalRookMoves(const Board& board, Piece piece, 
-                                                Colour colour, uint8_t currSquare) {
+void MoveGenerator::legalRookMoves(const Board& board, Piece piece, Colour colour, 
+                                   uint8_t currSquare, std::vector<Move>& moves) {
+
     using Function = uint8_t(*)(uint8_t);
-    std::vector<Move> moves;
     Colour opposingColour = (colour == Colour::WHITE) ?
                         Colour::BLACK :
                         Colour::WHITE;
@@ -194,17 +189,17 @@ std::vector<Move> MoveGenerator::legalRookMoves(const Board& board, Piece piece,
             }
         }
     }
-
-    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalQueenMoves(const Board& board, Piece piece, 
-                                                 Colour colour, uint8_t currSquare) {
-    
+void MoveGenerator::legalQueenMoves(const Board& board, Piece piece, Colour colour, 
+                                    uint8_t currSquare, std::vector<Move>& moves) {
+
+    legalBishopMoves(board, piece, colour, currSquare, moves);
+    legalRookMoves(board, piece, colour, currSquare, moves);
 }
 
-std::vector<Move> MoveGenerator::legalKingMoves(const Board& board, Piece piece, 
-                                                Colour colour, uint8_t currSquare) {
+void MoveGenerator::legalKingMoves(const Board& board, Piece piece, Colour colour, 
+                                   uint8_t currSquare, std::vector<Move>& moves) {
 
 }
 

@@ -32,12 +32,12 @@ public:
                                 std::optional<uint8_t> captureSquare = std::nullopt);
 
 private:
-    static std::vector<Move> legalPawnMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static std::vector<Move> legalKnightMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static std::vector<Move> legalBishopMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static std::vector<Move> legalRookMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static std::vector<Move> legalQueenMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
-    static std::vector<Move> legalKingMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
+    static void legalPawnMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+    static void legalKnightMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+    static void legalBishopMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+    static void legalRookMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+    static void legalQueenMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+    static void legalKingMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 };
 
 #endif // MOVE_H
