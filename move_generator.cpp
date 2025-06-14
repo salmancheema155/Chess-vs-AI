@@ -11,28 +11,8 @@ using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
-constexpr std::array<Bitboard, 64> knightMoveTable = []() {
-    std::array<Bitboard, 64> table {};
-    constexpr int offsets[8][2] = {{1, 2}, {2, 1}, {2, -1}, {1, -2},
-                                    {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}};
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            Bitboard moves = 0ULL;
-            for (auto& offset : offsets) {
-                int row = i + offset[0];
-                int col = j + offset[1];
-                if (0 <= row && row < 8 && 0 <= col && col < 8) {
-                    // Set square bit in bitboard
-                    moves |= (1ULL << (8 * row + col));                    
-                }
-            }
-            table[8 * i + j] = moves;
-        }
-    }
-    return table;
-}();
-
-static inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
+namespace {
+    inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour, 
                             uint8_t fromSquare, uint8_t toSquare, 
                             std::optional<uint8_t> captureSquare = std::nullopt) {
     return {
@@ -42,6 +22,64 @@ static inline Move makeMove(Chess::PieceType piece, Chess::PieceColour colour,
         .toSquare = toSquare,
         .captureSquare = captureSquare
     };
+}
+    template <size_t N>
+    constexpr std::array<Bitboard, 64> generateMoveTable(const std::array<std::array<int, 2>, N>& offsets) {
+        std::array<Bitboard, 64> table {};
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Bitboard moves = 0ULL;
+                for (auto& offset : offsets) {
+                    int row = i + offset[0];
+                    int col = j + offset[1];
+                    if (0 <= row && row < 8 && 0 <= col && col < 8) {
+                        // Set square bit in bitboard
+                        moves |= (1ULL << (8 * row + col));                    
+                    }
+                }
+                table[8 * i + j] = moves;
+            }
+        }
+        return table;
+    }
+
+    constexpr std::array<Bitboard, 64> generateKnightMoveTable() {
+        std::array<std::array<int, 2>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2},
+                                                    {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
+        return generateMoveTable(offsets);
+    }
+
+    constexpr std::array<Bitboard, 64> generateKingMoveTable() {
+        std::array<std::array<int, 2>, 8> offsets = {{{0, 1}, {1, 1}, {1, 0}, {1, -1},
+                                                    {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
+        return generateMoveTable(offsets);
+    }
+
+    inline int bitScan(Bitboard bitboard) {
+        return __builtin_ctzll(bitboard);
+    }
+
+    inline bool bitSet(uint64_t num, uint8_t shift) {
+        return num & (1ULL << shift);
+    }
+
+    void legalMovesFromTable(const Board& board, Piece piece, Colour colour, uint8_t currSquare, 
+                            std::vector<Move>& moves, Bitboard precomputedMoveBitboard) {
+
+        precomputedMoveBitboard &= ~board.getBitBoard(colour); // Remove moves which land onto same colour pieces
+        Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
+
+        while (precomputedMoveBitboard) {
+            uint8_t bitIndex = bitScan(precomputedMoveBitboard); // Square on board
+            // Check if valid move is a capture (capture bit is set)
+            std::optional<uint8_t> capture = bitSet(captureBitboard, bitIndex) ? std::optional<uint8_t>(bitIndex) : std::nullopt;
+            moves.push_back(makeMove(piece, colour, currSquare, bitIndex, capture));
+            precomputedMoveBitboard &= precomputedMoveBitboard - 1; // Remove trailing set bit
+        }
+    }
+
+    constexpr std::array<Bitboard, 64> knightMoveTable = generateKnightMoveTable();
+    constexpr std::array<Bitboard, 64> kingMoveTable = generateKingMoveTable();
 }
 
 std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece, 
@@ -76,7 +114,6 @@ std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece,
 void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
-    Bitboard piecesBitboard = board.getPiecesBitboard();
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
     uint8_t nextSquare = currSquare + 8 * direction;
 
@@ -121,23 +158,7 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
 void MoveGenerator::legalKnightMoves(const Board& board, Piece piece, Colour colour, 
                                      uint8_t currSquare, std::vector<Move>& moves) {
 
-    Bitboard precomputedMoveBitboard = knightMoveTable[currSquare];
-    precomputedMoveBitboard &= ~board.getBitBoard(colour); // Remove moves which land onto same colour pieces
-    Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
-
-    // Loop through all move bits and create and push a Move object
-    uint8_t bitIndex = 0; // Square on board
-    while (precomputedMoveBitboard) {
-        // Check if bit corresponds to valid move (bit is set)
-        if (precomputedMoveBitboard & 0x1) {
-            // Check if valid move is a capture (capture bit is set)
-            std::optional<uint8_t> capture = (captureBitboard & 0x1) ? std::optional<uint8_t>(bitIndex) : std::nullopt;
-            moves.push_back(makeMove(piece, colour, currSquare, bitIndex, capture));
-        }
-        precomputedMoveBitboard >>= 1; // Move onto next move bit
-        captureBitboard >>= 1; // Move onto next capture bit
-        bitIndex++;
-    }
+    legalMovesFromTable(board, piece, colour, currSquare, moves, knightMoveTable[currSquare]);
 }
 
 void MoveGenerator::legalBishopMoves(const Board& board, Piece piece, Colour colour, 
@@ -215,4 +236,5 @@ void MoveGenerator::legalQueenMoves(const Board& board, Piece piece, Colour colo
 void MoveGenerator::legalKingMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
+    legalMovesFromTable(board, piece, colour, currSquare, moves, kingMoveTable[currSquare]);
 }
