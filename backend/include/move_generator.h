@@ -1,22 +1,12 @@
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef MOVE_GENERATOR_H
+#define MOVE_GENERATOR_H
 
 #include <vector>
 #include <cstdint>
 #include <optional>
 #include "chess_types.h"
 #include "board.h"
-
-/**
- * Struct holding data to represent a move
- */
-struct Move {
-    Chess::PieceType piece; ///< Piece that is moving
-    Chess::PieceColour colour; ///< Colour of piece
-    uint8_t fromSquare; ///< Square the piece is moving from
-    uint8_t toSquare; ///< Square the piece is moving to
-    std::optional<uint8_t> captureSquare = std::nullopt; ///< Piece that is captured from this move
-};
+#include "move.h"
 
 /**
  * Class which provides functions to obtain legal moves given a current board position
@@ -25,6 +15,7 @@ class MoveGenerator {
 public:
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
+    using Move = ChessMove::Move;
 
     /**
      * @brief Gets the legal moves for a given piece
@@ -65,4 +56,4 @@ private:
     static void legalKingMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 };
 
-#endif // MOVE_H
+#endif // MOVE_GENERATOR_H

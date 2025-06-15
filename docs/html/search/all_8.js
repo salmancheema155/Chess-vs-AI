@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['legalbishopmoves_0',['legalBishopMoves',['../class_move_generator.html#ad1f980868a2036c408da599a7534eec1',1,'MoveGenerator']]],
-  ['legalkingmoves_1',['legalKingMoves',['../class_move_generator.html#a0d03b4b6ca5135f4272a57d88b8fbdd4',1,'MoveGenerator']]],
-  ['legalknightmoves_2',['legalKnightMoves',['../class_move_generator.html#ae6b95fa7eab80342f64902dff7b65385',1,'MoveGenerator']]],
-  ['legalmoves_3',['legalMoves',['../class_move_generator.html#a1e533f5e348edd8ebc031c87401a053c',1,'MoveGenerator']]],
-  ['legalpawnmoves_4',['legalPawnMoves',['../class_move_generator.html#a06a4bd51481212bdb49c925bbde80a87',1,'MoveGenerator']]],
-  ['legalqueenmoves_5',['legalQueenMoves',['../class_move_generator.html#a92eb11dfc6b980676e73d5b6ce26f5c9',1,'MoveGenerator']]],
-  ['legalrookmoves_6',['legalRookMoves',['../class_move_generator.html#a4fe03b3bbf525f91892cae7f6491a157',1,'MoveGenerator']]]
+  ['in_5fprogress_0',['IN_PROGRESS',['../check_8h.html#a7899b65f1ea0f655e4bbf8d2a5714285aca69f96c768067fbff6c911ca87bccc9',1,'check.h']]],
+  ['isempty_1',['isEmpty',['../class_board.html#af6f063c35de7ea5f45a3322baa996f7c',1,'Board']]],
+  ['isincheck_2',['isInCheck',['../class_check.html#a9d7a1ebe0481db20edeb43cf222321e4',1,'Check']]],
+  ['isoccupied_3',['isOccupied',['../class_board.html#acdd72c2e3f4a247863f7738b45455069',1,'Board::isOccupied(uint8_t square) const'],['../class_board.html#aadc66ee581efcb258ddf75d8161c2e4c',1,'Board::isOccupied(Piece piece, uint8_t square) const']]],
+  ['isopponentoccupied_4',['isOpponentOccupied',['../class_board.html#a9d80e50f34216850dc6ccaa03f71781c',1,'Board::isOpponentOccupied(Colour colour, uint8_t square) const'],['../class_board.html#a646cf05f8eba56baf28458ae88803d13',1,'Board::isOpponentOccupied(Piece piece, Colour colour, uint8_t square) const']]],
+  ['isselfoccupied_5',['isSelfOccupied',['../class_board.html#a119014689bffe29c7089d6c6e6bbc1b7',1,'Board::isSelfOccupied(Colour colour, uint8_t square) const'],['../class_board.html#a6bc2fc7e186b9d4139ad2eae3d132383',1,'Board::isSelfOccupied(Piece piece, Colour colour, uint8_t square) const']]]
 ];

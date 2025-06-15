@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['removepiece_0',['removePiece',['../class_board.html#a121fdfc69df9aec8ec3e79fc772075ab',1,'Board']]],
-  ['resetboard_1',['resetBoard',['../class_board.html#a7cef7a9ca499d64c71cb170d67f76ad0',1,'Board']]],
-  ['resetpieces_2',['resetPieces',['../class_board.html#ac686998ba5b1f7f53430b373e0fcc2b2',1,'Board']]]
+  ['makemove_0',['makeMove',['../namespace_chess_move.html#a0e13472a3579cbdbe3807df61d8ae21a',1,'ChessMove']]],
+  ['movepiece_1',['movePiece',['../class_board.html#a6e1a4787d3e58762c0bfacdb72a4ddb2',1,'Board']]]
 ];

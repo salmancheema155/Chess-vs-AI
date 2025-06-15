@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['king_0',['KING',['../namespace_chess.html#a3c98b086580ce616413ad071a11d7446a123b28961dd0f97d91bcb55d7a3b7c1c',1,'Chess']]],
-  ['knight_1',['KNIGHT',['../namespace_chess.html#a3c98b086580ce616413ad071a11d7446af7f210da15dbb4283299b2affd9bb238',1,'Chess']]]
+  ['draw_5fby_5ffifty_5fmove_5frule_0',['DRAW_BY_FIFTY_MOVE_RULE',['../check_8h.html#a7899b65f1ea0f655e4bbf8d2a5714285a77b2635112645a7c9c0db48e5d38f3c1',1,'check.h']]],
+  ['draw_5fby_5finsufficient_5fmaterial_1',['DRAW_BY_INSUFFICIENT_MATERIAL',['../check_8h.html#a7899b65f1ea0f655e4bbf8d2a5714285a57e5000115e83e8ac77dda5968dcb803',1,'check.h']]],
+  ['draw_5fby_5frepetition_2',['DRAW_BY_REPETITION',['../check_8h.html#a7899b65f1ea0f655e4bbf8d2a5714285a8c860e4e21b13b138262541acd9c8dea',1,'check.h']]]
 ];

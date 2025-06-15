@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['fromsquare_0',['fromSquare',['../struct_move.html#a02ae50837abecf670d1d0988183a80ac',1,'Move']]]
+  ['fromsquare_0',['fromSquare',['../struct_chess_move_1_1_move.html#aaf2a38baaa89ab7bde616e26dccf9456',1,'ChessMove::Move']]]
 ];

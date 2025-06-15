@@ -26,22 +26,36 @@ using \mbox{\hyperlink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour}} =
 \begin{DoxyCompactList}\small\item\em Gets bitboard representing white pieces current board state. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_a89249a430c330e08b18efd03b77f2e3f}{get\+Black\+Pieces\+Bitboard}} () const
 \begin{DoxyCompactList}\small\item\em Gets bitboard representing black pieces current board state. \end{DoxyCompactList}\item 
-\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_a8f283bbba5c28e91497d8ead2b24a4f2}{get\+Bit\+Board}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_af46cc289b8e6b363088acd8ec50632cf}{get\+Bitboard}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
 \begin{DoxyCompactList}\small\item\em Gets bitboard for specified colour. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_ab5b8328aeea91b708c9ba36464e4bdaa}{get\+Bitboard}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
+\begin{DoxyCompactList}\small\item\em Gets bitboard for specified colour and piece. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_ad1a8450c0343b953d3585186b979b283}{get\+Opposing\+Bitboard}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
 \begin{DoxyCompactList}\small\item\em Gets the bitboard of the opposing colour\textquotesingle{}s pieces. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} \mbox{\hyperlink{class_board_ab6e5038589f505029b8b31901be12613}{get\+Opposing\+Bitboard}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
+\begin{DoxyCompactList}\small\item\em Gets the bitboard for a specified opposing colour\textquotesingle{}s piece. \end{DoxyCompactList}\item 
 std\+::optional$<$ uint8\+\_\+t $>$ \mbox{\hyperlink{class_board_a578a10dc4a407a46bce86651a0a04065}{get\+En\+Passant\+Square}} () const
 \begin{DoxyCompactList}\small\item\em Gets the square of the pawn that just moved 2 steps forward. \end{DoxyCompactList}\item 
 std\+::optional$<$ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} $>$ \mbox{\hyperlink{class_board_a956d1a1a75f0d395add34affe91495ae}{get\+Colour}} (uint8\+\_\+t square) const
 \begin{DoxyCompactList}\small\item\em Gets the colour of the piece that occupies the square. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{class_board_ad6a8b46a07f33ae6ab0891c4214aadef}{get\+King\+Square}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
+\begin{DoxyCompactList}\small\item\em Gets the square that the king occupies. \end{DoxyCompactList}\item 
+std\+::vector$<$ uint8\+\_\+t $>$ \mbox{\hyperlink{class_board_afe334911efddb74e8dc6af94ab76d575}{get\+Squares}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
+\begin{DoxyCompactList}\small\item\em Gets the squares that a given type of piece of a given colour occupies. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_af6f063c35de7ea5f45a3322baa996f7c}{is\+Empty}} (uint8\+\_\+t square) const
 \begin{DoxyCompactList}\small\item\em Checks if a square is empty. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_acdd72c2e3f4a247863f7738b45455069}{is\+Occupied}} (uint8\+\_\+t square) const
 \begin{DoxyCompactList}\small\item\em Checks if a square is occupied. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_board_aadc66ee581efcb258ddf75d8161c2e4c}{is\+Occupied}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, uint8\+\_\+t square) const
+\begin{DoxyCompactList}\small\item\em Checks if a square is occupied with a given piece. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_a119014689bffe29c7089d6c6e6bbc1b7}{is\+Self\+Occupied}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t square) const
 \begin{DoxyCompactList}\small\item\em Checks if a player occupies a square. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_board_a6bc2fc7e186b9d4139ad2eae3d132383}{is\+Self\+Occupied}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t square) const
+\begin{DoxyCompactList}\small\item\em Checks if a player occupies a square with a given piece. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_a9d80e50f34216850dc6ccaa03f71781c}{is\+Opponent\+Occupied}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t square) const
 \begin{DoxyCompactList}\small\item\em Checks if opponent occupies a square. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_board_a646cf05f8eba56baf28458ae88803d13}{is\+Opponent\+Occupied}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour, uint8\+\_\+t square) const
+\begin{DoxyCompactList}\small\item\em Checks if a player occupies a square with a given piece. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_aea1af316e362338569094a60c24d4955}{get\+Kingside\+Castle}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
 \begin{DoxyCompactList}\small\item\em Returns if can kingside castle. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{class_board_ae1803bf5e315a94f5c5be1df077eb371}{get\+Queenside\+Castle}} (\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}} colour) const
@@ -150,11 +164,11 @@ Adds a piece to the board
 {\em square} & Square to add the piece to (0-\/63) \\
 \hline
 \end{DoxyParams}
-\Hypertarget{class_board_a8f283bbba5c28e91497d8ead2b24a4f2}\index{Board@{Board}!getBitBoard@{getBitBoard}}
-\index{getBitBoard@{getBitBoard}!Board@{Board}}
-\doxysubsubsection{\texorpdfstring{getBitBoard()}{getBitBoard()}}
-{\footnotesize\ttfamily \label{class_board_a8f283bbba5c28e91497d8ead2b24a4f2} 
-\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} Board\+::get\+Bit\+Board (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+\Hypertarget{class_board_af46cc289b8e6b363088acd8ec50632cf}\index{Board@{Board}!getBitboard@{getBitboard}}
+\index{getBitboard@{getBitboard}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{getBitboard()}{getBitboard()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \label{class_board_af46cc289b8e6b363088acd8ec50632cf} 
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} Board\+::get\+Bitboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
 
 
@@ -167,6 +181,26 @@ Gets bitboard for specified colour.
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 \doxylink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard} representation of player\textquotesingle{}s pieces 
+\end{DoxyReturn}
+\Hypertarget{class_board_ab5b8328aeea91b708c9ba36464e4bdaa}\index{Board@{Board}!getBitboard@{getBitboard}}
+\index{getBitboard@{getBitboard}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{getBitboard()}{getBitboard()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_board_ab5b8328aeea91b708c9ba36464e4bdaa} 
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} Board\+::get\+Bitboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Gets bitboard for specified colour and piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to get bitboard for \\
+\hline
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of piece \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard} representation of player\textquotesingle{}s specified piece locations 
 \end{DoxyReturn}
 \Hypertarget{class_board_a89249a430c330e08b18efd03b77f2e3f}\index{Board@{Board}!getBlackPiecesBitboard@{getBlackPiecesBitboard}}
 \index{getBlackPiecesBitboard@{getBlackPiecesBitboard}!Board@{Board}}
@@ -248,9 +282,33 @@ Returns if can kingside castle.
 \begin{DoxyReturn}{Returns}
 True if can kingside castle else False 
 \end{DoxyReturn}
+\Hypertarget{class_board_ad6a8b46a07f33ae6ab0891c4214aadef}\index{Board@{Board}!getKingSquare@{getKingSquare}}
+\index{getKingSquare@{getKingSquare}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{getKingSquare()}{getKingSquare()}}
+{\footnotesize\ttfamily \label{class_board_ad6a8b46a07f33ae6ab0891c4214aadef} 
+uint8\+\_\+t Board\+::get\+King\+Square (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Gets the square that the king occupies. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of king piece \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Square that the king occupies 
+\end{DoxyReturn}
+\begin{DoxyAttention}{Attention}
+This functions assumes that there is only one king on the board and always will return the king with the lower square number if there are multiple 
+\end{DoxyAttention}
+\begin{DoxyWarning}{Warning}
+Undefined behaviour if there is no king on the board 
+\end{DoxyWarning}
 \Hypertarget{class_board_ad1a8450c0343b953d3585186b979b283}\index{Board@{Board}!getOpposingBitboard@{getOpposingBitboard}}
 \index{getOpposingBitboard@{getOpposingBitboard}!Board@{Board}}
-\doxysubsubsection{\texorpdfstring{getOpposingBitboard()}{getOpposingBitboard()}}
+\doxysubsubsection{\texorpdfstring{getOpposingBitboard()}{getOpposingBitboard()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily \label{class_board_ad1a8450c0343b953d3585186b979b283} 
 \mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} Board\+::get\+Opposing\+Bitboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -265,6 +323,29 @@ Gets the bitboard of the opposing colour\textquotesingle{}s pieces.
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
 \doxylink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard} of oppposing colour\textquotesingle{}s pieces, e.\+g. if colour == WHITE, returns black pieces bitboard 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+colour is the colour of the player, not the opponent 
+\end{DoxyNote}
+\Hypertarget{class_board_ab6e5038589f505029b8b31901be12613}\index{Board@{Board}!getOpposingBitboard@{getOpposingBitboard}}
+\index{getOpposingBitboard@{getOpposingBitboard}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{getOpposingBitboard()}{getOpposingBitboard()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_board_ab6e5038589f505029b8b31901be12613} 
+\mbox{\hyperlink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard}} Board\+::get\+Opposing\+Bitboard (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Gets the bitboard for a specified opposing colour\textquotesingle{}s piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to get bitboard for \\
+\hline
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of player \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{class_board_ab14b366301954e05193ada122d2461f9}{Bitboard} representation of opponent\textquotesingle{}s specified piece locations 
 \end{DoxyReturn}
 \begin{DoxyNote}{Note}
 colour is the colour of the player, not the opponent 
@@ -318,6 +399,26 @@ Gets the rank that a square is located in.
 \begin{DoxyReturn}{Returns}
 Rank of the square 
 \end{DoxyReturn}
+\Hypertarget{class_board_afe334911efddb74e8dc6af94ab76d575}\index{Board@{Board}!getSquares@{getSquares}}
+\index{getSquares@{getSquares}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{getSquares()}{getSquares()}}
+{\footnotesize\ttfamily \label{class_board_afe334911efddb74e8dc6af94ab76d575} 
+std\+::vector$<$ uint8\+\_\+t $>$ Board\+::get\+Squares (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Gets the squares that a given type of piece of a given colour occupies. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to find squares for \\
+\hline
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of piece \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector of squares that the given piece of the given colour occupies 
+\end{DoxyReturn}
 \Hypertarget{class_board_a592edaf33dfe7e6ad40e9cff2b3473a3}\index{Board@{Board}!getTurn@{getTurn}}
 \index{getTurn@{getTurn}!Board@{Board}}
 \doxysubsubsection{\texorpdfstring{getTurn()}{getTurn()}}
@@ -362,9 +463,29 @@ Checks if a square is empty.
 \begin{DoxyReturn}{Returns}
 True if square is empty, otherwise false 
 \end{DoxyReturn}
+\Hypertarget{class_board_aadc66ee581efcb258ddf75d8161c2e4c}\index{Board@{Board}!isOccupied@{isOccupied}}
+\index{isOccupied@{isOccupied}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{isOccupied()}{isOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \label{class_board_aadc66ee581efcb258ddf75d8161c2e4c} 
+bool Board\+::is\+Occupied (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks if a square is occupied with a given piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to check if it occupies that square \\
+\hline
+{\em square} & Square to check if it is occupied (0-\/63) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if square is occupied, otherwise false 
+\end{DoxyReturn}
 \Hypertarget{class_board_acdd72c2e3f4a247863f7738b45455069}\index{Board@{Board}!isOccupied@{isOccupied}}
 \index{isOccupied@{isOccupied}!Board@{Board}}
-\doxysubsubsection{\texorpdfstring{isOccupied()}{isOccupied()}}
+\doxysubsubsection{\texorpdfstring{isOccupied()}{isOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily \label{class_board_acdd72c2e3f4a247863f7738b45455069} 
 bool Board\+::is\+Occupied (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -382,7 +503,7 @@ True if square is occupied, otherwise false
 \end{DoxyReturn}
 \Hypertarget{class_board_a9d80e50f34216850dc6ccaa03f71781c}\index{Board@{Board}!isOpponentOccupied@{isOpponentOccupied}}
 \index{isOpponentOccupied@{isOpponentOccupied}!Board@{Board}}
-\doxysubsubsection{\texorpdfstring{isOpponentOccupied()}{isOpponentOccupied()}}
+\doxysubsubsection{\texorpdfstring{isOpponentOccupied()}{isOpponentOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily \label{class_board_a9d80e50f34216850dc6ccaa03f71781c} 
 bool Board\+::is\+Opponent\+Occupied (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -403,9 +524,31 @@ True if square is occupied by opponent, otherwise false
 \begin{DoxyNote}{Note}
 colour is the colour of the player, not the opponent 
 \end{DoxyNote}
+\Hypertarget{class_board_a646cf05f8eba56baf28458ae88803d13}\index{Board@{Board}!isOpponentOccupied@{isOpponentOccupied}}
+\index{isOpponentOccupied@{isOpponentOccupied}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{isOpponentOccupied()}{isOpponentOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_board_a646cf05f8eba56baf28458ae88803d13} 
+bool Board\+::is\+Opponent\+Occupied (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks if a player occupies a square with a given piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to check if it occupies that square \\
+\hline
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of piece \\
+\hline
+{\em square} & Square to check if it is occupied (0-\/63) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if square is occupied by the piece with specified colour, otherwise false 
+\end{DoxyReturn}
 \Hypertarget{class_board_a119014689bffe29c7089d6c6e6bbc1b7}\index{Board@{Board}!isSelfOccupied@{isSelfOccupied}}
 \index{isSelfOccupied@{isSelfOccupied}!Board@{Board}}
-\doxysubsubsection{\texorpdfstring{isSelfOccupied()}{isSelfOccupied()}}
+\doxysubsubsection{\texorpdfstring{isSelfOccupied()}{isSelfOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily \label{class_board_a119014689bffe29c7089d6c6e6bbc1b7} 
 bool Board\+::is\+Self\+Occupied (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
 
@@ -421,7 +564,29 @@ Checks if a player occupies a square.
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-True if square is occupied by player, otherwise false 
+True if square is occupied by player with specified colour, otherwise false 
+\end{DoxyReturn}
+\Hypertarget{class_board_a6bc2fc7e186b9d4139ad2eae3d132383}\index{Board@{Board}!isSelfOccupied@{isSelfOccupied}}
+\index{isSelfOccupied@{isSelfOccupied}!Board@{Board}}
+\doxysubsubsection{\texorpdfstring{isSelfOccupied()}{isSelfOccupied()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_board_a6bc2fc7e186b9d4139ad2eae3d132383} 
+bool Board\+::is\+Self\+Occupied (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Piece}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{square}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks if a player occupies a square with a given piece. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{class_board_a1ca8cf5b0d846308281916c40d35292e}{Piece} to check if it occupies that square \\
+\hline
+{\em colour} & \doxylink{class_board_ad7dfac5154f789827569a7f35100d417}{Colour} of piece \\
+\hline
+{\em square} & Square to check if it is occupied (0-\/63) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if square is occupied by the piece with specified colour, otherwise false 
 \end{DoxyReturn}
 \Hypertarget{class_board_a6e1a4787d3e58762c0bfacdb72a4ddb2}\index{Board@{Board}!movePiece@{movePiece}}
 \index{movePiece@{movePiece}!Board@{Board}}

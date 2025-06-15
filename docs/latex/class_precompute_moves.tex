@@ -1,0 +1,125 @@
+\doxysection{Precompute\+Moves Class Reference}
+\hypertarget{class_precompute_moves}{}\label{class_precompute_moves}\index{PrecomputeMoves@{PrecomputeMoves}}
+
+
+{\ttfamily \#include $<$precompute\+\_\+moves.\+h$>$}
+
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}} = \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess\+::\+Bitboard}}
+\item 
+using \mbox{\hyperlink{class_precompute_moves_aa603550b29e9872cbf5ef210fadfd244}{Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}
+\item 
+using \mbox{\hyperlink{class_precompute_moves_a42caf1704c988e35203c76694ac24ec6}{Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}
+\item 
+using \mbox{\hyperlink{class_precompute_moves_af88ce05ccc0e6990abe57634323c6dad}{Move}} = \mbox{\hyperlink{struct_chess_move_1_1_move}{Chess\+Move\+::\+Move}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static constexpr std\+::array$<$ \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64 $>$ \mbox{\hyperlink{class_precompute_moves_a60c0dc724f8cdb52645bbaac022173ab}{knight\+Move\+Table}}
+\item 
+static constexpr std\+::array$<$ \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64 $>$ \mbox{\hyperlink{class_precompute_moves_acc7c84c4d1139950d50f9fdb350f0019}{king\+Move\+Table}}
+\item 
+static constexpr std\+::array$<$ \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64 $>$ \mbox{\hyperlink{class_precompute_moves_aa8f5c864f8094efeb39670880beeecc3}{white\+Pawn\+Capture\+Table}}
+\item 
+static constexpr std\+::array$<$ \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64 $>$ \mbox{\hyperlink{class_precompute_moves_afa125652bdadce7777298a67f9f2dd19}{black\+Pawn\+Capture\+Table}}
+\end{DoxyCompactItemize}
+
+
+\label{doc-typedef-members}
+\Hypertarget{class_precompute_moves_doc-typedef-members}
+\doxysubsection{Member Typedef Documentation}
+\Hypertarget{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}\index{PrecomputeMoves@{PrecomputeMoves}!Bitboard@{Bitboard}}
+\index{Bitboard@{Bitboard}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{Bitboard}{Bitboard}}
+{\footnotesize\ttfamily \label{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0} 
+using \mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Precompute\+Moves\+::\+Bitboard}} = \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess\+::\+Bitboard}}}
+
+\Hypertarget{class_precompute_moves_a42caf1704c988e35203c76694ac24ec6}\index{PrecomputeMoves@{PrecomputeMoves}!Colour@{Colour}}
+\index{Colour@{Colour}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{Colour}{Colour}}
+{\footnotesize\ttfamily \label{class_precompute_moves_a42caf1704c988e35203c76694ac24ec6} 
+using \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Precompute\+Moves\+::\+Colour}} = \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}}
+
+\Hypertarget{class_precompute_moves_af88ce05ccc0e6990abe57634323c6dad}\index{PrecomputeMoves@{PrecomputeMoves}!Move@{Move}}
+\index{Move@{Move}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{Move}{Move}}
+{\footnotesize\ttfamily \label{class_precompute_moves_af88ce05ccc0e6990abe57634323c6dad} 
+using \mbox{\hyperlink{class_precompute_moves_af88ce05ccc0e6990abe57634323c6dad}{Precompute\+Moves\+::\+Move}} = \mbox{\hyperlink{struct_chess_move_1_1_move}{Chess\+Move\+::\+Move}}}
+
+\Hypertarget{class_precompute_moves_aa603550b29e9872cbf5ef210fadfd244}\index{PrecomputeMoves@{PrecomputeMoves}!Piece@{Piece}}
+\index{Piece@{Piece}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{Piece}{Piece}}
+{\footnotesize\ttfamily \label{class_precompute_moves_aa603550b29e9872cbf5ef210fadfd244} 
+using \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Precompute\+Moves\+::\+Piece}} = \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}}
+
+
+
+\label{doc-variable-members}
+\Hypertarget{class_precompute_moves_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_precompute_moves_afa125652bdadce7777298a67f9f2dd19}\index{PrecomputeMoves@{PrecomputeMoves}!blackPawnCaptureTable@{blackPawnCaptureTable}}
+\index{blackPawnCaptureTable@{blackPawnCaptureTable}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{blackPawnCaptureTable}{blackPawnCaptureTable}}
+{\footnotesize\ttfamily \label{class_precompute_moves_afa125652bdadce7777298a67f9f2dd19} 
+std\+::array$<$\mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64$>$ Precompute\+Moves\+::black\+Pawn\+Capture\+Table\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}, {\ttfamily [constexpr]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ []\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{-\/1,\ -\/1\},\ \{1,\ -\/1\}\}\};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{\ \ \ \ \}()}
+
+\end{DoxyCode}
+\Hypertarget{class_precompute_moves_acc7c84c4d1139950d50f9fdb350f0019}\index{PrecomputeMoves@{PrecomputeMoves}!kingMoveTable@{kingMoveTable}}
+\index{kingMoveTable@{kingMoveTable}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{kingMoveTable}{kingMoveTable}}
+{\footnotesize\ttfamily \label{class_precompute_moves_acc7c84c4d1139950d50f9fdb350f0019} 
+std\+::array$<$\mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64$>$ Precompute\+Moves\+::king\+Move\+Table\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}, {\ttfamily [constexpr]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ []\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{0,\ 1\},\ \{1,\ 1\},\ \{1,\ 0\},\ \{1,\ -\/1\},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{0,\ -\/1\},\ \{-\/1,\ -\/1\},\ \{-\/1,\ 0\},\ \{-\/1,\ 1\}\}\};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{\ \ \ \ \}()}
+
+\end{DoxyCode}
+\Hypertarget{class_precompute_moves_a60c0dc724f8cdb52645bbaac022173ab}\index{PrecomputeMoves@{PrecomputeMoves}!knightMoveTable@{knightMoveTable}}
+\index{knightMoveTable@{knightMoveTable}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{knightMoveTable}{knightMoveTable}}
+{\footnotesize\ttfamily \label{class_precompute_moves_a60c0dc724f8cdb52645bbaac022173ab} 
+std\+::array$<$\mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64$>$ Precompute\+Moves\+::knight\+Move\+Table\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}, {\ttfamily [constexpr]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ []\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{1,\ 2\},\ \{2,\ 1\},\ \{2,\ -\/1\},\ \{1,\ -\/2\},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{-\/1,\ -\/2\},\ \{-\/2,\ -\/1\},\ \{-\/2,\ 1\},\ \{-\/1,\ 2\}\}\};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{\ \ \ \ \}()}
+
+\end{DoxyCode}
+\Hypertarget{class_precompute_moves_aa8f5c864f8094efeb39670880beeecc3}\index{PrecomputeMoves@{PrecomputeMoves}!whitePawnCaptureTable@{whitePawnCaptureTable}}
+\index{whitePawnCaptureTable@{whitePawnCaptureTable}!PrecomputeMoves@{PrecomputeMoves}}
+\doxysubsubsection{\texorpdfstring{whitePawnCaptureTable}{whitePawnCaptureTable}}
+{\footnotesize\ttfamily \label{class_precompute_moves_aa8f5c864f8094efeb39670880beeecc3} 
+std\+::array$<$\mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}, 64$>$ Precompute\+Moves\+::white\+Pawn\+Capture\+Table\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}, {\ttfamily [constexpr]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ []\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{-\/1,\ 1\},\ \{1,\ 1\}\}\};}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{\ \ \ \ \}()}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+backend/include/\mbox{\hyperlink{precompute__moves_8h}{precompute\+\_\+moves.\+h}}\end{DoxyCompactItemize}

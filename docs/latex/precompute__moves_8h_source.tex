@@ -1,0 +1,72 @@
+\doxysection{precompute\+\_\+moves.\+h}
+\hypertarget{precompute__moves_8h_source}{}\label{precompute__moves_8h_source}\index{backend/include/precompute\_moves.h@{backend/include/precompute\_moves.h}}
+\mbox{\hyperlink{precompute__moves_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ PRECOMPUTE\_MOVES\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ PRECOMPUTE\_MOVES\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <array>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{board_8h}{board.h}}"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{chess__types_8h}{chess\_types.h}}"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{move_8h}{move.h}}"{}}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }\{}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}{Bitboard}}\ =\ \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess::Bitboard}};}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keywordtype}{size\_t}\ N>}
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keyword}{constexpr}\ std::array<Bitboard,\ 64>\ generateMoveTable(\textcolor{keyword}{const}\ std::array<std::array<int,\ 2>,\ N>\&\ offsets)\ \{}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ std::array<Bitboard,\ 64>\ table\ \{\};}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ 8;\ i++)\ \{}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ j\ =\ 0;\ j\ <\ 8;\ j++)\ \{}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{board_8cpp_ae7e3f6564c51b31c69fe905b6f5d95d0}{Bitboard}}\ moves\ =\ 0ULL;}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\&\ offset\ :\ offsets)\ \{}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ row\ =\ i\ +\ offset[0];}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ col\ =\ j\ +\ offset[1];}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (0\ <=\ row\ \&\&\ row\ <\ 8\ \&\&\ 0\ <=\ col\ \&\&\ col\ <\ 8)\ \{}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Set\ square\ bit\ in\ bitboard}}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ moves\ |=\ (1ULL\ <<\ (8\ *\ row\ +\ col));\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ table[8\ *\ i\ +\ j]\ =\ moves;}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ table;}
+\DoxyCodeLine{00039\ \ \ \ \ \}}
+\DoxyCodeLine{00040\ \}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_precompute_moves}{PrecomputeMoves}}\ \{}
+\DoxyCodeLine{00043\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_precompute_moves_a219fa8308a62b3242a1dfde3f5be0fe0}{Bitboard}}\ =\ \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess::Bitboard}};}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_precompute_moves_aa603550b29e9872cbf5ef210fadfd244}{Piece}}\ =\ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess::PieceType}};}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_precompute_moves_a42caf1704c988e35203c76694ac24ec6}{Colour}}\ =\ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess::PieceColour}};}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_precompute_moves_af88ce05ccc0e6990abe57634323c6dad}{Move}}\ =\ \mbox{\hyperlink{struct_chess_move_1_1_move}{ChessMove::Move}};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ std::array<Bitboard,\ 64>\ \mbox{\hyperlink{class_precompute_moves_a60c0dc724f8cdb52645bbaac022173ab}{knightMoveTable}}\ =\ []\ \{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{1,\ 2\},\ \{2,\ 1\},\ \{2,\ -\/1\},\ \{1,\ -\/2\},}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{-\/1,\ -\/2\},\ \{-\/2,\ -\/1\},\ \{-\/2,\ 1\},\ \{-\/1,\ 2\}\}\};}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{00053\ \ \ \ \ \}();}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ std::array<Bitboard,\ 64>\ \mbox{\hyperlink{class_precompute_moves_acc7c84c4d1139950d50f9fdb350f0019}{kingMoveTable}}\ =\ []\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{0,\ 1\},\ \{1,\ 1\},\ \{1,\ 0\},\ \{1,\ -\/1\},}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{0,\ -\/1\},\ \{-\/1,\ -\/1\},\ \{-\/1,\ 0\},\ \{-\/1,\ 1\}\}\};}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{00059\ \ \ \ \ \}();}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ std::array<Bitboard,\ 64>\ \mbox{\hyperlink{class_precompute_moves_aa8f5c864f8094efeb39670880beeecc3}{whitePawnCaptureTable}}\ =\ []\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{-\/1,\ 1\},\ \{1,\ 1\}\}\};}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{00064\ \ \ \ \ \}();}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ std::array<Bitboard,\ 64>\ \mbox{\hyperlink{class_precompute_moves_afa125652bdadce7777298a67f9f2dd19}{blackPawnCaptureTable}}\ =\ []\ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ std::array<std::array<int,\ 2>,\ 8>\ offsets\ =\ \{\{\{-\/1,\ -\/1\},\ \{1,\ -\/1\}\}\};}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ generateMoveTable(offsets);}
+\DoxyCodeLine{00069\ \ \ \ \ \}();}
+\DoxyCodeLine{00070\ \};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ PRECOMPUTE\_MOVES\_H}}
+
+\end{DoxyCode}

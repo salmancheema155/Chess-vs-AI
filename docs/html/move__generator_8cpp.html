@@ -98,51 +98,23 @@ $(function(){initNavTree('move__generator_8cpp.html','',''); });
 <code>#include &lt;cassert&gt;</code><br />
 <code>#include &quot;<a class="el" href="chess__types_8h_source.html">chess_types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="board_8h_source.html">board.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="precompute__moves_8h_source.html">precompute_moves.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="move__generator_8h_source.html">move_generator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="move_8h_source.html">move.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a4de554c940fc3363d5105580364050bd" id="r_a4de554c940fc3363d5105580364050bd"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4de554c940fc3363d5105580364050bd">Bitboard</a> = <a class="el" href="namespace_chess.html#a48c17f2a4accb3276bf16751b80df865">Chess::Bitboard</a></td></tr>
-<tr class="memitem:adce465eaf40a62772dd20a382f2ce663" id="r_adce465eaf40a62772dd20a382f2ce663"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adce465eaf40a62772dd20a382f2ce663">Piece</a> = <a class="el" href="namespace_chess.html#a3c98b086580ce616413ad071a11d7446">Chess::PieceType</a></td></tr>
-<tr class="memitem:a89c1fbc82b77a9ef75e31789afede1ef" id="r_a89c1fbc82b77a9ef75e31789afede1ef"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89c1fbc82b77a9ef75e31789afede1ef">Colour</a> = <a class="el" href="namespace_chess.html#a16eda0f6957c2da123254fa3c5eb8767">Chess::PieceColour</a></td></tr>
+<tr class="memitem:a2b111e4af6e71499df3e3c63ea68cf77" id="r_a2b111e4af6e71499df3e3c63ea68cf77"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b111e4af6e71499df3e3c63ea68cf77">Move</a> = <a class="el" href="struct_chess_move_1_1_move.html">ChessMove::Move</a></td></tr>
 </table>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
-<a id="a4de554c940fc3363d5105580364050bd" name="a4de554c940fc3363d5105580364050bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4de554c940fc3363d5105580364050bd">&#9670;&#160;</a></span>Bitboard</h2>
+<a id="a2b111e4af6e71499df3e3c63ea68cf77" name="a2b111e4af6e71499df3e3c63ea68cf77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b111e4af6e71499df3e3c63ea68cf77">&#9670;&#160;</a></span>Move</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="board_8cpp.html#ae7e3f6564c51b31c69fe905b6f5d95d0">Bitboard</a> = <a class="el" href="namespace_chess.html#a48c17f2a4accb3276bf16751b80df865">Chess::Bitboard</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a89c1fbc82b77a9ef75e31789afede1ef" name="a89c1fbc82b77a9ef75e31789afede1ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a89c1fbc82b77a9ef75e31789afede1ef">&#9670;&#160;</a></span>Colour</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespace_chess.html#a16eda0f6957c2da123254fa3c5eb8767">Colour</a> = <a class="el" href="namespace_chess.html#a16eda0f6957c2da123254fa3c5eb8767">Chess::PieceColour</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="adce465eaf40a62772dd20a382f2ce663" name="adce465eaf40a62772dd20a382f2ce663"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adce465eaf40a62772dd20a382f2ce663">&#9670;&#160;</a></span>Piece</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespace_chess.html#a3c98b086580ce616413ad071a11d7446">Piece</a> = <a class="el" href="namespace_chess.html#a3c98b086580ce616413ad071a11d7446">Chess::PieceType</a></td>
+          <td class="memname">using <a class="el" href="#a2b111e4af6e71499df3e3c63ea68cf77">Move</a> = <a class="el" href="struct_chess_move_1_1_move.html">ChessMove::Move</a></td>
         </tr>
       </table>
 </div><div class="memdoc">

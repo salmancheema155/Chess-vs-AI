@@ -1,0 +1,43 @@
+\doxysection{Chess\+Move Namespace Reference}
+\hypertarget{namespace_chess_move}{}\label{namespace_chess_move}\index{ChessMove@{ChessMove}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_chess_move_1_1_move}{Move}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+constexpr \mbox{\hyperlink{struct_chess_move_1_1_move}{Move}} \mbox{\hyperlink{namespace_chess_move_a0e13472a3579cbdbe3807df61d8ae21a}{make\+Move}} (\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}} piece, \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}} colour, uint8\+\_\+t from\+Square, uint8\+\_\+t to\+Square, std\+::optional$<$ uint8\+\_\+t $>$ capture\+Square=std\+::nullopt)
+\begin{DoxyCompactList}\small\item\em Creates instance of \doxylink{struct_chess_move_1_1_move}{Move} struct. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{namespace_chess_move_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespace_chess_move_a0e13472a3579cbdbe3807df61d8ae21a}\index{ChessMove@{ChessMove}!makeMove@{makeMove}}
+\index{makeMove@{makeMove}!ChessMove@{ChessMove}}
+\doxysubsubsection{\texorpdfstring{makeMove()}{makeMove()}}
+{\footnotesize\ttfamily \label{namespace_chess_move_a0e13472a3579cbdbe3807df61d8ae21a} 
+\mbox{\hyperlink{struct_chess_move_1_1_move}{Move}} Chess\+Move\+::make\+Move (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}}}]{piece}{, }\item[{\mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}}}]{colour}{, }\item[{uint8\+\_\+t}]{from\+Square}{, }\item[{uint8\+\_\+t}]{to\+Square}{, }\item[{std\+::optional$<$ uint8\+\_\+t $>$}]{capture\+Square}{ = {\ttfamily std\+:\+:nullopt}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [constexpr]}}
+
+
+
+Creates instance of \doxylink{struct_chess_move_1_1_move}{Move} struct. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em piece} & \doxylink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece} to move \\
+\hline
+{\em colour} & \doxylink{board_8cpp_a58c42320e0344a9aab311e40ebbe7c26}{Colour} of piece \\
+\hline
+{\em from\+Square} & Square that the piece moves from \\
+\hline
+{\em to\+Square} & Square that the piece moves to \\
+\hline
+{\em capture\+Square} & \doxylink{board_8cpp_a0a8c768141748a6f409a5ff3fe62071c}{Piece} that is captured from this move \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{struct_chess_move_1_1_move}{Move} instance representing the move 
+\end{DoxyReturn}

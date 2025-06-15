@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['pawn_0',['PAWN',['../namespace_chess.html#a3c98b086580ce616413ad071a11d7446a3acd2a53aca11e0f883236ea27a3b627',1,'Chess']]],
-  ['piece_1',['Piece',['../class_board.html#a1ca8cf5b0d846308281916c40d35292e',1,'Board::Piece'],['../class_move_generator.html#aa2af91ef391fc0b3922e56b1a805287b',1,'MoveGenerator::Piece'],['../board_8cpp.html#a0a8c768141748a6f409a5ff3fe62071c',1,'Piece:&#160;board.cpp'],['../move__generator_8cpp.html#adce465eaf40a62772dd20a382f2ce663',1,'Piece:&#160;move_generator.cpp']]],
-  ['piece_2',['piece',['../struct_move.html#ae548eec0c62b076fa31b58bb949cdcbe',1,'Move']]],
-  ['piecebitboards_3',['pieceBitboards',['../class_board.html#a17f34af6fe1cf94f65018574a4f67767',1,'Board']]],
-  ['piececolour_4',['PieceColour',['../namespace_chess.html#a16eda0f6957c2da123254fa3c5eb8767',1,'Chess']]],
-  ['piecesbitboard_5',['piecesBitboard',['../class_board.html#acf8d9792ceddd8c055566f65af49e0a1',1,'Board']]],
-  ['piecetype_6',['PieceType',['../namespace_chess.html#a3c98b086580ce616413ad071a11d7446',1,'Chess']]]
+  ['makemove_0',['makeMove',['../namespace_chess_move.html#a0e13472a3579cbdbe3807df61d8ae21a',1,'ChessMove']]],
+  ['move_1',['Move',['../struct_chess_move_1_1_move.html',1,'ChessMove::Move'],['../class_move_generator.html#a3ae935aff9058724735fedb32609ac7c',1,'MoveGenerator::Move'],['../class_precompute_moves.html#af88ce05ccc0e6990abe57634323c6dad',1,'PrecomputeMoves::Move'],['../move__generator_8cpp.html#a2b111e4af6e71499df3e3c63ea68cf77',1,'Move:&#160;move_generator.cpp']]],
+  ['move_2eh_2',['move.h',['../move_8h.html',1,'']]],
+  ['move_5fgenerator_2ecpp_3',['move_generator.cpp',['../move__generator_8cpp.html',1,'']]],
+  ['move_5fgenerator_2eh_4',['move_generator.h',['../move__generator_8h.html',1,'']]],
+  ['movegenerator_5',['MoveGenerator',['../class_move_generator.html',1,'']]],
+  ['movepiece_6',['movePiece',['../class_board.html#a6e1a4787d3e58762c0bfacdb72a4ddb2',1,'Board']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['setenpassantsquare_0',['setEnPassantSquare',['../class_board.html#a6b46debe164e78f0762d6baf24c9c08d',1,'Board']]],
-  ['switchturn_1',['switchTurn',['../class_board.html#a1821a1fa85ba29f8bd68c0c7d9b1c1ef',1,'Board']]]
+  ['nullifykingsidecastle_0',['nullifyKingsideCastle',['../class_board.html#a32f54e1b9092c3c6bb8f35d7a1675550',1,'Board']]],
+  ['nullifyqueensidecastle_1',['nullifyQueensideCastle',['../class_board.html#a67cabfedb1e4b74e1cf0de95206d517d',1,'Board']]]
 ];

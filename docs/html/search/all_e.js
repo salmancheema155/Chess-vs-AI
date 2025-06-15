@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['setenpassantsquare_0',['setEnPassantSquare',['../class_board.html#a6b46debe164e78f0762d6baf24c9c08d',1,'Board']]],
-  ['switchturn_1',['switchTurn',['../class_board.html#a1821a1fa85ba29f8bd68c0c7d9b1c1ef',1,'Board']]]
+  ['queen_0',['QUEEN',['../namespace_chess.html#a3c98b086580ce616413ad071a11d7446a02d144e18eda99bcb94f3a764756805e',1,'Chess']]],
+  ['queensidecastle_1',['queensideCastle',['../class_board.html#ae9670bc16247d36c80ac53dd3062fa51',1,'Board']]]
 ];

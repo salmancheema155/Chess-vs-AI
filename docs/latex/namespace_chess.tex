@@ -50,7 +50,7 @@ using \mbox{\hyperlink{namespace_chess_a48c17f2a4accb3276bf16751b80df865}{Chess\
 {\footnotesize\ttfamily \label{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767} 
 enum class \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess\+::\+Piece\+Colour}} \+: uint8\+\_\+t\hspace{0.3cm}{\ttfamily [strong]}}
 
-\begin{DoxyEnumFields}[2]{Enumerator}
+Enum representing different colours of pieces \begin{DoxyEnumFields}[2]{Enumerator}
 \raisebox{\heightof{T}}[0pt][0pt]{\index{WHITE@{WHITE}!Chess@{Chess}}\index{Chess@{Chess}!WHITE@{WHITE}}}\Hypertarget{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767ab5bf627e448384cf3a4c35121ca6008d}\label{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767ab5bf627e448384cf3a4c35121ca6008d} 
 WHITE&\\
 \hline
@@ -66,7 +66,7 @@ BLACK&\\
 {\footnotesize\ttfamily \label{namespace_chess_a3c98b086580ce616413ad071a11d7446} 
 enum class \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess\+::\+Piece\+Type}} \+: uint8\+\_\+t\hspace{0.3cm}{\ttfamily [strong]}}
 
-\begin{DoxyEnumFields}[2]{Enumerator}
+Enum representing different types of pieces \begin{DoxyEnumFields}[2]{Enumerator}
 \raisebox{\heightof{T}}[0pt][0pt]{\index{PAWN@{PAWN}!Chess@{Chess}}\index{Chess@{Chess}!PAWN@{PAWN}}}\Hypertarget{namespace_chess_a3c98b086580ce616413ad071a11d7446a3acd2a53aca11e0f883236ea27a3b627}\label{namespace_chess_a3c98b086580ce616413ad071a11d7446a3acd2a53aca11e0f883236ea27a3b627} 
 PAWN&\\
 \hline
@@ -92,7 +92,7 @@ KING&\\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{COUNT@{COUNT}!Chess@{Chess}}\index{Chess@{Chess}!COUNT@{COUNT}}}\Hypertarget{namespace_chess_a3c98b086580ce616413ad071a11d7446a4905ac9d6a22bdfc1ae096094ce6248d}\label{namespace_chess_a3c98b086580ce616413ad071a11d7446a4905ac9d6a22bdfc1ae096094ce6248d} 
-COUNT&\\
+COUNT&Number of pieces. \\
 \hline
 
 \end{DoxyEnumFields}
@@ -117,5 +117,5 @@ Convert an enum value to its corresponding integer value
 Corresponding integer value for the enum 
 \end{DoxyReturn}
 \begin{DoxyWarning}{Warning}
-The enum value must have a corresponding integer value and integer values must be contiguous start from 0 
+The enum value must have a corresponding integer value and integer values must be contiguous starting from 0 
 \end{DoxyWarning}

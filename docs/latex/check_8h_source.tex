@@ -1,0 +1,36 @@
+\doxysection{check.\+h}
+\hypertarget{check_8h_source}{}\label{check_8h_source}\index{backend/include/check.h@{backend/include/check.h}}
+\mbox{\hyperlink{check_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ CHECK\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ CHECK\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{board_8h}{board.h}}"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{chess__types_8h}{chess\_types.h}}"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285}{GameState}}\ \{}
+\DoxyCodeLine{00009\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285aca69f96c768067fbff6c911ca87bccc9}{IN\_PROGRESS}},}
+\DoxyCodeLine{00010\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a3f79793bbc2cfedde1169237aaa54626}{CHECKMATE}},}
+\DoxyCodeLine{00011\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a34d3dfbb18f1436b9ae10c4796384c51}{STALEMATE}},}
+\DoxyCodeLine{00012\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c46d8d9d3402788403e2f6911153089}{CHECK}},}
+\DoxyCodeLine{00013\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c860e4e21b13b138262541acd9c8dea}{DRAW\_BY\_REPETITION}},}
+\DoxyCodeLine{00014\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a57e5000115e83e8ac77dda5968dcb803}{DRAW\_BY\_INSUFFICIENT\_MATERIAL}},}
+\DoxyCodeLine{00015\ \ \ \ \ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a77b2635112645a7c9c0db48e5d38f3c1}{DRAW\_BY\_FIFTY\_MOVE\_RULE}}}
+\DoxyCodeLine{00016\ \};}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_check}{Check}}\ \{}
+\DoxyCodeLine{00019\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_check_a0424d7ed7084656eddf61fe9cfcc681f}{Piece}}\ =\ \mbox{\hyperlink{namespace_chess_a3c98b086580ce616413ad071a11d7446}{Chess::PieceType}};}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_check_a495cfb0f2e97cfcc38bff9a7469b51f9}{Colour}}\ =\ \mbox{\hyperlink{namespace_chess_a16eda0f6957c2da123254fa3c5eb8767}{Chess::PieceColour}};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285}{GameState}}\ \mbox{\hyperlink{class_check_a0242909bab8cf2bac3ceb39feac89ea2}{evaluateGameState}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_board}{Board}}\&\ board,\ \mbox{\hyperlink{class_check_a495cfb0f2e97cfcc38bff9a7469b51f9}{Colour}}\ colour);}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_check_a9d7a1ebe0481db20edeb43cf222321e4}{isInCheck}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_board}{Board}}\&\ board,\ \mbox{\hyperlink{class_check_a495cfb0f2e97cfcc38bff9a7469b51f9}{Colour}}\ colour);}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_check_a0a3f98cec0d33fa56440343362660783}{hasMove}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_board}{Board}}\&\ board,\ \mbox{\hyperlink{class_check_a495cfb0f2e97cfcc38bff9a7469b51f9}{Colour}}\ colour);}
+\DoxyCodeLine{00028\ \};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ CHECK\_H}}
+
+\end{DoxyCode}

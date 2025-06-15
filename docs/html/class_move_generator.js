@@ -1,6 +1,7 @@
 var class_move_generator =
 [
     [ "Colour", "class_move_generator.html#aa4fb2590318146e85d52e8f780a9011c", null ],
+    [ "Move", "class_move_generator.html#a3ae935aff9058724735fedb32609ac7c", null ],
     [ "Piece", "class_move_generator.html#aa2af91ef391fc0b3922e56b1a805287b", null ],
     [ "legalBishopMoves", "class_move_generator.html#ad1f980868a2036c408da599a7534eec1", null ],
     [ "legalKingMoves", "class_move_generator.html#a0d03b4b6ca5135f4272a57d88b8fbdd4", null ],

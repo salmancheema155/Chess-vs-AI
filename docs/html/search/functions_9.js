@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['toindex_0',['toIndex',['../namespace_chess.html#a6262d972b405ab71204f1171c2ed02cc',1,'Chess::toIndex()'],['../board_8cpp.html#a6262d972b405ab71204f1171c2ed02cc',1,'toIndex():&#160;chess_types.h']]]
+  ['removepiece_0',['removePiece',['../class_board.html#a121fdfc69df9aec8ec3e79fc772075ab',1,'Board']]],
+  ['resetboard_1',['resetBoard',['../class_board.html#a7cef7a9ca499d64c71cb170d67f76ad0',1,'Board']]],
+  ['resetpieces_2',['resetPieces',['../class_board.html#ac686998ba5b1f7f53430b373e0fcc2b2',1,'Board']]]
 ];

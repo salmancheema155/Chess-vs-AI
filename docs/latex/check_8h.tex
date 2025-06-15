@@ -1,0 +1,65 @@
+\doxysection{backend/include/check.h File Reference}
+\hypertarget{check_8h}{}\label{check_8h}\index{backend/include/check.h@{backend/include/check.h}}
+{\ttfamily \#include $<$cstdint$>$}\newline
+{\ttfamily \#include "{}board.\+h"{}}\newline
+{\ttfamily \#include "{}chess\+\_\+types.\+h"{}}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{class_check}{Check}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}} \{ \newline
+\mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285aca69f96c768067fbff6c911ca87bccc9}{IN\+\_\+\+PROGRESS}}
+, \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a3f79793bbc2cfedde1169237aaa54626}{CHECKMATE}}
+, \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a34d3dfbb18f1436b9ae10c4796384c51}{STALEMATE}}
+, \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c46d8d9d3402788403e2f6911153089}{CHECK}}
+, \newline
+\mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c860e4e21b13b138262541acd9c8dea}{DRAW\+\_\+\+BY\+\_\+\+REPETITION}}
+, \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a57e5000115e83e8ac77dda5968dcb803}{DRAW\+\_\+\+BY\+\_\+\+INSUFFICIENT\+\_\+\+MATERIAL}}
+, \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a77b2635112645a7c9c0db48e5d38f3c1}{DRAW\+\_\+\+BY\+\_\+\+FIFTY\+\_\+\+MOVE\+\_\+\+RULE}}
+ \}
+\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{check_8h_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285}\index{check.h@{check.h}!GameState@{GameState}}
+\index{GameState@{GameState}!check.h@{check.h}}
+\doxysubsubsection{\texorpdfstring{GameState}{GameState}}
+{\footnotesize\ttfamily \label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285} 
+enum class \mbox{\hyperlink{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285}{Game\+State}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{IN\_PROGRESS@{IN\_PROGRESS}!check.h@{check.h}}\index{check.h@{check.h}!IN\_PROGRESS@{IN\_PROGRESS}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285aca69f96c768067fbff6c911ca87bccc9}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285aca69f96c768067fbff6c911ca87bccc9} 
+IN\+\_\+\+PROGRESS&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHECKMATE@{CHECKMATE}!check.h@{check.h}}\index{check.h@{check.h}!CHECKMATE@{CHECKMATE}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a3f79793bbc2cfedde1169237aaa54626}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a3f79793bbc2cfedde1169237aaa54626} 
+CHECKMATE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STALEMATE@{STALEMATE}!check.h@{check.h}}\index{check.h@{check.h}!STALEMATE@{STALEMATE}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a34d3dfbb18f1436b9ae10c4796384c51}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a34d3dfbb18f1436b9ae10c4796384c51} 
+STALEMATE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CHECK@{CHECK}!check.h@{check.h}}\index{check.h@{check.h}!CHECK@{CHECK}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c46d8d9d3402788403e2f6911153089}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c46d8d9d3402788403e2f6911153089} 
+CHECK&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DRAW\_BY\_REPETITION@{DRAW\_BY\_REPETITION}!check.h@{check.h}}\index{check.h@{check.h}!DRAW\_BY\_REPETITION@{DRAW\_BY\_REPETITION}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c860e4e21b13b138262541acd9c8dea}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a8c860e4e21b13b138262541acd9c8dea} 
+DRAW\+\_\+\+BY\+\_\+\+REPETITION&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DRAW\_BY\_INSUFFICIENT\_MATERIAL@{DRAW\_BY\_INSUFFICIENT\_MATERIAL}!check.h@{check.h}}\index{check.h@{check.h}!DRAW\_BY\_INSUFFICIENT\_MATERIAL@{DRAW\_BY\_INSUFFICIENT\_MATERIAL}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a57e5000115e83e8ac77dda5968dcb803}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a57e5000115e83e8ac77dda5968dcb803} 
+DRAW\+\_\+\+BY\+\_\+\+INSUFFICIENT\+\_\+\+MATERIAL&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DRAW\_BY\_FIFTY\_MOVE\_RULE@{DRAW\_BY\_FIFTY\_MOVE\_RULE}!check.h@{check.h}}\index{check.h@{check.h}!DRAW\_BY\_FIFTY\_MOVE\_RULE@{DRAW\_BY\_FIFTY\_MOVE\_RULE}}}\Hypertarget{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a77b2635112645a7c9c0db48e5d38f3c1}\label{check_8h_a7899b65f1ea0f655e4bbf8d2a5714285a77b2635112645a7c9c0db48e5d38f3c1} 
+DRAW\+\_\+\+BY\+\_\+\+FIFTY\+\_\+\+MOVE\+\_\+\+RULE&\\
+\hline
+
+\end{DoxyEnumFields}

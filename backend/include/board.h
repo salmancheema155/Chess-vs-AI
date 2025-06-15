@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <array>
+#include <vector>
 #include <optional>
 #include "chess_types.h"
 
@@ -56,10 +57,20 @@ public:
      * @param colour Colour of player
      * @return Bitboard representation of player's pieces
      */
-    inline Bitboard getBitBoard(Colour colour) const {
+    inline Bitboard getBitboard(Colour colour) const {
         return (colour == Colour::WHITE) ?
             whitePiecesBitboard :
             blackPiecesBitboard;
+    }
+
+    /**
+     * @brief Gets bitboard for specified colour and piece
+     * @param piece Piece to get bitboard for
+     * @param colour Colour of piece
+     * @return Bitboard representation of player's specified piece locations
+     */
+    inline Bitboard getBitboard(Piece piece, Colour colour) const {
+        return pieceBitboards[toIndex(colour)][toIndex(piece)];
     }
 
     /**
@@ -74,6 +85,18 @@ public:
             blackPiecesBitboard :
             whitePiecesBitboard;
     }
+
+    /**
+     * @brief Gets the bitboard for a specified opposing colour's piece
+     * @param piece Piece to get bitboard for
+     * @param colour Colour of player
+     * @return Bitboard representation of opponent's specified piece locations
+     * @note colour is the colour of the player, not the opponent
+     */
+    inline Bitboard getOpposingBitboard(Piece piece, Colour colour) const {
+        Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+        return pieceBitboards[toIndex(opposingColour)][toIndex(piece)];
+    } 
 
     /**
      * @brief Gets the square of the pawn that just moved 2 steps forward
@@ -91,6 +114,37 @@ public:
      * else returns std::nullopt
      */
     std::optional<Colour> getColour(uint8_t square) const;
+
+    /**
+     * @brief Gets the square that the king occupies
+     * @param colour Colour of king piece
+     * @return Square that the king occupies
+     * @attention This functions assumes that there is only one king on the board and always
+     * will return the king with the lower square number if there are multiple
+     * @warning Undefined behaviour if there is no king on the board
+     */
+    inline uint8_t getKingSquare(Colour colour) const {
+        return __builtin_ctzll(pieceBitboards[toIndex(colour)][toIndex(Piece::KING)]);
+    }
+
+    /**
+     * @brief Gets the squares that a given type of piece of a given colour occupies
+     * @param piece Piece to find squares for
+     * @param colour Colour of piece
+     * @return Vector of squares that the given piece of the given colour occupies
+     */
+    inline std::vector<uint8_t> getSquares(Piece piece, Colour colour) const {
+        std::vector<uint8_t> squares;
+        squares.reserve(10);
+        Bitboard bitboard = getBitboard(piece, colour);
+        
+        while (bitboard) {
+            squares.push_back(__builtin_ctzll(bitboard));
+            bitboard &= bitboard - 1;
+        }
+
+        return squares;
+    }
 
     /**
      * @brief Checks if a square is empty
@@ -111,13 +165,37 @@ public:
     }
 
     /**
+     * @brief Checks if a square is occupied with a given piece
+     * @param piece Piece to check if it occupies that square
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied, otherwise false
+     */
+    inline bool isOccupied(Piece piece, uint8_t square) const {
+        Bitboard pieceOccupied = getBitboard(piece, Colour::WHITE) |
+                                 getBitboard(piece, Colour::BLACK);
+
+        return pieceOccupied & (1ULL << square);
+    }
+
+    /**
      * @brief Checks if a player occupies a square
      * @param colour Colour of player
      * @param square Square to check if it is occupied (0-63)
-     * @return True if square is occupied by player, otherwise false
+     * @return True if square is occupied by player with specified colour, otherwise false
      */
     inline bool isSelfOccupied(Colour colour, uint8_t square) const {
-        return getBitBoard(colour) & (1ULL << square);
+        return getBitboard(colour) & (1ULL << square);
+    }
+
+    /**
+     * @brief Checks if a player occupies a square with a given piece
+     * @param piece Piece to check if it occupies that square
+     * @param colour Colour of piece
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied by the piece with specified colour, otherwise false
+     */
+    inline bool isSelfOccupied(Piece piece, Colour colour, uint8_t square) const {
+        return getBitboard(piece, colour) & (1ULL << square);
     }
 
     /**
@@ -129,6 +207,17 @@ public:
      */
     inline bool isOpponentOccupied(Colour colour, uint8_t square) const {
         return getOpposingBitboard(colour) & (1ULL << square);
+    }
+
+    /**
+     * @brief Checks if a player occupies a square with a given piece
+     * @param piece Piece to check if it occupies that square
+     * @param colour Colour of piece
+     * @param square Square to check if it is occupied (0-63)
+     * @return True if square is occupied by the piece with specified colour, otherwise false
+     */
+    inline bool isOpponentOccupied(Piece piece, Colour colour, uint8_t square) const {
+        return getOpposingBitboard(piece, colour) & (1ULL << square);
     }
 
     /**
