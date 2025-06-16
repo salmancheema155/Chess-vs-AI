@@ -8,6 +8,7 @@
 #include "precompute_moves.h"
 #include "move_generator.h"
 #include "move.h"
+#include "check.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;

@@ -1,8 +1,10 @@
 #include <cstdint>
+#include <vector>
 #include "board.h"
 #include "check.h"
 #include "chess_types.h"
 #include "precompute_moves.h"
+#include "move_generator.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
@@ -85,5 +87,17 @@ bool Check::isInCheck(const Board& board, Colour colour) {
 }
 
 bool Check::hasMove(const Board& board, Colour colour) {
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KING, Piece::KNIGHT,
+                                 Piece::ROOK, Piece::BISHOP, Piece::QUEEN};
+    
+    for (Piece piece : pieces) {
+        const auto& squares = board.getSquares(piece, colour);
+        for (uint8_t square : squares) {
+            if (!MoveGenerator::legalMoves(board, piece, colour, square).empty()) {
+                return true;
+            }
+        }
+    }
 
+    return false;
 }
