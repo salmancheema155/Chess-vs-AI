@@ -20,11 +20,11 @@ public:
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
 
-    static GameState evaluateGameState(const Board& board, Colour colour);
+    static GameState evaluateGameState(Board& board, Colour colour);
+    static bool isInCheck(const Board& board, Colour colour);
 
 private:
-    static bool isInCheck(const Board& board, Colour colour);
-    static bool hasMove(const Board& board, Colour colour);
+    static bool hasMove(Board& board, Colour colour);
 };
 
 #endif // CHECK_H

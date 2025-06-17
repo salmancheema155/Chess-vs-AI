@@ -60,7 +60,7 @@ namespace {
     }
 }
 
-std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece, 
+std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece, 
                                             Colour colour, uint8_t currSquare) {
     std::vector<Move> moves;
     switch (piece) {
@@ -84,6 +84,16 @@ std::vector<Move> MoveGenerator::legalMoves(const Board& board, Piece piece,
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
+            return {};
+    }
+
+    for (int i = moves.size() - 1; i >= 0; i--) {
+        Move move = moves[i];
+        board.movePiece(piece, colour, move.fromSquare, move.toSquare);
+        if (Check::isInCheck(board, colour)) {
+            moves.erase(moves.begin() + i);
+        }
+        board.movePiece(piece, colour, move.toSquare, move.fromSquare);
     }
 
     return moves;

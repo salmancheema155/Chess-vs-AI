@@ -24,7 +24,7 @@ public:
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
      */
-    static std::vector<Move> legalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare);
+    static std::vector<Move> legalMoves(Board& board, Piece piece, Colour colour, uint8_t currSquare);
 
 private:
     /**

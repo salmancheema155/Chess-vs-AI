@@ -10,7 +10,7 @@ using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
-GameState Check::evaluateGameState(const Board& board, Colour colour) {
+GameState Check::evaluateGameState(Board& board, Colour colour) {
     bool isCheck = isInCheck(board, colour);
     bool hasLegalMove = hasMove(board, colour);
 
@@ -86,7 +86,7 @@ bool Check::isInCheck(const Board& board, Colour colour) {
     return false;
 }
 
-bool Check::hasMove(const Board& board, Colour colour) {
+bool Check::hasMove(Board& board, Colour colour) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KING, Piece::KNIGHT,
                                  Piece::ROOK, Piece::BISHOP, Piece::QUEEN};
     
