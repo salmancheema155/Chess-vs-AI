@@ -5,6 +5,7 @@
 #include "chess_types.h"
 
 using Chess::toIndex;
+using Chess::fromIndex;
 using Bitboard = Board::Bitboard;
 using Piece = Board::Piece;
 using Colour = Board::Colour;
@@ -17,12 +18,31 @@ Board::Board() : currTurn(Colour::WHITE),
 }
 
 std::optional<Colour> Board::getColour(uint8_t square) const {
-    if (whitePiecesBitboard & (1ULL << square)) {
+    uint8_t mask = 1ULL << square;
+    if (whitePiecesBitboard & mask) {
         return std::optional<Colour>(Colour::WHITE);
-    } else if (blackPiecesBitboard & (1ULL << square)) {
+    } else if (blackPiecesBitboard & mask) {
         return std::optional<Colour>(Colour::BLACK);
     }
     return std::nullopt;
+}
+
+std::pair<std::optional<Piece>, std::optional<Colour>> Board::getPieceAndColour(uint8_t square) const {
+    uint8_t mask = 1ULL << square;
+    for (uint8_t i = 0; i < 6; i++) {
+        for (uint8_t j = 0; j < 2; j++) {
+            if (getBitboard(fromIndex<Piece>(i), fromIndex<Colour>(j)) & mask) {
+                return {std::optional<Piece>(fromIndex<Piece>(i)), 
+                        std::optional<Colour>(fromIndex<Colour>(j))};
+            }
+        }
+    }
+
+    return {};
+}
+
+std::optional<Piece> Board::getPiece(uint8_t square) const {
+    return getPieceAndColour(square).first;
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {

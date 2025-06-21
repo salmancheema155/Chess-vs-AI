@@ -116,6 +116,21 @@ public:
     std::optional<Colour> getColour(uint8_t square) const;
 
     /**
+     * @brief Gets the piece that occupies the square
+     * @param square Square of the piece (0-63)
+     * @return Colour of piece that occupies that square if it exists
+     * else returns std::nullopt
+     */
+    std::optional<Piece> getPiece(uint8_t square) const;
+
+    /**
+     * @brief Gets the piece that occupies the square and the colour of the piece
+     * @param square Square on the board (0-63)
+     * @return std::pair with first element being the Piece and the second being the colour
+     */
+    std::pair<std::optional<Piece>, std::optional<Colour>> getPieceAndColour(uint8_t square) const;
+
+    /**
      * @brief Gets the square that the king occupies
      * @param colour Colour of king piece
      * @return Square that the king occupies
