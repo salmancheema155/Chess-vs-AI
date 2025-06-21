@@ -2,7 +2,7 @@
 #define CHECK_H
 
 #include <cstdint>
-#include "board.h"
+#include "board/board.h"
 #include "chess_types.h"
 
 enum class GameState {

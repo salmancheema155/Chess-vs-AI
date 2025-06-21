@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <optional>
 #include "chess_types.h"
-#include "board.h"
-#include "move.h"
+#include "board/board.h"
+#include "move/move.h"
 
 /**
  * Class which provides functions to obtain legal moves given a current board position

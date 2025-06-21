@@ -5,9 +5,9 @@
 #include <array>
 #include <vector>
 #include <optional>
-#include "board.h"
+#include "board/board.h"
+#include "move/move.h"
 #include "chess_types.h"
-#include "move.h"
 
 namespace {
     using Bitboard = Chess::Bitboard;

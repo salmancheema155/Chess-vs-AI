@@ -3,12 +3,12 @@
 #include <optional>
 #include <cstdint>
 #include <cassert>
+#include "board/board.h"
+#include "move/precompute_moves.h"
+#include "move/move_generator.h"
+#include "move/move.h"
+#include "check/check.h"
 #include "chess_types.h"
-#include "board.h"
-#include "precompute_moves.h"
-#include "move_generator.h"
-#include "move.h"
-#include "check.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;

@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <optional>
 #include <array>
-#include "board.h"
+#include "board/board.h"
 #include "chess_types.h"
 
 using Chess::toIndex;

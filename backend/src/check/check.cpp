@@ -1,10 +1,10 @@
 #include <cstdint>
 #include <vector>
-#include "board.h"
-#include "check.h"
+#include "board/board.h"
+#include "check/check.h"
+#include "move/precompute_moves.h"
+#include "move/move_generator.h"
 #include "chess_types.h"
-#include "precompute_moves.h"
-#include "move_generator.h"
 
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
