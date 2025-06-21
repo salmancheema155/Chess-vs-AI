@@ -17,6 +17,22 @@ using Move = ChessMove::Move;
 
 namespace {
     /**
+     * @brief Gets bit index of least significant set bit
+     */
+    static inline constexpr int bitScan(Bitboard bitboard) {
+        return __builtin_ctzll(bitboard);
+    }
+
+    /**
+     * @brief Checks if a bit is set
+     * @param num Number to check for the set bit
+     * @param shift Bit index to check for the set bit starting from least significant bit
+     */
+    static inline constexpr bool bitSet(uint64_t num, uint8_t shift) {
+        return num & (1ULL << shift);
+    }
+
+    /**
      * @brief Generates legal moves for a piece using a precomputed table of moves
      * @param board Board object representing current board state
      * @param piece Piece to find legal moves for
@@ -41,22 +57,6 @@ namespace {
             moves.push_back(ChessMove::makeMove(piece, colour, currSquare, bitIndex, capture));
             precomputedMoveBitboard &= precomputedMoveBitboard - 1; // Remove trailing set bit
         }
-    }
-
-    /**
-     * @brief Gets bit index of least significant set bit
-     */
-    static inline constexpr int bitScan(Bitboard bitboard) {
-        return __builtin_ctzll(bitboard);
-    }
-
-    /**
-     * @brief Checks if a bit is set
-     * @param num Number to check for the set bit
-     * @param shift Bit index to check for the set bit starting from least significant bit
-     */
-    static inline constexpr bool bitSet(uint64_t num, uint8_t shift) {
-        return num & (1ULL << shift);
     }
 }
 
@@ -121,8 +121,11 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
     }
 
     constexpr uint8_t files[2] = {0, 7}; // Boundaries for left and right captures respectively
-    uint8_t captureSquares[2] = {currSquare + 8 * direction - 1, currSquare + 8 * direction + 1}; // Diagonal capture squares
-    constexpr uint8_t enPassantDirections[2] = {-1, 1}; // Left, right
+    // Diagonal capture squares
+    int captureSquares[2] = {
+        static_cast<int> (currSquare + 8 * direction - 1), 
+        static_cast<int> (currSquare + 8 * direction + 1)};
+    constexpr int enPassantDirections[2] = {-1, 1}; // Left, right
     const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
     
     for (int i = 0; i < 2; i++) {
