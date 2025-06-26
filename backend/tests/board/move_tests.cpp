@@ -1,18 +1,11 @@
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <array>
-#include <vector>
 #include <optional>
 #include <cstdint>
 #include "board/board.h"
-#include "board/board_debug.h"
-#include "tests/board/board_utilities.h"
 #include "chess_types.h"
 
 using Colour = Chess::PieceColour;
 using Piece = Chess::PieceType;
-using Chess::toIndex;
-using Chess::fromIndex;
 
 TEST(MovePiece, checkMovePiece) {
     Board b;
