@@ -2,6 +2,7 @@
 #include <array>
 #include <optional>
 #include <cstdint>
+#include <bit>
 #include <cassert>
 #include "board/board.h"
 #include "move/precompute_moves.h"
@@ -16,13 +17,6 @@ using Colour = Chess::PieceColour;
 using Move = ChessMove::Move;
 
 namespace {
-    /**
-     * @brief Gets bit index of least significant set bit
-     */
-    static inline constexpr int bitScan(Bitboard bitboard) {
-        return __builtin_ctzll(bitboard);
-    }
-
     /**
      * @brief Checks if a bit is set
      * @param num Number to check for the set bit
@@ -47,11 +41,12 @@ namespace {
     static void legalMovesFromTable(const Board& board, Piece piece, Colour colour, uint8_t currSquare, 
                                     std::vector<Move>& moves, Bitboard precomputedMoveBitboard) {
 
+        assert(currSquare < 64 && "currSquare must be between 0-63");
         precomputedMoveBitboard &= ~board.getBitboard(colour); // Remove moves which land onto same colour pieces
         Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
 
         while (precomputedMoveBitboard) {
-            uint8_t bitIndex = bitScan(precomputedMoveBitboard); // Square on board
+            uint8_t bitIndex = std::countr_zero(precomputedMoveBitboard); // Square on board
             // Check if valid move is a capture (capture bit is set)
             std::optional<uint8_t> capture = bitSet(captureBitboard, bitIndex) ? std::optional<uint8_t>(bitIndex) : std::nullopt;
             moves.push_back(ChessMove::makeMove(piece, colour, currSquare, bitIndex, capture));
@@ -62,6 +57,8 @@ namespace {
 
 std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece, 
                                             Colour colour, uint8_t currSquare) {
+                                                
+    assert(currSquare < 64 && "currSquare must be between 0-63");
     std::vector<Move> moves;
     switch (piece) {
         case Piece::PAWN:
@@ -87,7 +84,7 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
             return {};
     }
 
-    for (int i = moves.size() - 1; i >= 0; i--) {
+    for (size_t i = moves.size() - 1; i >= 0; i--) {
         Move move = moves[i];
         board.movePiece(piece, colour, move.fromSquare, move.toSquare);
         if (Check::isInCheck(board, colour)) {
