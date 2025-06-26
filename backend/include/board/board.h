@@ -6,6 +6,8 @@
 #include <vector>
 #include <optional>
 #include <utility>
+#include <bit>
+#include <cassert>
 #include "chess_types.h"
 
 /**
@@ -140,7 +142,7 @@ public:
      * @warning Undefined behaviour if there is no king on the board
      */
     inline uint8_t getKingSquare(Colour colour) const {
-        return __builtin_ctzll(pieceBitboards[toIndex(colour)][toIndex(Piece::KING)]);
+        return std::countr_zero(pieceBitboards[toIndex(colour)][toIndex(Piece::KING)]);
     }
 
     /**
@@ -155,7 +157,7 @@ public:
         Bitboard bitboard = getBitboard(piece, colour);
         
         while (bitboard) {
-            squares.push_back(__builtin_ctzll(bitboard));
+            squares.push_back(std::countr_zero(bitboard));
             bitboard &= bitboard - 1;
         }
 
@@ -168,6 +170,7 @@ public:
      * @return True if square is empty, otherwise false
      */
     inline bool isEmpty(uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return !(piecesBitboard & (1ULL << square));
     }
 
@@ -177,6 +180,7 @@ public:
      * @return True if square is occupied, otherwise false
      */
     inline bool isOccupied(uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return piecesBitboard & (1ULL << square);
     }
 
@@ -187,6 +191,7 @@ public:
      * @return True if square is occupied, otherwise false
      */
     inline bool isOccupied(Piece piece, uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         Bitboard pieceOccupied = getBitboard(piece, Colour::WHITE) |
                                  getBitboard(piece, Colour::BLACK);
 
@@ -200,6 +205,7 @@ public:
      * @return True if square is occupied by player with specified colour, otherwise false
      */
     inline bool isSelfOccupied(Colour colour, uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return getBitboard(colour) & (1ULL << square);
     }
 
@@ -211,6 +217,7 @@ public:
      * @return True if square is occupied by the piece with specified colour, otherwise false
      */
     inline bool isSelfOccupied(Piece piece, Colour colour, uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return getBitboard(piece, colour) & (1ULL << square);
     }
 
@@ -222,6 +229,7 @@ public:
      * @note colour is the colour of the player, not the opponent
      */
     inline bool isOpponentOccupied(Colour colour, uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return getOpposingBitboard(colour) & (1ULL << square);
     }
 
@@ -233,6 +241,7 @@ public:
      * @return True if square is occupied by the piece with specified colour, otherwise false
      */
     inline bool isOpponentOccupied(Piece piece, Colour colour, uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
         return getOpposingBitboard(piece, colour) & (1ULL << square);
     }
 
@@ -282,6 +291,8 @@ public:
      * if it exists otherwise updates with std::nullopt
      */
     inline void setEnPassantSquare(std::optional<uint8_t> square) {
+        assert(square.has_value() && "square must be between 0-63");
+        assert(*square < 64 && "square must be between 0-63");
         enPassantSquare = square;
     }
 
@@ -300,6 +311,13 @@ public:
      * @param square Square to remove the piece from (0-63)
      */
     void removePiece(Piece piece, Colour colour, uint8_t square);
+
+    /**
+     * Removes a piece from the board
+     * @param square Square to remove the piece from (0-63)
+     * @warning A piece must exist at this square
+     */
+    void removePiece(uint8_t square);
 
     /**
      * Moves a piece from a square to another
@@ -334,6 +352,7 @@ public:
      * @return Rank of the square
      */
     static inline uint8_t getRank(uint8_t square) {
+        assert(square < 64 && "square must be between 0-63");
         return square >> 3;
     }
 
@@ -343,6 +362,7 @@ public:
      * @return File of the square
      */
     static inline uint8_t getFile(uint8_t square) {
+        assert(square < 64 && "square must be between 0-63");
         return square & 0x7;
     }
 

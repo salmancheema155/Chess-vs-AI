@@ -2,6 +2,7 @@
 #include <optional>
 #include <array>
 #include <utility>
+#include <cassert>
 #include "board/board.h"
 #include "chess_types.h"
 
@@ -19,7 +20,8 @@ Board::Board() : currTurn(Colour::WHITE),
 }
 
 std::optional<Colour> Board::getColour(uint8_t square) const {
-    uint8_t mask = 1ULL << square;
+    assert(square < 64 && "square must be between 0-63");
+    uint64_t mask = 1ULL << square;
     if (whitePiecesBitboard & mask) {
         return std::optional<Colour>(Colour::WHITE);
     } else if (blackPiecesBitboard & mask) {
@@ -29,7 +31,8 @@ std::optional<Colour> Board::getColour(uint8_t square) const {
 }
 
 std::pair<std::optional<Piece>, std::optional<Colour>> Board::getPieceAndColour(uint8_t square) const {
-    uint8_t mask = 1ULL << square;
+    assert(square < 64 && "square must be between 0-63");
+    uint64_t mask = 1ULL << square;
     for (uint8_t i = 0; i < 6; i++) {
         for (uint8_t j = 0; j < 2; j++) {
             if (getBitboard(fromIndex<Piece>(i), fromIndex<Colour>(j)) & mask) {
@@ -47,6 +50,7 @@ std::optional<Piece> Board::getPiece(uint8_t square) const {
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
+    assert(square < 64 && "square must be between 0-63");
     Bitboard& board = (colour == Colour::WHITE) ? whitePiecesBitboard : blackPiecesBitboard;
     uint64_t mask = 1ULL << square;
     board |= mask;
@@ -55,11 +59,19 @@ void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
 }
 
 void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
+    assert(square < 64 && "square must be between 0-63");
     Bitboard& board = (colour == Colour::WHITE) ? whitePiecesBitboard : blackPiecesBitboard;
     uint64_t mask = ~(1ULL << square);
     board &= mask;
     pieceBitboards[toIndex(colour)][toIndex(piece)] &= mask;
     piecesBitboard &= mask;
+}
+
+void Board::removePiece(uint8_t square) {
+    auto [piece, colour] = getPieceAndColour(square);
+    assert(piece.has_value() && "No piece seems to occupy fromSquare");
+    assert(colour.has_value() && "No colour seems to occupy fromSquare");
+    removePiece(*piece, *colour, square);
 }
 
 void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare) {
@@ -69,6 +81,8 @@ void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t to
 
 void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
     auto [piece, colour] = getPieceAndColour(fromSquare);
+    assert(piece.has_value() && "No piece seems to occupy fromSquare");
+    assert(colour.has_value() && "No colour seems to occupy fromSquare");
     movePiece(*piece, *colour, fromSquare, toSquare);
 }
 
