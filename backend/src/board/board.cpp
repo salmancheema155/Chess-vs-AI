@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <optional>
 #include <array>
+#include <utility>
 #include "board/board.h"
 #include "chess_types.h"
 
@@ -64,6 +65,11 @@ void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
 void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare) {
     removePiece(piece, colour, fromSquare);
     addPiece(piece, colour, toSquare);
+}
+
+void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
+    auto [piece, colour] = getPieceAndColour(fromSquare);
+    movePiece(*piece, *colour, fromSquare, toSquare);
 }
 
 void Board::resetBoard() {

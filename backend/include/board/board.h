@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <optional>
+#include <utility>
 #include "chess_types.h"
 
 /**
@@ -310,6 +311,17 @@ public:
      * checking if the move is valid
      */
     void movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare);
+
+    /**
+     * Moves the piece located at the fromSquare to the toSquare
+     * This function uses an overload of movePiece
+     * @param fromSquare Square to move the piece from (0-63)
+     * @param toSquare Square to move the piece to (0-63)
+     * @attention This function moves a piece and updates it on the board without 
+     * checking if the move is valid
+     * @warning A piece must exist at the fromSquare in order for this function to execute
+     */
+    void movePiece(uint8_t fromSquare, uint8_t toSquare);
 
     /**
      * @brief Resets board back to initial state
