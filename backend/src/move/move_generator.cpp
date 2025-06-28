@@ -57,7 +57,7 @@ namespace {
 
 std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece, 
                                             Colour colour, uint8_t currSquare) {
-                                                
+
     assert(currSquare < 64 && "currSquare must be between 0-63");
     std::vector<Move> moves;
     switch (piece) {
@@ -84,7 +84,7 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
             return {};
     }
 
-    for (size_t i = moves.size() - 1; i >= 0; i--) {
+    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
         Move move = moves[i];
         board.movePiece(piece, colour, move.fromSquare, move.toSquare);
         if (Check::isInCheck(board, colour)) {
