@@ -3,9 +3,12 @@
 #include <iostream>
 #include <regex>
 #include <cassert>
+#include <array>
 #include <string>
 #include "board/board.h"
 #include "chess_types.h"
+
+#define UINT8_T_MAX (0xFF)
 
 using Chess::toIndex;
 using Piece = Chess::PieceType;
@@ -59,6 +62,7 @@ namespace {
     }
 
     uint8_t algebraicToSquare(std::string algString) {
+        if (algString == "--") return UINT8_T_MAX;
         return (algString[0] - 'a') + 8 * (algString[1] - '1');
     }
 }
@@ -103,7 +107,13 @@ This function should only be used in testing and debugging
 */
 void Board::setCustomBoardState(const char* boardState) {
     assert(isValidBoardState(boardState) && "string boardState has incorrect format");
-    resetPieces();
+    pieceBitboards = {{{0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL},
+                        {0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL}}};
+
+    whitePiecesBitboard = 0ULL;
+    blackPiecesBitboard = 0ULL;
+    piecesBitboard = 0ULL;
+    
     constexpr char charMap[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
                                     {'p', 'n', 'b', 'r', 'q', 'k'}};
     const int boardChars = 71;
@@ -139,8 +149,9 @@ void Board::setCustomBoardState(const char* boardState) {
     kingsideCastle[1] = (blackKingsideChar == 'k') ? true : false;
     queensideCastle[0] = (whiteQueensideChar == 'Q') ? true : false;
     queensideCastle[1] = (blackQueensideChar == 'q') ? true : false;
-    enPassantSquare = algebraicToSquare(enPassantSquareString);
 
+    uint8_t square = algebraicToSquare(enPassantSquareString);
+    enPassantSquare = (square == UINT8_T_MAX) ? std::nullopt : std::optional<uint8_t>(square);
 }
 
 #endif // NDEBUG
