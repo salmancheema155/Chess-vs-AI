@@ -3,8 +3,8 @@ setlocal
 
 cd /d "%~dp0"
 
-set testName=BackendTests
-set testFolder=
+set testName=MoveTests
+set testFolder=move\
 
 call tests_setup.bat "%testName%" "%testFolder%" %*
 

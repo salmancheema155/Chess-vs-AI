@@ -1,15 +1,12 @@
 @echo off
+setlocal
 
-cd /d "%~dp0.."
+cd /d "%~dp0"
 
-cmake -S . -B build
-cmake --build build --target BoardTests --config Debug --parallel
+set testName=BoardTests
+set testFolder=board\
 
-if exist "build/backend/tests/board/Debug/BoardTests.exe" (
-	echo Running BoardTests...
-	"build/backend/tests/board/Debug/BoardTests.exe" --gtest_color=yes --gtest_print_time --gtest_brief=0 %*
-) else (
-	echo BoardTests.exe was not found!
-)
+call tests_setup.bat "%testName%" "%testFolder%" %*
 
+endlocal
 pause
