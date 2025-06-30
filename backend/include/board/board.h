@@ -366,6 +366,14 @@ public:
         return square & 0x7;
     }
 
+    /**
+     * @brief Sets the board state to a given position
+     * @param boardState String representation of board state
+     * @note See full documentation in tests/board/board_debug.cpp
+     * @attention This function should only be used for testing and debugging
+     */
+    void setCustomBoardState(const char* boardState);
+
 private:
     Colour currTurn;
     std::array<bool, 2> kingsideCastle;
