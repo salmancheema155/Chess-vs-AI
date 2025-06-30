@@ -291,8 +291,7 @@ public:
      * if it exists otherwise updates with std::nullopt
      */
     inline void setEnPassantSquare(std::optional<uint8_t> square) {
-        assert(square.has_value() && "square must be between 0-63");
-        assert(*square < 64 && "square must be between 0-63");
+        assert((square.has_value() && *square < 64) && "square must be between 0-63");
         enPassantSquare = square;
     }
 
