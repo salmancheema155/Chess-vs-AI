@@ -18,7 +18,7 @@ file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c
 
 add_executable(${This} 
 	${TEST_SOURCES}
-	${CMAKE_CURRENT_SOURCE_DIR}/../src/board/board_debug.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/board/board_debug.cpp)
 
 target_link_libraries(${This} PRIVATE Backend gtest_main)
 
@@ -28,5 +28,6 @@ target_include_directories(${This} PRIVATE
 )
 
 add_subdirectory(board)
+add_subdirectory(move)
 
 gtest_discover_tests(${This})

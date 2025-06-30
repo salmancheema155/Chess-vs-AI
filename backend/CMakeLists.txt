@@ -4,7 +4,6 @@ set(This Backend)
 project(${This} LANGUAGES CXX)
 
 file(GLOB_RECURSE BACKEND_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
-list(FILTER BACKEND_SOURCES EXCLUDE REGEX ".+_debug\\.cpp$")
 
 add_library(${This} STATIC ${BACKEND_SOURCES})
 

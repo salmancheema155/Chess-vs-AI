@@ -14,6 +14,8 @@ namespace ChessMove {
         uint8_t fromSquare; ///< Square the piece is moving from
         uint8_t toSquare; ///< Square the piece is moving to
         std::optional<uint8_t> captureSquare = std::nullopt; ///< Piece that is captured from this move
+
+        auto operator<=>(const Move&) const = default;
     };
 
     /**

@@ -1,12 +1,12 @@
-# backend/tests/board/CMakeLists.txt
+# backend/tests/move/CMakeLists.txt
 
-set(This BoardTests)
+set(This MoveTests)
 
 file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_executable(${This}
 	${TEST_SOURCES}
-	board_debug.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../board/board_debug.cpp
 )
 
 target_link_libraries(${This} PRIVATE Backend gtest_main)
