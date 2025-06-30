@@ -5,7 +5,7 @@
 #include <optional>
 #include <cstdint>
 #include "board/board.h"
-#include "board/board_debug.h"
+#include "tests/board/board_debug.h"
 #include "tests/board/board_utilities.h"
 #include "chess_types.h"
 
