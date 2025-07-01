@@ -37,13 +37,13 @@ namespace Chess {
      */
     template <typename Enum>
     inline constexpr std::underlying_type_t<Enum> toIndex(Enum item) {
-        static_assert(std::is_enum_v<Enum>, "toIndex requires as Enum type");
+        static_assert(std::is_enum_v<Enum>, "toIndex requires an Enum type");
         return static_cast<std::underlying_type_t<Enum>>(item);
     }
 
     template <typename Enum>
     inline constexpr Enum fromIndex(std::underlying_type_t<Enum> index) {
-        static_assert(std::is_enum_v<Enum>, "fromIndex requires as Enum type");
+        static_assert(std::is_enum_v<Enum>, "fromIndex requires an Enum type");
         return static_cast<Enum>(index);
     }
 }

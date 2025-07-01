@@ -14,7 +14,7 @@
 using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
-using Move = ChessMove::Move;
+using Chess::toIndex;
 
 namespace {
     /**
@@ -48,8 +48,8 @@ namespace {
         while (precomputedMoveBitboard) {
             uint8_t bitIndex = std::countr_zero(precomputedMoveBitboard); // Square on board
             // Check if valid move is a capture (capture bit is set)
-            std::optional<uint8_t> capture = bitSet(captureBitboard, bitIndex) ? std::optional<uint8_t>(bitIndex) : std::nullopt;
-            moves.push_back(ChessMove::makeMove(piece, colour, currSquare, bitIndex, capture));
+            uint8_t capture = bitSet(captureBitboard, bitIndex) ? toIndex(*(board.getPiece(bitIndex))) : Move::NO_CAPTURE;
+            moves.push_back(Move(currSquare, bitIndex, capture));
             precomputedMoveBitboard &= precomputedMoveBitboard - 1; // Remove trailing set bit
         }
     }
@@ -86,11 +86,11 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
 
     for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
         Move move = moves[i];
-        board.movePiece(piece, colour, move.fromSquare, move.toSquare);
+        board.movePiece(piece, colour, move.getFromSquare(), move.getToSquare());
         if (Check::isInCheck(board, colour)) {
             moves.erase(moves.begin() + i);
         }
-        board.movePiece(piece, colour, move.toSquare, move.fromSquare);
+        board.movePiece(piece, colour, move.getToSquare(), move.getFromSquare());
     }
 
     return moves;
@@ -100,20 +100,18 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
-    uint8_t nextSquare = currSquare + 8 * direction;
+    int nextSquare = currSquare + 8 * direction;
 
     // One square forward
-    if (board.isEmpty(nextSquare)) {
-        moves.push_back(ChessMove::makeMove(piece, colour, currSquare, nextSquare));
+    if (nextSquare >= 0 && nextSquare < 64 && board.isEmpty(nextSquare)) {
+        moves.push_back(Move(currSquare, nextSquare));
 
         // Two squares forward
         nextSquare += 8 * direction;
-        if (nextSquare < 64) {
-            uint8_t initialPawnRank = (colour == Colour::WHITE) ? 1 : 6;
-            bool isUnmoved = Board::getRank(currSquare) == initialPawnRank;
-            if (isUnmoved && board.isEmpty(nextSquare)) { // Unmoved and square is free
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, nextSquare));
-            }
+        uint8_t initialPawnRank = (colour == Colour::WHITE) ? 1 : 6;
+        bool isUnmoved = Board::getRank(currSquare) == initialPawnRank;
+        if (isUnmoved && board.isEmpty(nextSquare)) { // Unmoved and square is free
+            moves.push_back(Move(currSquare, nextSquare));
         }
     }
 
@@ -131,13 +129,15 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
             uint8_t captureSquare = captureSquares[i];
             // Opponent piece at capture square
             if (board.isOpponentOccupied(colour, captureSquare)) {
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, captureSquare, captureSquare));
+                uint8_t capture = toIndex(*board.getPiece(currSquare));
+                moves.push_back(Move(currSquare, captureSquare, capture));
             }
 
             // En passant
             // Check that pawn is adjacent to the en passant square
             if (enPassantSquare && currSquare + enPassantDirections[i] == *enPassantSquare) {
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, (*enPassantSquare) + 8 * direction, enPassantSquare));
+                moves.push_back(Move(currSquare, (*enPassantSquare) + 8 * direction, 
+                                        Move::NO_CAPTURE, Move::NO_PROMOTION, Move::NO_CASTLE, *enPassantSquare));
             }
         }
     }
@@ -165,17 +165,18 @@ void MoveGenerator::legalBishopMoves(const Board& board, Piece piece, Colour col
             uint8_t square = currSquare + directions[i];
             // Not at edge of the board and square is empty
             while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && board.isEmpty(square)) {
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, square));
+                moves.push_back(Move(currSquare, square));
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
             std::optional<Colour> finalSquareColour = board.getColour(square);
             if (!finalSquareColour || finalSquareColour == opposingColour) {
                 // Capture if final square is of the opposing colour
-                std::optional<uint8_t> capture = (finalSquareColour == opposingColour) ?
-                                                std::optional<uint8_t>(square) :
-                                                std::nullopt;
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, square, capture));
+                uint8_t capture = (finalSquareColour == opposingColour) ?
+                                    toIndex(*board.getPiece(square)) :
+                                    Move::NO_CAPTURE;
+
+                moves.push_back(Move(currSquare, square, capture));
             }
         }
     }
@@ -198,17 +199,18 @@ void MoveGenerator::legalRookMoves(const Board& board, Piece piece, Colour colou
             uint8_t square = currSquare + directions[i];
             // Not at edge of the board and square is empty
             while (functions[i & 0x1](square) != boundaryChecks[i] && board.isEmpty(square)) {
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, square));
+                moves.push_back(Move(currSquare, square));
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
             std::optional<Colour> finalSquareColour = board.getColour(square);
             if (!finalSquareColour || finalSquareColour == opposingColour) {
                 // Capture if final square is of the opposing colour
-                std::optional<uint8_t> capture = (finalSquareColour == opposingColour) ?
-                                                std::optional<uint8_t>(square) :
-                                                std::nullopt;
-                moves.push_back(ChessMove::makeMove(piece, colour, currSquare, square, capture));
+                uint8_t capture = (finalSquareColour == opposingColour) ?
+                                    toIndex(*board.getPiece(square)) :
+                                    Move::NO_CAPTURE;
+
+                moves.push_back(Move(currSquare, square, capture));
             }
         }
     }

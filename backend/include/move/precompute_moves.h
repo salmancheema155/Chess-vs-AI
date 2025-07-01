@@ -44,7 +44,6 @@ public:
     using Bitboard = Chess::Bitboard;
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
-    using Move = ChessMove::Move;
 
     inline static constexpr std::array<Bitboard, 64> knightMoveTable = [] {
         std::array<std::array<int, 2>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2},

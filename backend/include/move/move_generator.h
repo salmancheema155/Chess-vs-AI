@@ -15,7 +15,6 @@ class MoveGenerator {
 public:
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
-    using Move = ChessMove::Move;
 
     /**
      * @brief Gets the legal moves for a given piece
