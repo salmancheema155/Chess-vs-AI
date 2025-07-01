@@ -24,14 +24,6 @@ public:
     Board();
 
     /**
-     * @brief Gets current player's turn
-     * @return PieceColour enum representing player's turn
-    */
-    inline Colour getTurn() const {
-        return currTurn;
-    }
-
-    /**
      * @brief Gets bitboard representing current board state
      * @return Bitboard of current board
      */
@@ -280,13 +272,6 @@ public:
     }
 
     /**
-     * @brief Switches the current player turn to opposing player
-    */
-    inline void switchTurn() {
-        currTurn = (currTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-    }
-
-    /**
      * @brief Updates the square of the pawn that just moved 2 forward
      * if it exists otherwise updates with std::nullopt
      */
@@ -374,7 +359,6 @@ public:
     void setCustomBoardState(const char* boardState);
 
 private:
-    Colour currTurn;
     std::array<bool, 2> kingsideCastle;
     std::array<bool, 2> queensideCastle;
     std::optional<uint8_t> enPassantSquare;
