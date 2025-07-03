@@ -249,6 +249,15 @@ public:
     }
 
     /**
+     * @brief Gets all current castling rights
+     * @return 2d array indexed as [colour][castlingType] with each element being
+     * a true of false value with true = can castle, false = cannot castle
+     */
+    inline std::array<std::array<bool, 2>, 2> getCastlingRights() const {
+        return castlingRights;
+    }
+
+    /**
      * @brief Permanently prevents castling
      * @param colour Player colour
      * @param castlingType Type of castling
