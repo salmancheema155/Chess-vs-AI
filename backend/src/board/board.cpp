@@ -12,8 +12,7 @@ using Bitboard = Board::Bitboard;
 using Piece = Board::Piece;
 using Colour = Board::Colour;
 
-Board::Board() : kingsideCastle{true, true}, 
-                 queensideCastle{true, true},
+Board::Board() : castlingRights{{{true, true}, {true, true}}},
                  enPassantSquare(std::nullopt) {
 
     resetPieces();
@@ -87,8 +86,11 @@ void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
 }
 
 void Board::resetBoard() {
-    kingsideCastle[0] = true, kingsideCastle[1] = true;
-    queensideCastle[0] = true, queensideCastle[1] = true;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            castlingRights[i][j] = true;
+        }
+    }
     enPassantSquare = std::nullopt;
     resetPieces();
 }

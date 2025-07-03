@@ -20,6 +20,7 @@ public:
     using Bitboard = Chess::Bitboard;
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
+    using Castling = Chess::Castling;
 
     Board();
 
@@ -238,37 +239,22 @@ public:
     }
 
     /**
-     * @brief Returns if can kingside castle
+     * @brief Returns current state of castling rights
      * @param colour Player colour
-     * @return True if can kingside castle else False
+     * @param castlingType Type of castling
+     * @return True if can castle else False
     */
-    inline bool getKingsideCastle(Colour colour) const {
-        return kingsideCastle[toIndex(colour)];
+    inline bool getCastlingRights(Colour colour, Castling castlingType) const {
+        return castlingRights[toIndex(colour)][toIndex(castlingType)];
     }
 
     /**
-     * @brief Checks if can queenside castle
+     * @brief Permanently prevents castling
      * @param colour Player colour
-     * @return True if can queenside castle else False
+     * @param castlingType Type of castling
     */
-    inline bool getQueensideCastle(Colour colour) const {
-        return queensideCastle[toIndex(colour)];
-    }
-
-    /**
-     * @brief Prevents king's side castling
-     * @param colour Player colour
-    */
-    inline void nullifyKingsideCastle(Colour colour) {
-        kingsideCastle[toIndex(colour)] = false;
-    }
-
-    /**
-     * @brief Prevents queen's side castling
-     * @param colour Player colour
-    */
-    inline void nullifyQueensideCastle(Colour colour) {
-        queensideCastle[toIndex(colour)] = false;
+    inline void nullifyCastlingRights(Colour colour, Castling castlingType) {
+        castlingRights[toIndex(colour)][toIndex(castlingType)] = false;
     }
 
     /**
@@ -359,14 +345,13 @@ public:
     void setCustomBoardState(const char* boardState);
 
 private:
-    std::array<bool, 2> kingsideCastle;
-    std::array<bool, 2> queensideCastle;
+    std::array<std::array<bool, 2>, 2> castlingRights; ///< Indexed as [colour][kingside/queenside] with kingside before queenside
     std::optional<uint8_t> enPassantSquare;
     Bitboard whitePiecesBitboard;
     Bitboard blackPiecesBitboard;
     Bitboard piecesBitboard;
 
-    // Indexed as [colour][pieceType]
+    /// Indexed as [colour][pieceType]
     std::array<std::array<Bitboard, Chess::toIndex(Piece::COUNT)>, 2> pieceBitboards;
 
     /**
