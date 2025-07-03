@@ -29,7 +29,6 @@ namespace Zobrist {
      * @param movedPiece Piece that was last moved
      * @return Updated zobrist hash of the current game state
      * @attention currentHash should be first computed once using computeInitialHash
-     * @note newGameState can and should be passed into this function with a dummy hash value
      */
     uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
                         const std::optional<uint8_t> newEnPassantSquare, const std::array<std::array<bool, 2>, 2> oldCastleRights, 
