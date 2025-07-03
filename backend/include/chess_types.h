@@ -29,6 +29,15 @@ namespace Chess {
     };
 
     /**
+     * Enum representing different castling types
+     */
+    enum class Castling : uint8_t {
+        KINGSIDE = 0,
+        QUEENSIDE = 1,
+        NONE = 2
+    };
+
+    /**
      * Convert an enum value to its corresponding integer value
      * @param item Enum value to convert
      * @return Corresponding integer value for the enum
