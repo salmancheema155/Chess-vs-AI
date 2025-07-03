@@ -21,12 +21,19 @@ namespace Zobrist {
      * @brief Updates the zobrist hash of the game state
      * @param currentHash Zobrist hash computed from the previous board state
      * @param move Move object representing the current move
-     * @param oldBoard Board object respresenting the board state before making the move
-     * @param newBoard Board object representing the board state after making the move
+     * @param oldEnPassantSquare The updated square of the pawn that just moved 2 forward before the move if it exists
+     * @param newEnPassantSquare The updated square of the pawn that just moved 2 forward after the move if it exists
+     * @param oldCastleRights Castling rights before the move, indexed as [colour][kingside/queenside] with kingside before queenside
+     * @param newCastleRights Castling rights after the move, indexed as [colour][kingside/queenside] with kingside before queenside
+     * @param playerTurn Turn of player that just made their move
+     * @param movedPiece Piece that was last moved
      * @return Updated zobrist hash of the current game state
-     * @note currentHash should be first computed once using computeInitialHash
+     * @attention currentHash should be first computed once using computeInitialHash
+     * @note newGameState can and should be passed into this function with a dummy hash value
      */
-    uint64_t updateHash(uint64_t currentHash, const Move& move, const Board& oldBoard, const Board& newBoard);
+    uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
+                        const std::optional<uint8_t> newEnPassantSquare, const std::array<std::array<bool, 2>, 2> oldCastleRights, 
+                        const std::array<std::array<bool, 2>, 2> newCastleRights, Colour playerTurn, Chess::PieceType movedPiece);
 }
 
 #endif // ZOBRIST_HASH_H

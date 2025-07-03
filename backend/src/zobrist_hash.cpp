@@ -44,59 +44,67 @@ namespace Zobrist {
         return hash;
     }
 
-    uint64_t updateHash(uint64_t currentHash, const Move& move, const Board& oldBoard, const Board& newBoard) {
+        uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
+                            const std::optional<uint8_t> newEnPassantSquare, const std::array<std::array<bool, 2>, 2> oldCastleRights, 
+                            const std::array<std::array<bool, 2>, 2> newCastleRights, Colour playerTurn, Chess::PieceType movedPiece) {
+
         uint8_t fromSquare = move.getFromSquare();
         uint8_t toSquare = move.getToSquare();
+        Colour captureColour = (playerTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+
+        // Remove old piece hash
+        currentHash ^= zobristTable[toIndex(playerTurn)][toIndex(movedPiece)][fromSquare];
 
         // Promotion move
         uint8_t promotion = move.getPromotionPiece();
-        if (promotion != Move::NO_PROMOTION) {
-            Colour colour = *(oldBoard.getColour(fromSquare));
+        if (promotion != move.NO_PROMOTION) {
+            // Add new promotion piece hash
+            currentHash ^= zobristTable[toIndex(playerTurn)][promotion][toSquare];
 
-            currentHash ^= zobristTable[toIndex(colour)][toIndex(Piece::PAWN)][fromSquare];
-            currentHash ^= zobristTable[toIndex(colour)][promotion][toSquare];
-            
         // No promotion move
         } else {
-            auto [piece, colour] = newBoard.getPieceAndColour(toSquare);
+            // Add new piece hash (pawn in promotion disappears so this is not executed)
+            currentHash ^= zobristTable[toIndex(playerTurn)][toIndex(movedPiece)][toSquare];
+        }            
 
-            // Remove old piece hash and update with new piece hash
-            currentHash ^= zobristTable[toIndex(*colour)][toIndex(*piece)][fromSquare];
-            currentHash ^= zobristTable[toIndex(*colour)][toIndex(*piece)][toSquare];
+        // Deal with capture hash update
+        uint8_t capturedPiece = move.getCapturedPiece();
+        if (capturedPiece != Move::NO_CAPTURE) {
 
-            // Deal with capture hash update
-            uint8_t capturedPiece = move.getCapturedPiece();
-            if (capturedPiece != Move::NO_CAPTURE) {
+            // Capture square for en passant is different
+            uint8_t capturedSquare = (move.getEnPassant() != Move::NO_EN_PASSANT) ? 
+                                    *oldEnPassantSquare :
+                                    toSquare;
 
-                // Capture square for en passant is different
-                uint8_t capturedSquare = (move.getEnPassant() != Move::NO_EN_PASSANT) ? 
-                                        *(oldBoard.getEnPassantSquare()) :
-                                        toSquare;
+            currentHash ^= zobristTable[toIndex(captureColour)][capturedPiece][capturedSquare];
+        }
 
-                Colour capturedColour = *(oldBoard.getColour(capturedSquare));
-                currentHash ^= zobristTable[toIndex(capturedColour)][capturedPiece][capturedSquare];
-            }
+        // Deal with rook move in castling
+        uint8_t castling = move.getCastling();
+        if (castling != Move::NO_CASTLE) {
+            uint8_t setBitIndex = std::countr_zero(castling);
+            uint8_t castleRookSquare = castleRookSquares[setBitIndex];
+            
+            currentHash ^= zobristTable[toIndex(playerTurn)][toIndex(Piece::ROOK)][castleRookSquare];
+            // currentHash ^= zobristCastling[2 * toIndex(playerTurn) + setBitIndex];
+        }
 
-            // Deal with castling hash update
-            uint8_t castling = move.getCastling();
-            if (castling != Move::NO_CASTLE) {
-                uint8_t setBitIndex = std::countr_zero(castling);
-                uint8_t castleRookSquare = castleRookSquares[setBitIndex];
-                
-                currentHash ^= zobristTable[toIndex(*colour)][toIndex(Piece::ROOK)][castleRookSquare];
-                currentHash ^= zobristCastling[setBitIndex];
-            }
-
-            // Deal with en passant hash update
-            std::optional<uint8_t> oldEnPassantSquare = oldBoard.getEnPassantSquare();
-            std::optional<uint8_t> newEnPassantSquare = newBoard.getEnPassantSquare();
-            if (oldEnPassantSquare != newEnPassantSquare) {
-                if (oldEnPassantSquare.has_value()) {
-                    currentHash ^= zobristEnPassant[Board::getFile(*oldEnPassantSquare)];
+        // Deal with update in castling rights
+        for (uint8_t i = 0; i < 2; i++) {
+            for (uint8_t j = 0; j < 2; j++) {
+                if (oldCastleRights[i][j] != newCastleRights[i][j]) {
+                    currentHash ^= zobristCastling[2 * i + j];
                 }
-                if (newEnPassantSquare.has_value()) {
-                    currentHash ^= zobristEnPassant[Board::getFile(*newEnPassantSquare)];
-                }
+            }
+        }
+
+        // Deal with update in en passant square
+        if (oldEnPassantSquare != newEnPassantSquare) {
+            if (oldEnPassantSquare.has_value()) {
+                currentHash ^= zobristEnPassant[Board::getFile(*oldEnPassantSquare)];
+            }
+            if (newEnPassantSquare.has_value()) {
+                currentHash ^= zobristEnPassant[Board::getFile(*newEnPassantSquare)];
             }
         }
 
