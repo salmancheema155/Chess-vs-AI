@@ -62,41 +62,43 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
     std::vector<Move> moves;
     switch (piece) {
         case Piece::PAWN:
-            legalPawnMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalPawnMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::KNIGHT:
-            legalKnightMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalKnightMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::BISHOP:
-            legalBishopMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalBishopMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::ROOK:
-            legalRookMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalRookMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::QUEEN:
-            legalQueenMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalQueenMoves(board, piece, colour, currSquare, moves);
             break;
         case Piece::KING:
-            legalKingMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalKingMoves(board, piece, colour, currSquare, moves);
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
             return {};
     }
 
+    auto castlingRightsBeforeMove = board.getCastlingRights();
+    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
     for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
-        Move move = moves[i];
-        board.movePiece(piece, colour, move.getFromSquare(), move.getToSquare());
+        const Move& move = moves[i];
+        board.makeMove(move, colour);
         if (Check::isInCheck(board, colour)) {
             moves.erase(moves.begin() + i);
         }
-        board.movePiece(piece, colour, move.getToSquare(), move.getFromSquare());
+        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
     }
 
     return moves;
 }
 
-void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
@@ -129,7 +131,7 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
             uint8_t captureSquare = captureSquares[i];
             // Opponent piece at capture square
             if (board.isOpponentOccupied(colour, captureSquare)) {
-                uint8_t capture = toIndex(*board.getPiece(currSquare));
+                uint8_t capture = toIndex(*board.getPiece(captureSquare));
                 moves.push_back(Move(currSquare, captureSquare, capture));
             }
 
@@ -137,19 +139,19 @@ void MoveGenerator::legalPawnMoves(const Board& board, Piece piece, Colour colou
             // Check that pawn is adjacent to the en passant square
             if (enPassantSquare && currSquare + enPassantDirections[i] == *enPassantSquare) {
                 moves.push_back(Move(currSquare, (*enPassantSquare) + 8 * direction, 
-                                        Move::NO_CAPTURE, Move::NO_PROMOTION, Move::NO_CASTLE, *enPassantSquare));
+                                        toIndex(Piece::PAWN), Move::NO_PROMOTION, Move::NO_CASTLE, 1));
             }
         }
     }
 }
 
-void MoveGenerator::legalKnightMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalKnightMoves(const Board& board, Piece piece, Colour colour, 
                                      uint8_t currSquare, std::vector<Move>& moves) {
 
     legalMovesFromTable(board, piece, colour, currSquare, moves, PrecomputeMoves::knightMoveTable[currSquare]);
 }
 
-void MoveGenerator::legalBishopMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Piece piece, Colour colour, 
                                      uint8_t currSquare, std::vector<Move>& moves) {
 
     Colour opposingColour = (colour == Colour::WHITE) ?
@@ -182,7 +184,7 @@ void MoveGenerator::legalBishopMoves(const Board& board, Piece piece, Colour col
     }
 }
 
-void MoveGenerator::legalRookMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalRookMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
     using Function = uint8_t(*)(uint8_t);
@@ -216,14 +218,14 @@ void MoveGenerator::legalRookMoves(const Board& board, Piece piece, Colour colou
     }
 }
 
-void MoveGenerator::legalQueenMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalQueenMoves(const Board& board, Piece piece, Colour colour, 
                                     uint8_t currSquare, std::vector<Move>& moves) {
 
-    legalBishopMoves(board, piece, colour, currSquare, moves);
-    legalRookMoves(board, piece, colour, currSquare, moves);
+    pseudoLegalBishopMoves(board, piece, colour, currSquare, moves);
+    pseudoLegalRookMoves(board, piece, colour, currSquare, moves);
 }
 
-void MoveGenerator::legalKingMoves(const Board& board, Piece piece, Colour colour, 
+void MoveGenerator::pseudoLegalKingMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
     legalMovesFromTable(board, piece, colour, currSquare, moves, PrecomputeMoves::kingMoveTable[currSquare]);
