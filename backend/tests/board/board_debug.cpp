@@ -8,9 +8,13 @@
 #include "board/board.h"
 #include "chess_types.h"
 
+#include <ostream>
+#include <bitset>
+
 #define UINT8_T_MAX (0xFF)
 
 using Chess::toIndex;
+using Chess::Castling;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
@@ -77,34 +81,32 @@ void printBoard(const Board& board, char delimiter) {
     }
 }
 
-/*
-Parses a custom board state string similar to FEN notation
-
-Format: 
-- 8 rows (ranks) separated by '/' from rank 1 (bottom) to rank 8 (top)
-- Each row must contain exactly 8 characters
-- Lower case characters represent black pieces, upper case represent white pieces
-
-- Piece Characters:
-    - p, n, b, r, q, k represent black pawn, knight, bishop, rook, queen or king respectively
-    - P, N, B, R, Q, K represent white pawn, knight, bishop, rook, queen or king respectively
-    - '.' character denotes an empty square
-
-- After the board representation, the following fields must be included separated by a single space
-    - Current player turn: 'w' or 'b' character denoting the current player's turn
-    - Castling rights: 'K', 'Q', 'k', 'q' or '-' characters to denote black and white's kingside and queenside castle rights
-       where '-' denotes illegibility
-    - En passant square: Current square of the piece that just moved 2 squares forward represented in algebraic notation (e.g. e4)
-       where '--' denotes no such piece
-    - Half move number: Number of half moves elapsed since the last capture or pawn advance
-    - Full move number: Number of full moves elapsed since the start of the game starting at 1 and incremented after black's turn
-
-Examples:
-- "RNBQKBNR/PPPPPPPP/......../......../......../......../pppppppp/rnbqkbnr w KQkq -- 0 1"
-- "R..Q.RK./PP...PPP/..P..N../..BPP.../p.bNp.../..np...p/.pp..pp./r.bq.rk. b ---- -- 0 11"
-
-This function should only be used in testing and debugging
-*/
+/**
+ * Parses a custom board state string similar to FEN notation
+ * 
+ * Format:
+ * - 8 rows (ranks) separated by '/' from rank 1 (bottom) to rank 8 (top)
+ * - Each row must contain exactly 8 characters
+ * - Lower case characters represent black pieces, upper case represent white pieces
+ * 
+ * - Piece Characters:
+ *      - p, n, b, r, q, k represent black pawn, knight, bishop, rook, queen or king respectively
+ *      - P, N, B, R, Q, K represent white pawn, knight, bishop, rook, queen or king respectively
+ *      - '.' character denotes an empty square
+ * 
+ * - After the board representation, the following fields must be included separated by a single space
+ *      - Current player turn: 'w' or 'b' character denoting the current player's turn
+ *      - Castling rights: 'K', 'Q', 'k', 'q' or '-' characters to denote black and white's kingside and queenside castle rights where '-' denotes illegibility
+ *      - En passant square: Current square of the piece that just moved 2 squares forward represented in algebraic notation (e.g. e4) where '--' denotes no such piece
+ *      - Half move number: Number of half moves elapsed since the last capture or pawn advance
+ *      - Full move number: Number of full moves elapsed since the start of the game starting at 1 and incremented after black's turn
+ * 
+ * Examples:
+ * - "RNBQKBNR/PPPPPPPP/......../......../......../......../pppppppp/rnbqkbnr w KQkq -- 0 1"
+ * - "R..Q.RK./PP...PPP/..P..N../..BPP.../p.bNp.../..np...p/.pp..pp./r.bq.rk. b ---- -- 0 11"
+ * 
+ * This function should only be used in testing and debugging
+ */
 void Board::setCustomBoardState(const char* boardState) {
     assert(isValidBoardState(boardState) && "string boardState has incorrect format");
     pieceBitboards = {{{0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL},
@@ -113,7 +115,7 @@ void Board::setCustomBoardState(const char* boardState) {
     whitePiecesBitboard = 0ULL;
     blackPiecesBitboard = 0ULL;
     piecesBitboard = 0ULL;
-    
+
     constexpr char charMap[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
                                     {'p', 'n', 'b', 'r', 'q', 'k'}};
     const int boardChars = 71;
@@ -143,12 +145,10 @@ void Board::setCustomBoardState(const char* boardState) {
     }
     piecesBitboard = whitePiecesBitboard | blackPiecesBitboard;
 
-    currTurn = (currTurnChar == 'w') ? Colour::WHITE : Colour::BLACK;
-
-    kingsideCastle[0] = (whiteKingsideChar == 'K') ? true : false;
-    kingsideCastle[1] = (blackKingsideChar == 'k') ? true : false;
-    queensideCastle[0] = (whiteQueensideChar == 'Q') ? true : false;
-    queensideCastle[1] = (blackQueensideChar == 'q') ? true : false;
+    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::KINGSIDE)] = (whiteKingsideChar == 'K') ? true : false;
+    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::QUEENSIDE)] = (whiteQueensideChar == 'Q') ? true : false;
+    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::KINGSIDE)] = (blackKingsideChar == 'k') ? true : false;
+    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::QUEENSIDE)] = (blackQueensideChar == 'q') ? true : false;
 
     uint8_t square = algebraicToSquare(enPassantSquareString);
     enPassantSquare = (square == UINT8_T_MAX) ? std::nullopt : std::optional<uint8_t>(square);

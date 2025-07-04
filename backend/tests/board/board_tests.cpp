@@ -13,6 +13,7 @@ using Colour = Chess::PieceColour;
 using Piece = Chess::PieceType;
 using Chess::toIndex;
 using Chess::fromIndex;
+using Chess::Castling;
 using BoardUtils::getExpectedInitialStartingSquares;
 
 void checkInitialBoard(Board& b) {
@@ -31,14 +32,13 @@ void checkInitialBoard(Board& b) {
 
 TEST(BoardTest, InitialiseBoard) {
     Board b;
-    EXPECT_EQ(b.getTurn(), Colour::WHITE);
 
     checkInitialBoard(b);
 
-    EXPECT_EQ(b.getKingsideCastle(Colour::WHITE), true);
-    EXPECT_EQ(b.getKingsideCastle(Colour::BLACK), true);
-    EXPECT_EQ(b.getQueensideCastle(Colour::WHITE), true);
-    EXPECT_EQ(b.getQueensideCastle(Colour::BLACK), true);
+    EXPECT_EQ(b.getCastlingRights(Colour::WHITE, Castling::KINGSIDE), true);
+    EXPECT_EQ(b.getCastlingRights(Colour::BLACK, Castling::KINGSIDE), true);
+    EXPECT_EQ(b.getCastlingRights(Colour::WHITE, Castling::QUEENSIDE), true);
+    EXPECT_EQ(b.getCastlingRights(Colour::BLACK, Castling::QUEENSIDE), true);
 
     EXPECT_EQ(b.getEnPassantSquare(), std::nullopt);
 }

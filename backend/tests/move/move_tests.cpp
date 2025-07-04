@@ -7,35 +7,26 @@
 
 using Colour = Chess::PieceColour;
 using Piece = Chess::PieceType;
-using ChessMove::Move;
-using ChessMove::makeMove;
+using Chess::toIndex;
 
-TEST(MoveTest, checkMakeMove) {
-    Move m = makeMove(Piece::PAWN, Colour::WHITE, 12, 28);
-    EXPECT_EQ(m.piece, Piece::PAWN);
-    EXPECT_EQ(m.colour, Colour::WHITE);
-    EXPECT_EQ(m.fromSquare, 12);
-    EXPECT_EQ(m.toSquare, 28);
-    EXPECT_EQ(m.captureSquare, std::nullopt);
+TEST(MoveTest, checkMoveConstructor) {
+    Move m(12, 28);
+    EXPECT_EQ(m.getFromSquare(), 12);
+    EXPECT_EQ(m.getToSquare(), 28);
+    EXPECT_EQ(m.getCapturedPiece(), Move::NO_CAPTURE);
 
-    m = makeMove(Piece::QUEEN, Colour::BLACK, 14, 45, std::optional<uint8_t>(45));
-    EXPECT_EQ(m.piece, Piece::QUEEN);
-    EXPECT_EQ(m.colour, Colour::BLACK);
-    EXPECT_EQ(m.fromSquare, 14);
-    EXPECT_EQ(m.toSquare, 45);
-    EXPECT_EQ(m.captureSquare, 45);
+    m = Move(14, 45, toIndex(Piece::QUEEN));
+    EXPECT_EQ(m.getFromSquare(), 14);
+    EXPECT_EQ(m.getToSquare(), 45);
+    EXPECT_EQ(m.getCapturedPiece(), 4);
 
-    m = makeMove(Piece::BISHOP, Colour::BLACK, 7, 54, std::optional<uint8_t>(54));
-    EXPECT_EQ(m.piece, Piece::BISHOP);
-    EXPECT_EQ(m.colour, Colour::BLACK);
-    EXPECT_EQ(m.fromSquare, 7);
-    EXPECT_EQ(m.toSquare, 54);
-    EXPECT_EQ(m.captureSquare, 54);
+    m = Move(7, 54, toIndex(Piece::PAWN));
+    EXPECT_EQ(m.getFromSquare(), 7);
+    EXPECT_EQ(m.getToSquare(), 54);
+    EXPECT_EQ(m.getCapturedPiece(), 0);
 
-    m = makeMove(Piece::PAWN, Colour::BLACK, 12, 28, 37);
-    EXPECT_EQ(m.piece, Piece::PAWN);
-    EXPECT_EQ(m.colour, Colour::BLACK);
-    EXPECT_EQ(m.fromSquare, 12);
-    EXPECT_EQ(m.toSquare, 28);
-    EXPECT_EQ(m.captureSquare, 37);
+    m = Move(12, 28, toIndex(Piece::ROOK));
+    EXPECT_EQ(m.getFromSquare(), 12);
+    EXPECT_EQ(m.getToSquare(), 28);
+    EXPECT_EQ(m.getCapturedPiece(), 3);
 }
