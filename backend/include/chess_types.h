@@ -38,7 +38,7 @@ namespace Chess {
     };
 
     /**
-     * Convert an enum value to its corresponding integer value
+     * Converts an enum value to its corresponding integer value
      * @param item Enum value to convert
      * @return Corresponding integer value for the enum
      * @warning The enum value must have a corresponding integer value and 
@@ -50,6 +50,13 @@ namespace Chess {
         return static_cast<std::underlying_type_t<Enum>>(item);
     }
 
+    /**
+     * Converts an integer value to a corresponding enum value
+     * @param index Integer value
+     * @return Corresponding enum value
+     * @warning The enum value must have a corresponding integer value and 
+     * integer values must be contiguous starting from 0
+     */
     template <typename Enum>
     inline constexpr Enum fromIndex(std::underlying_type_t<Enum> index) {
         static_assert(std::is_enum_v<Enum>, "fromIndex requires an Enum type");
