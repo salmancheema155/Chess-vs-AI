@@ -8,6 +8,7 @@
 #include <utility>
 #include <bit>
 #include <cassert>
+#include "move/move.h"
 #include "chess_types.h"
 
 /**
@@ -319,6 +320,16 @@ public:
      * @warning A piece must exist at the fromSquare in order for this function to execute
      */
     void movePiece(uint8_t fromSquare, uint8_t toSquare);
+
+    /**
+     * @brief Reverts the board back 1 move
+     * @param move Last move executed
+     * @param oldPlayerTurn Turn of player that executed the last move
+     * @param oldCastlingRights Castling rights array before the last move was executed
+     * @param oldEnPassantSquare The square of the pawn that just moved 2 forward for the opposing specified player if it exists
+     */
+    void undo(Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+                                                                std::optional<uint8_t> oldEnPassantSquare);
 
     /**
      * @brief Resets board back to initial state

@@ -3,7 +3,9 @@
 #include <array>
 #include <utility>
 #include <cassert>
+#include <bit>
 #include "board/board.h"
+#include "move/move.h"
 #include "chess_types.h"
 
 using Chess::toIndex;
@@ -83,6 +85,53 @@ void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
     assert(piece.has_value() && "No piece seems to occupy fromSquare");
     assert(colour.has_value() && "No colour seems to occupy fromSquare");
     movePiece(*piece, *colour, fromSquare, toSquare);
+}
+
+void Board::undo(Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+                                                                std::optional<uint8_t> oldEnPassantSquare) {
+
+    uint8_t fromSquare = move.getFromSquare();
+    uint8_t toSquare = move.getToSquare();
+
+    // Remove promoted piece if it exists
+    uint8_t promotion = move.getPromotionPiece();
+    if (promotion != Move::NO_PROMOTION) {
+        removePiece(fromIndex<Piece>(promotion), oldPlayerTurn, toSquare);
+        addPiece(Piece::PAWN, oldPlayerTurn, fromSquare);
+    } else {
+        Piece movedPiece = *getPiece(toSquare);
+
+        // Move piece back
+        movePiece(movedPiece, oldPlayerTurn, toSquare, fromSquare);
+    }
+
+    // Place captured piece back if it exists
+    uint8_t capture = move.getCapturedPiece();
+    if (capture != Move::NO_CAPTURE) {
+        Piece capturedPiece = fromIndex<Piece>(capture);
+        Colour capturedColour = (oldPlayerTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+        uint8_t capturedSquare = (move.getEnPassant() != Move::NO_EN_PASSANT) ? 
+                                 *oldEnPassantSquare :
+                                 toSquare;
+
+        addPiece(capturedPiece, capturedColour, capturedSquare);
+    }
+
+    // Place rook back if castled
+    uint8_t castle = move.getCastling();
+    if (castle != Move::NO_CASTLE) {
+        constexpr uint8_t beforeCastleRookSquares[2][2] = {{7, 0}, {63, 56}}; // Indexed [colour][kingside/queenside]
+        constexpr uint8_t afterCastleRookSquares[2][2] = {{5, 3}, {61, 59}}; // Indexed [colour][kingside/queenside]
+        uint8_t castlingType = std::countr_zero(castle);
+
+        uint8_t beforeRookSquare = beforeCastleRookSquares[toIndex(oldPlayerTurn)][castlingType];
+        uint8_t afterRookSquare = afterCastleRookSquares[toIndex(oldPlayerTurn)][castlingType];
+
+        movePiece(Piece::ROOK, oldPlayerTurn, afterRookSquare, beforeRookSquare);
+    }
+
+    castlingRights = oldCastlingRights; // Restore castling rights
+    enPassantSquare = oldEnPassantSquare; // Restore en passant square
 }
 
 void Board::resetBoard() {
