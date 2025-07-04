@@ -23,7 +23,7 @@ struct GameState {
     uint64_t hash; ///< Zobrist hash of current board state
 };
 
-GameState createGameState(Chess::PieceColour playerTurn, std::optional<uint8_t> enPassantSquare, 
+inline GameState createGameState(Chess::PieceColour playerTurn, std::optional<uint8_t> enPassantSquare, 
                             const std::array<std::array<bool, 2>, 2>& castleRights, uint16_t halfMoveClock, uint16_t fullMoves, uint64_t hash) {
 
     return {
