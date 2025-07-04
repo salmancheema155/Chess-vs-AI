@@ -34,10 +34,8 @@
  *      - NO PROMOTION = NO_PROMOTION
  * 
  * - castling:
- *      - uint8_t where the 6 most significant bits are 0
- *      - For the 2 least significant bits, 1 = castling type was played, 0 = not played
- *          - Bit index 0: kingside castle
- *          - Bit index 1: queenside castle
+ *      - 0 = kingside castling
+ *      - 1 = queenside castling
  *      - NO_CASTLE = No castling was played
  * 
  * enPassant:
