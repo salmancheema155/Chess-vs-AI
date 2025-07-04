@@ -10,9 +10,10 @@
 using Colour = Chess::PieceColour;
 using Piece = Chess::PieceType;
 using Chess::toIndex;
+using Chess::Castling;
 
 namespace {
-    static constexpr uint8_t castleRookSquares[4] = {5, 3, 61, 59};
+    static constexpr uint8_t castleRookSquares[2][2] = {{5, 3}, {61, 59}};
 }
 
 namespace Zobrist {
@@ -30,10 +31,10 @@ namespace Zobrist {
         }
 
         // Castling hash
-        if (board.getKingsideCastle(Colour::WHITE)) hash ^= zobristCastling[0];
-        if (board.getQueensideCastle(Colour::WHITE)) hash ^= zobristCastling[1];
-        if (board.getKingsideCastle(Colour::BLACK)) hash ^= zobristCastling[2];
-        if (board.getQueensideCastle(Colour::BLACK)) hash ^= zobristCastling[3];
+        if (board.getCastlingRights(Colour::WHITE, Castling::KINGSIDE)) hash ^= zobristCastling[0];
+        if (board.getCastlingRights(Colour::WHITE, Castling::QUEENSIDE)) hash ^= zobristCastling[1];
+        if (board.getCastlingRights(Colour::BLACK, Castling::KINGSIDE)) hash ^= zobristCastling[2];
+        if (board.getCastlingRights(Colour::BLACK, Castling::QUEENSIDE)) hash ^= zobristCastling[3];
 
         // En passant hash
         if (board.getEnPassantSquare().has_value()) hash ^= zobristEnPassant[Board::getFile(*(board.getEnPassantSquare()))];
@@ -45,8 +46,10 @@ namespace Zobrist {
     }
 
         uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
-                            const std::optional<uint8_t> newEnPassantSquare, const std::array<std::array<bool, 2>, 2> oldCastleRights, 
-                            const std::array<std::array<bool, 2>, 2> newCastleRights, Colour playerTurn, Chess::PieceType movedPiece) {
+                            const std::optional<uint8_t> newEnPassantSquare, 
+                            const std::array<std::array<bool, 2>, 2> oldCastleRights, 
+                            const std::array<std::array<bool, 2>, 2> newCastleRights, 
+                            Chess::PieceColour playerTurn, Chess::PieceType movedPiece) {
 
         uint8_t fromSquare = move.getFromSquare();
         uint8_t toSquare = move.getToSquare();
@@ -82,11 +85,9 @@ namespace Zobrist {
         // Deal with rook move in castling
         uint8_t castling = move.getCastling();
         if (castling != Move::NO_CASTLE) {
-            uint8_t setBitIndex = std::countr_zero(castling);
-            uint8_t castleRookSquare = castleRookSquares[setBitIndex];
+            uint8_t castleRookSquare = castleRookSquares[toIndex(playerTurn)][castling];
             
             currentHash ^= zobristTable[toIndex(playerTurn)][toIndex(Piece::ROOK)][castleRookSquare];
-            // currentHash ^= zobristCastling[2 * toIndex(playerTurn) + setBitIndex];
         }
 
         // Deal with update in castling rights

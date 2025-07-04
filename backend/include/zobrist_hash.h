@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "board/board.h"
-#include "game_state.h"
+#include "game/game_state.h"
 #include "chess_types.h"
 
 namespace Zobrist {
@@ -31,8 +31,10 @@ namespace Zobrist {
      * @attention currentHash should be first computed once using computeInitialHash
      */
     uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
-                        const std::optional<uint8_t> newEnPassantSquare, const std::array<std::array<bool, 2>, 2> oldCastleRights, 
-                        const std::array<std::array<bool, 2>, 2> newCastleRights, Colour playerTurn, Chess::PieceType movedPiece);
+                        const std::optional<uint8_t> newEnPassantSquare, 
+                        const std::array<std::array<bool, 2>, 2> oldCastleRights, 
+                        const std::array<std::array<bool, 2>, 2> newCastleRights, 
+                        Chess::PieceColour playerTurn, Chess::PieceType movedPiece);
 }
 
 #endif // ZOBRIST_HASH_H
