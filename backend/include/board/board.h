@@ -115,7 +115,7 @@ public:
     /**
      * @brief Gets the piece that occupies the square
      * @param square Square of the piece (0-63)
-     * @return Colour of piece that occupies that square if it exists
+     * @return Piece that occupies that square if it exists
      * else returns std::nullopt
      */
     std::optional<Piece> getPiece(uint8_t square) const;
