@@ -51,7 +51,7 @@ public:
 
     inline static constexpr uint8_t NO_CAPTURE = 7; ///< Flag to represent moves does not capture
     inline static constexpr uint8_t NO_PROMOTION = 7; ///< Flag to represent move does not promote
-    inline static constexpr uint8_t NO_CASTLE = 0; ///< Flag to represent move does not castle
+    inline static constexpr uint8_t NO_CASTLE = 2; ///< Flag to represent move does not castle
     inline static constexpr uint8_t NO_EN_PASSANT = 0; ///< Flag to represent move does not en passant
 
     auto operator<=>(const Move& other) const = default;
