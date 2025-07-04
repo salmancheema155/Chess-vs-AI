@@ -14,6 +14,11 @@ using Bitboard = Board::Bitboard;
 using Piece = Board::Piece;
 using Colour = Board::Colour;
 
+namespace {
+    constexpr uint8_t beforeCastleRookSquares[2][2] = {{7, 0}, {63, 56}}; // Indexed [colour][kingside/queenside]
+    constexpr uint8_t afterCastleRookSquares[2][2] = {{5, 3}, {61, 59}}; // Indexed [colour][kingside/queenside]
+}
+
 Board::Board() : castlingRights{{{true, true}, {true, true}}},
                  enPassantSquare(std::nullopt) {
 
@@ -87,7 +92,77 @@ void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
     movePiece(*piece, *colour, fromSquare, toSquare);
 }
 
-void Board::undo(Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+void Board::makeMove(const Move& move, Colour playerTurn) {
+    uint8_t fromSquare = move.getFromSquare();
+    uint8_t toSquare = move.getToSquare();
+    Piece piece = *getPiece(fromSquare);
+
+    // Remove castling rights if rook has moved
+    if (castlingRights[toIndex(playerTurn)][toIndex(Castling::KINGSIDE)] && piece == Piece::ROOK) {
+        nullifyCastlingRights(playerTurn, Castling::KINGSIDE);
+    } else if (castlingRights[toIndex(playerTurn)][toIndex(Castling::QUEENSIDE)] && piece == Piece::ROOK) {
+        nullifyCastlingRights(playerTurn, Castling::QUEENSIDE);
+    }
+
+    // Remove castling rights if king has moved
+    if (piece == Piece::KING) {
+        nullifyCastlingRights(playerTurn, Castling::KINGSIDE);
+        nullifyCastlingRights(playerTurn, Castling::QUEENSIDE);
+    }
+
+    // Remove captured piece if any
+    uint8_t capture = move.getCapturedPiece();
+    if (capture != Move::NO_CAPTURE) {
+        Piece capturedPiece = fromIndex<Piece>(capture);
+        Colour capturedColour = (playerTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+        uint8_t capturedSquare = (move.getEnPassant() != Move::NO_EN_PASSANT) ? 
+                                *enPassantSquare :
+                                toSquare;
+        
+        removePiece(capturedPiece, capturedColour, capturedSquare);
+
+        // Remove castling rights if rook is captured
+        if (capturedPiece == Piece::ROOK) {
+            if (capturedSquare == beforeCastleRookSquares[toIndex(capturedColour)][toIndex(Castling::KINGSIDE)]) {
+                nullifyCastlingRights(capturedColour, Castling::KINGSIDE);
+            } else if (capturedSquare == beforeCastleRookSquares[toIndex(capturedColour)][toIndex(Castling::QUEENSIDE)]) {
+                nullifyCastlingRights(capturedColour, Castling::QUEENSIDE);
+            }
+        }
+    }
+
+    // Move rook if castling
+    uint8_t castle = move.getCastling();
+    if (castle != Move::NO_CASTLE) {
+        uint8_t beforeRookSquare = beforeCastleRookSquares[toIndex(playerTurn)][castle];
+        uint8_t afterRookSquare = afterCastleRookSquares[toIndex(playerTurn)][castle];
+        movePiece(Piece::ROOK, playerTurn, beforeRookSquare, afterRookSquare);
+
+        // Remove castling rights after castling
+        nullifyCastlingRights(playerTurn, Castling::KINGSIDE);
+        nullifyCastlingRights(playerTurn, Castling::QUEENSIDE);
+    }
+
+    // Add promotion piece if promoting
+    uint8_t promotion = move.getPromotionPiece();
+    if (promotion != Move::NO_PROMOTION) {
+        removePiece(Piece::PAWN, playerTurn, fromSquare); // Remove pawn
+        addPiece(fromIndex<Piece>(promotion), playerTurn, toSquare); // Add promotion piece
+    } else {
+        movePiece(piece, playerTurn, fromSquare, toSquare); // Move piece if not promoting
+    }
+
+    // Update en passant square if pawn moves 2 forward
+    uint8_t fromRank = getRank(fromSquare);
+    uint8_t toRank = getRank(toSquare);
+    if (piece == Piece::PAWN && (toRank == fromRank + 2 || fromRank == toRank + 2)) {
+        enPassantSquare = std::optional<uint8_t>(toSquare);
+    } else {
+        enPassantSquare = std::nullopt;
+    }
+}
+
+void Board::undo(const Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
                                                                 std::optional<uint8_t> oldEnPassantSquare) {
 
     uint8_t fromSquare = move.getFromSquare();
@@ -120,12 +195,8 @@ void Board::undo(Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2
     // Place rook back if castled
     uint8_t castle = move.getCastling();
     if (castle != Move::NO_CASTLE) {
-        constexpr uint8_t beforeCastleRookSquares[2][2] = {{7, 0}, {63, 56}}; // Indexed [colour][kingside/queenside]
-        constexpr uint8_t afterCastleRookSquares[2][2] = {{5, 3}, {61, 59}}; // Indexed [colour][kingside/queenside]
-        uint8_t castlingType = std::countr_zero(castle);
-
-        uint8_t beforeRookSquare = beforeCastleRookSquares[toIndex(oldPlayerTurn)][castlingType];
-        uint8_t afterRookSquare = afterCastleRookSquares[toIndex(oldPlayerTurn)][castlingType];
+        uint8_t beforeRookSquare = beforeCastleRookSquares[toIndex(oldPlayerTurn)][castle];
+        uint8_t afterRookSquare = afterCastleRookSquares[toIndex(oldPlayerTurn)][castle];
 
         movePiece(Piece::ROOK, oldPlayerTurn, afterRookSquare, beforeRookSquare);
     }

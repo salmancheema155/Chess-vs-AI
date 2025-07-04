@@ -272,7 +272,6 @@ public:
      * if it exists otherwise updates with std::nullopt
      */
     inline void setEnPassantSquare(std::optional<uint8_t> square) {
-        assert((square.has_value() && *square < 64) && "square must be between 0-63");
         enPassantSquare = square;
     }
 
@@ -322,13 +321,20 @@ public:
     void movePiece(uint8_t fromSquare, uint8_t toSquare);
 
     /**
+     * @brief Makes a move on the board
+     * @param move Move to execute
+     * @param playerTurn Colour of player who executes this move
+     */
+    void makeMove(const Move& move, Colour playerTurn);
+
+    /**
      * @brief Reverts the board back 1 move
      * @param move Last move executed
      * @param oldPlayerTurn Turn of player that executed the last move
      * @param oldCastlingRights Castling rights array before the last move was executed
-     * @param oldEnPassantSquare The square of the pawn that just moved 2 forward for the opposing specified player if it exists
+     * @param oldEnPassantSquare The square of the pawn that just moved 2 forward
      */
-    void undo(Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+    void undo(const Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
                                                                 std::optional<uint8_t> oldEnPassantSquare);
 
     /**
