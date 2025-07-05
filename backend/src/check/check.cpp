@@ -21,24 +21,22 @@ GameState Check::evaluateGameState(Board& board, Colour colour) {
     return GameState::IN_PROGRESS;
 }
 
-bool Check::isInCheck(const Board& board, Colour colour) {
-    uint8_t kingSquare = board.getKingSquare(colour);
-
+bool Check::isInDanger(const Board& board, Colour colour, uint8_t targetSquare) {
     // Knights
-    Bitboard knightAttacksBitboard = PrecomputeMoves::knightMoveTable[kingSquare];
+    Bitboard knightAttacksBitboard = PrecomputeMoves::knightMoveTable[targetSquare];
     Bitboard opposingKnightsBitboard = board.getOpposingBitboard(Piece::KNIGHT, colour);
     if (knightAttacksBitboard & opposingKnightsBitboard) return true;
 
     // Pawns
     Bitboard pawnAttacksBitboard = (colour == Colour::WHITE) ?
-                                    PrecomputeMoves::blackPawnCaptureTable[kingSquare] :
-                                    PrecomputeMoves::whitePawnCaptureTable[kingSquare];
+                                    PrecomputeMoves::blackPawnCaptureTable[targetSquare] :
+                                    PrecomputeMoves::whitePawnCaptureTable[targetSquare];
 
     Bitboard opposingPawnsBitboard = board.getOpposingBitboard(Piece::PAWN, colour);
     if (pawnAttacksBitboard & opposingPawnsBitboard) return true;
 
     // King
-    Bitboard kingAttacksBitboard = PrecomputeMoves::kingMoveTable[kingSquare];
+    Bitboard kingAttacksBitboard = PrecomputeMoves::kingMoveTable[targetSquare];
     Bitboard opposingKingBitboard = board.getOpposingBitboard(Piece::KING, colour);
     if (kingAttacksBitboard & opposingKingBitboard) return true;
 
@@ -53,8 +51,8 @@ bool Check::isInCheck(const Board& board, Colour colour) {
 
     for (int i = 0; i < 4; i++) {
         // Orthogonal directions
-        if (functions[i & 0x1](kingSquare) != boundaryChecks[i]) { // Toggle between file and rank checks at each iteration
-            uint8_t square = kingSquare + orthogonalDirections[i];
+        if (functions[i & 0x1](targetSquare) != boundaryChecks[i]) { // Toggle between file and rank checks at each iteration
+            uint8_t square = targetSquare + orthogonalDirections[i];
             // Not at edge of the board and square is empty
             while (functions[i & 0x1](square) != boundaryChecks[i] && board.isEmpty(square)) {
                 square += orthogonalDirections[i];
@@ -68,8 +66,8 @@ bool Check::isInCheck(const Board& board, Colour colour) {
         }
 
         // Diagonal directions
-        if (Board::getFile(kingSquare) != fileChecks[i] && Board::getRank(kingSquare) != rankChecks[i]) {
-            uint8_t square = kingSquare + diagonalDirections[i];
+        if (Board::getFile(targetSquare) != fileChecks[i] && Board::getRank(targetSquare) != rankChecks[i]) {
+            uint8_t square = targetSquare + diagonalDirections[i];
             // Not at edge of the board and square is empty
             while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && board.isEmpty(square)) {
                 square += diagonalDirections[i];
@@ -84,6 +82,11 @@ bool Check::isInCheck(const Board& board, Colour colour) {
     }
 
     return false;
+}
+
+bool Check::isInCheck(const Board& board, Colour colour) {
+    uint8_t kingSquare = board.getKingSquare(colour);
+    return isInDanger(board, colour, kingSquare);
 }
 
 bool Check::hasMove(Board& board, Colour colour) {
