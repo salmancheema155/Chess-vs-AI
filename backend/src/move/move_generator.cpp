@@ -15,6 +15,7 @@ using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::toIndex;
+using Chess::Castling;
 
 namespace {
     /**
@@ -141,6 +142,8 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
             // Opponent piece at capture square
             if (board.isOpponentOccupied(colour, captureSquare)) {
                 uint8_t capture = toIndex(*board.getPiece(captureSquare));
+
+                // Possible promotion
                 if (Board::getRank(currSquare) == promotionPawnRank) {
                     moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::KNIGHT)));
                     moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::BISHOP)));
@@ -244,5 +247,30 @@ void MoveGenerator::pseudoLegalQueenMoves(const Board& board, Piece piece, Colou
 void MoveGenerator::pseudoLegalKingMoves(const Board& board, Piece piece, Colour colour, 
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
+    // Regular moves
     legalMovesFromTable(board, piece, colour, currSquare, moves, PrecomputeMoves::kingMoveTable[currSquare]);
+
+    // Castling moves
+    bool canQueensideCastle = board.getCastlingRights(colour, Castling::QUEENSIDE);
+    bool canKingsideCastle = board.getCastlingRights(colour, Castling::KINGSIDE);
+
+    if (canQueensideCastle) {
+        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0xE : 0x0E00000000000000; // Squares between king and rook are empty
+        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
+            // Cannot pass through attacked square and cannot castle if in check
+            if (!Check::isInDanger(board, colour, 3) && !Check::isInCheck(board, colour)) {
+                moves.push_back(Move(currSquare, currSquare - 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::QUEENSIDE)));
+            }
+        }
+    }
+
+    if (canKingsideCastle) {
+        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0x60 : 0x6000000000000000; // Squares between king and rook are empty
+        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
+            // Cannot pass through attacked square and cannot castle if in check
+            if (!Check::isInDanger(board, colour, 5) && !Check::isInCheck(board, colour)) {
+                moves.push_back(Move(currSquare, currSquare + 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::KINGSIDE)));
+            }
+        }
+    }
 }
