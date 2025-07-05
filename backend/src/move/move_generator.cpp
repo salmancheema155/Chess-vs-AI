@@ -102,18 +102,27 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
                                    uint8_t currSquare, std::vector<Move>& moves) {
 
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
-    int nextSquare = currSquare + 8 * direction;
+    uint8_t nextSquare = currSquare + 8 * direction;
+    uint8_t promotionPawnRank = (colour == Colour::WHITE) ? 6 : 1;
 
     // One square forward
-    if (nextSquare >= 0 && nextSquare < 64 && board.isEmpty(nextSquare)) {
-        moves.push_back(Move(currSquare, nextSquare));
-
-        // Two squares forward
-        nextSquare += 8 * direction;
-        uint8_t initialPawnRank = (colour == Colour::WHITE) ? 1 : 6;
-        bool isUnmoved = Board::getRank(currSquare) == initialPawnRank;
-        if (isUnmoved && board.isEmpty(nextSquare)) { // Unmoved and square is free
+    if (board.isEmpty(nextSquare)) {
+        // Possible promotion
+        if (Board::getRank(currSquare) == promotionPawnRank) {
+            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::KNIGHT)));
+            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::BISHOP)));
+            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::ROOK)));
+            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::QUEEN)));
+        } else {
             moves.push_back(Move(currSquare, nextSquare));
+
+            // Two squares forward
+            nextSquare += 8 * direction;
+            uint8_t initialPawnRank = (colour == Colour::WHITE) ? 1 : 6;
+            bool isUnmoved = (Board::getRank(currSquare) == initialPawnRank);
+            if (isUnmoved && board.isEmpty(nextSquare)) { // Unmoved and square is free
+                moves.push_back(Move(currSquare, nextSquare));
+            }
         }
     }
 
@@ -132,7 +141,14 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
             // Opponent piece at capture square
             if (board.isOpponentOccupied(colour, captureSquare)) {
                 uint8_t capture = toIndex(*board.getPiece(captureSquare));
-                moves.push_back(Move(currSquare, captureSquare, capture));
+                if (Board::getRank(currSquare) == promotionPawnRank) {
+                    moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::KNIGHT)));
+                    moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::BISHOP)));
+                    moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::ROOK)));
+                    moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::QUEEN)));
+                } else {
+                    moves.push_back(Move(currSquare, captureSquare, capture));
+                }
             }
 
             // En passant
