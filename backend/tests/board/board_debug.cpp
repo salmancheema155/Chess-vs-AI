@@ -11,8 +11,6 @@
 #include "board/board.h"
 #include "chess_types.h"
 
-#define UINT8_T_MAX (0xFF)
-
 using Chess::toIndex;
 using Chess::Castling;
 using Chess::Bitboard;
