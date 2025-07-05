@@ -9,26 +9,24 @@
 #include "move/move.h"
 #include "chess_types.h"
 
-namespace {
-    inline const char* pieceMap[] = {"PAWN", "KNIGHT", "BISHOP", "ROOK", "QUEEN", "KING"};
-    inline const char* colourMap[] = {"WHITE", "BLACK"};
-    inline const char* castlingMap[] = {"KINGSIDE", "QUEENSIDE"};
-    inline const char* enPassantMap[] = {"FALSE", "TRUE"};
+inline const char* pieceMap[] = {"PAWN", "KNIGHT", "BISHOP", "ROOK", "QUEEN", "KING"};
+inline const char* colourMap[] = {"WHITE", "BLACK"};
+inline const char* castlingMap[] = {"KINGSIDE", "QUEENSIDE"};
+inline const char* enPassantMap[] = {"FALSE", "TRUE"};
 
-    uint8_t algebraicToSquare(std::string algString) {
-        return (algString[0] - 'a') + 8 * (algString[1] - '1');
-    }
+inline uint8_t algebraicToSquare(std::string algString) {
+    return (algString[0] - 'a') + 8 * (algString[1] - '1');
+}
 
-    std::string squareToAlgebraic(uint8_t square) {
-        assert(square < 64 && "Square must be between 0-63");
-        uint8_t file = Board::getFile(square);
-        uint8_t rank = Board::getRank(square);
+inline std::string squareToAlgebraic(uint8_t square) {
+    assert(square < 64 && "Square must be between 0-63");
+    uint8_t file = Board::getFile(square);
+    uint8_t rank = Board::getRank(square);
 
-        char fileChar = 'a' + file;
-        char rankChar = '1' + rank;
+    char fileChar = 'a' + file;
+    char rankChar = '1' + rank;
 
-        return std::string() + fileChar + rankChar;
-    }
+    return std::string() + fileChar + rankChar;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Move& move) {

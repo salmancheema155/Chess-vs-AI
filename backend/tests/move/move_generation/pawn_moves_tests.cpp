@@ -42,7 +42,7 @@ TEST(legalPawnGeneratorTest, board1) {
     11. d4
     */
 
-    b.setCustomBoardState("R..Q.RK./PP...PPP/..P..N../..BPP.../p.bNp.../..np...p/.pp..pp./r.bq.rk. b ---- -- 0 11");
+    b.setCustomBoardState("r1bq1rk1/1pp2pp1/2np3p/p1bNp3/2BPP3/2P2N2/PP3PPP/R2Q1RK1 b - - 0 11");
     //printBoard(b); // View visual board for test
 
     // White pawn on d4
@@ -117,7 +117,7 @@ TEST(legalPawnGeneratorTest, board1) {
 TEST(legalPawnGeneratorTest, board2) {
     Board b;
 
-    b.setCustomBoardState("R....RK./PPP...P./..N.P..P/......Q./.pB.p..n/p...P..R/..p...pp/r.rq..kn w ---- -- 2 25");
+    b.setCustomBoardState("r1rq2kn/2p3pp/p3P2R/1pB1p2n/6Q1/2N1P2P/PPP3P1/5RK1 w - - 2 25");
     //printBoard(b); // View visual board for test
 
     // Black pawn on g7

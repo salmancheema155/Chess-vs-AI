@@ -5,16 +5,17 @@
 #include <cassert>
 #include <array>
 #include <string>
+#include <cstdint>
+#include <cctype>
+#include <unordered_map>
 #include "board/board.h"
 #include "chess_types.h"
-
-#include <ostream>
-#include <bitset>
 
 #define UINT8_T_MAX (0xFF)
 
 using Chess::toIndex;
 using Chess::Castling;
+using Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
@@ -53,11 +54,11 @@ namespace {
 
     bool isValidBoardState(const char* boardState) {
         static const std::regex pattern(
-            R"(^([PNBRQKpnbrqk\.]{8}/){7})" // 7 repetitions of (8 piece characters followed by /)
-            R"([PNBRQKpnbrqk\.]{8})" // 8 piece characters
+            R"(^([PNBRQKpnbrqk1-9]+/){7})" // 7 repetitions of (8 piece characters followed by /)
+            R"([PNBRQKpnbrqk1-9]+)" // 8 piece characters
             R"( (w|b))" // Current player turn
-            R"( (K|-)(Q|-)(k|-)(q|-))" // Castling information
-            R"( ([a-h][36]|--))" // En passant square
+            R"( (-|(K?Q?k?q?)))" // Castling information
+            R"( ([a-h][36]|-))" // En passant square
             R"( \d+)" // Half move number
             R"( \d+$)" // Full move number
         );
@@ -66,8 +67,13 @@ namespace {
     }
 
     uint8_t algebraicToSquare(std::string algString) {
-        if (algString == "--") return UINT8_T_MAX;
         return (algString[0] - 'a') + 8 * (algString[1] - '1');
+    }
+
+    std::string enPassantTargetToEnPassantSquare(std::string enPassantTarget) {
+        char targetRank = enPassantTarget[1];
+        char rank = (targetRank == '3') ? '4' : '6';
+        return std::string() + enPassantTarget[0] + rank;
     }
 }
 
@@ -81,34 +87,8 @@ void printBoard(const Board& board, char delimiter) {
     }
 }
 
-/**
- * Parses a custom board state string similar to FEN notation
- * 
- * Format:
- * - 8 rows (ranks) separated by '/' from rank 1 (bottom) to rank 8 (top)
- * - Each row must contain exactly 8 characters
- * - Lower case characters represent black pieces, upper case represent white pieces
- * 
- * - Piece Characters:
- *      - p, n, b, r, q, k represent black pawn, knight, bishop, rook, queen or king respectively
- *      - P, N, B, R, Q, K represent white pawn, knight, bishop, rook, queen or king respectively
- *      - '.' character denotes an empty square
- * 
- * - After the board representation, the following fields must be included separated by a single space
- *      - Current player turn: 'w' or 'b' character denoting the current player's turn
- *      - Castling rights: 'K', 'Q', 'k', 'q' or '-' characters to denote black and white's kingside and queenside castle rights where '-' denotes illegibility
- *      - En passant square: Current square of the piece that just moved 2 squares forward represented in algebraic notation (e.g. e4) where '--' denotes no such piece
- *      - Half move number: Number of half moves elapsed since the last capture or pawn advance
- *      - Full move number: Number of full moves elapsed since the start of the game starting at 1 and incremented after black's turn
- * 
- * Examples:
- * - "RNBQKBNR/PPPPPPPP/......../......../......../......../pppppppp/rnbqkbnr w KQkq -- 0 1"
- * - "R..Q.RK./PP...PPP/..P..N../..BPP.../p.bNp.../..np...p/.pp..pp./r.bq.rk. b ---- -- 0 11"
- * 
- * This function should only be used in testing and debugging
- */
-void Board::setCustomBoardState(const char* boardState) {
-    assert(isValidBoardState(boardState) && "string boardState has incorrect format");
+void Board::setCustomBoardState(const char* fen) {
+    assert(isValidBoardState(fen) && "string fen has incorrect format");
     pieceBitboards = {{{0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL},
                         {0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL}}};
 
@@ -116,42 +96,76 @@ void Board::setCustomBoardState(const char* boardState) {
     blackPiecesBitboard = 0ULL;
     piecesBitboard = 0ULL;
 
-    constexpr char charMap[2][6] = {{'P', 'N', 'B', 'R', 'Q', 'K'},
-                                    {'p', 'n', 'b', 'r', 'q', 'k'}};
-    const int boardChars = 71;
-    const char currTurnChar = boardState[72];
-    const char whiteKingsideChar = boardState[74];
-    const char whiteQueensideChar = boardState[75];
-    const char blackKingsideChar = boardState[76];
-    const char blackQueensideChar = boardState[77];
-    const std::string enPassantSquareString(boardState + 79, 2);
+    std::unordered_map<char, Bitboard*> charMap;
+    charMap['P'] = &pieceBitboards[0][0];
+    charMap['N'] = &pieceBitboards[0][1];
+    charMap['B'] = &pieceBitboards[0][2];
+    charMap['R'] = &pieceBitboards[0][3];
+    charMap['Q'] = &pieceBitboards[0][4];
+    charMap['K'] = &pieceBitboards[0][5];
+    charMap['p'] = &pieceBitboards[1][0];
+    charMap['n'] = &pieceBitboards[1][1];
+    charMap['b'] = &pieceBitboards[1][2];
+    charMap['r'] = &pieceBitboards[1][3];
+    charMap['q'] = &pieceBitboards[1][4];
+    charMap['k'] = &pieceBitboards[1][5];
 
-    for (uint8_t i = 0; i < 2; i++) {
-        for (uint8_t j = 0; j < toIndex(Piece::COUNT); j++) {
-            char symbol = charMap[i][j];
-            for (int k = 0; k < boardChars; k++) {
-                if (boardState[k] == symbol) {
-                    uint8_t row = k / 9, col = k % 9;
-                    uint8_t square = 8 * row + col;
-                    setBit(pieceBitboards[i][j], square);
-                    if (i == 0) {
-                        setBit(whitePiecesBitboard, square);
-                    } else {
-                        setBit(blackPiecesBitboard, square);
-                    }
-                }
-            }
+    uint8_t index = 0;
+    uint8_t row = 7;
+    uint8_t col = 0;
+    while (fen[index] != ' ') {
+        if (fen[index] == '/') {
+            row--;
+            col = 0;
+        } else if (std::isdigit(fen[index])) {
+            uint8_t digit = fen[index] - '0';
+            col += digit;
+        } else {
+            uint8_t square = 8 * row + col;
+            Bitboard* pPieceBitboard = charMap[fen[index]];
+            setBit(*pPieceBitboard, square);
+            std::isupper(fen[index]) ? setBit(whitePiecesBitboard, square) : setBit(blackPiecesBitboard, square);
+            col++;
         }
+        index++;
     }
     piecesBitboard = whitePiecesBitboard | blackPiecesBitboard;
 
-    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::KINGSIDE)] = (whiteKingsideChar == 'K') ? true : false;
-    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::QUEENSIDE)] = (whiteQueensideChar == 'Q') ? true : false;
-    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::KINGSIDE)] = (blackKingsideChar == 'k') ? true : false;
-    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::QUEENSIDE)] = (blackQueensideChar == 'q') ? true : false;
+    index += 3; // Jump to castling rights
+    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::KINGSIDE)] = false;
+    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::QUEENSIDE)] = false;
+    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::KINGSIDE)] = false;
+    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::QUEENSIDE)] = false;
+    if (fen[index] != '-') {
+        while (fen[index] != ' ') {
+            switch (fen[index]) {
+                case 'K':
+                    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::KINGSIDE)] = true;
+                    break;
+                case 'Q':
+                    castlingRights[toIndex(Colour::WHITE)][toIndex(Castling::QUEENSIDE)] = true;
+                    break;
+                case 'k':
+                    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::KINGSIDE)] = true;
+                    break;
+                case 'q':
+                    castlingRights[toIndex(Colour::BLACK)][toIndex(Castling::QUEENSIDE)] = true;
+                    break;
+            }
+            index++;
+        }
+    } else {
+        index++;
+    }
 
-    uint8_t square = algebraicToSquare(enPassantSquareString);
-    enPassantSquare = (square == UINT8_T_MAX) ? std::nullopt : std::optional<uint8_t>(square);
+    index++; // Go to en passant target square
+    if (fen[index] != '-') {
+        std::string enPassantTargetString(fen + index, 2);
+        std::string enPassantSquareString = enPassantTargetToEnPassantSquare(enPassantTargetString);
+        enPassantSquare = algebraicToSquare(enPassantSquareString);
+    } else {
+        enPassantSquare = std::nullopt;
+    }
 }
 
 #endif // NDEBUG
