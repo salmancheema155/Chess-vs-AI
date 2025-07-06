@@ -159,9 +159,7 @@ void Board::setCustomBoardState(const char* fen) {
     index++; // Go to en passant target square
     if (fen[index] != '-') {
         std::string enPassantTargetString(fen + index, 2);
-        std::cout << enPassantTargetString << std::endl;
         std::string enPassantSquareString = enPassantTargetToEnPassantSquare(enPassantTargetString);
-        std::cout << enPassantSquareString << std::endl;
         enPassantSquare = algebraicToSquare(enPassantSquareString);
     } else {
         enPassantSquare = std::nullopt;
