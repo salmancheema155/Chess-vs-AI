@@ -90,10 +90,12 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
     for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
         const Move& move = moves[i];
         board.makeMove(move, colour);
-        if (Check::isInCheck(board, colour)) {
+        bool inCheck = Check::isInCheck(board, colour);
+        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
+
+        if (inCheck) {
             moves.erase(moves.begin() + i);
         }
-        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
     }
 
     return moves;
