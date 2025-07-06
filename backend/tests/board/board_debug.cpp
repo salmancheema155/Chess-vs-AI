@@ -70,7 +70,7 @@ namespace {
 
     std::string enPassantTargetToEnPassantSquare(std::string enPassantTarget) {
         char targetRank = enPassantTarget[1];
-        char rank = (targetRank == '3') ? '4' : '6';
+        char rank = (targetRank == '3') ? '4' : '5'; // Convert rank of 3 to 4 and rank of 6 to 5
         return std::string() + enPassantTarget[0] + rank;
     }
 }
@@ -159,7 +159,9 @@ void Board::setCustomBoardState(const char* fen) {
     index++; // Go to en passant target square
     if (fen[index] != '-') {
         std::string enPassantTargetString(fen + index, 2);
+        std::cout << enPassantTargetString << std::endl;
         std::string enPassantSquareString = enPassantTargetToEnPassantSquare(enPassantTargetString);
+        std::cout << enPassantSquareString << std::endl;
         enPassantSquare = algebraicToSquare(enPassantSquareString);
     } else {
         enPassantSquare = std::nullopt;
