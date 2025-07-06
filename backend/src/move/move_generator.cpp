@@ -258,7 +258,7 @@ void MoveGenerator::pseudoLegalKingMoves(const Board& board, Piece piece, Colour
         uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0xE : 0x0E00000000000000; // Squares between king and rook are empty
         if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
             // Cannot pass through attacked square and cannot castle if in check
-            if (!Check::isInDanger(board, colour, 3) && !Check::isInCheck(board, colour)) {
+            if (!Check::isInDanger(board, colour, currSquare - 1) && !Check::isInCheck(board, colour)) {
                 moves.push_back(Move(currSquare, currSquare - 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::QUEENSIDE)));
             }
         }
@@ -268,7 +268,7 @@ void MoveGenerator::pseudoLegalKingMoves(const Board& board, Piece piece, Colour
         uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0x60 : 0x6000000000000000; // Squares between king and rook are empty
         if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
             // Cannot pass through attacked square and cannot castle if in check
-            if (!Check::isInDanger(board, colour, 5) && !Check::isInCheck(board, colour)) {
+            if (!Check::isInDanger(board, colour, currSquare + 1) && !Check::isInCheck(board, colour)) {
                 moves.push_back(Move(currSquare, currSquare + 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::KINGSIDE)));
             }
         }
