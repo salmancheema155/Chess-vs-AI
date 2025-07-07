@@ -29,5 +29,6 @@ target_include_directories(${This} PRIVATE
 
 add_subdirectory(board)
 add_subdirectory(move)
+add_subdirectory(check)
 
 gtest_discover_tests(${This})
