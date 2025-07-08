@@ -7,6 +7,7 @@ docs/
 out/
 bin/
 lib/
+node_modules/
 
 CMakeFiles/
 CMakeCache.txt
