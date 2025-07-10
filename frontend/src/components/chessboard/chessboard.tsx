@@ -16,6 +16,9 @@ import "./chessboard.css"
 
 type BoardState = (Piece | null)[][];
 
+/**
+ * Maps piece types and colours to their corresponding piece images
+ */
 const pieceImages = {
     white: {
         pawn: whitePawn,
@@ -35,6 +38,9 @@ const pieceImages = {
     }
 };
 
+/**
+ * Initial board state
+ */
 const initialBoard: BoardState = [
     [
         {type: "rook", colour: "black"},
@@ -61,8 +67,63 @@ const initialBoard: BoardState = [
     ]
 ];
 
+/**
+ * Chess board UI with interactive pieces
+ * @returns {JSX.elmeent} Chess board react component
+ */
 const ChessBoard = () => {
     const [board, setBoard] = useState<BoardState>(initialBoard);
+    const [selectedSquare, setSelectedSquare] = useState<{row: number, col: number} | null>(null);
+    const [movedFromSquare, setMovedFromSquare] = useState<{row: number, col: number} | null>(null);
+    const [movedToSquare, setMovedToSquare] = useState<{row: number, col: number} | null>(null);
+
+    /**
+     * Selects a square on the board
+     * @param {number} rowIndex - Row the square is located in
+     * @param {number} colIndex - Column the square is located in 
+     */
+    const handleSelectedSquare = (rowIndex: number, colIndex: number) => {
+        setSelectedSquare({row: rowIndex, col: colIndex});
+    };
+
+    /**
+     * Removes the currently selected square if any
+     */
+    const nullifySelectedSquare = () => {
+        setSelectedSquare(null);
+    }
+
+    /**
+     * Marks a square as the square a piece just moved from
+     * @param {number} rowIndex - Row the square is located in
+     * @param {number} colIndex - Column the square is located in 
+     */
+    const handleMovedFromSquare = (rowIndex: number, colIndex: number) => {
+        setMovedFromSquare({row: rowIndex, col: colIndex});
+    }
+
+    /**
+     * Marks a square as the square a piece just moved to
+     * @param {number} rowIndex - Row the square is located in
+     * @param {number} colIndex - Column the square is located in 
+     */
+    const handleMovedToSquare = (rowIndex: number, colIndex: number) => {
+        setMovedToSquare({row: rowIndex, col: colIndex});
+    }
+
+    /**
+     * Moves a piece on the interactive board from one square to another
+     * @param {{rowIndex: number, colIndex: number}} from - from Row and column of the square that the piece is currently on
+     * @param {{rowIndex: number, colIndex: number}} to - to Row and column of the square that the piece is moving to
+     */
+    const moveSquare = (from: {rowIndex: number, colIndex: number}, to: {rowIndex: number, colIndex: number}) => {
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => row.slice());
+            newBoard[to.rowIndex][to.colIndex] = prevBoard[from.rowIndex][from.colIndex];
+            newBoard[from.rowIndex][from.colIndex] = null;
+            return newBoard;
+        });
+    };
 
     return (
         <div className="chess-board">
@@ -71,18 +132,59 @@ const ChessBoard = () => {
                     {row.map((piece, colIndex) => {
                         const isLight = ((rowIndex + colIndex) % 2 === 0);
                         return (
-                            <div className={`${isLight ? "light" : "dark"}-square`} key={`${rowIndex}-${colIndex}`}>
+                            <div 
+                                key={`${rowIndex}-${colIndex}`}
+                                className={`
+                                    ${isLight ? "light" : "dark"}-square
+                                    ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
+                                    ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
+                                    ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
+                                `}
+                                onClick={() => {
+                                    if (piece) {
+                                        if (selectedSquare) {
+                                            if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
+                                                if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
+                                                    // User clicks on the piece that is already currently selected
+                                                    nullifySelectedSquare();
+                                                } else {
+                                                    // User clicks on a piece of the same colour as the currently selected piece
+                                                    handleSelectedSquare(rowIndex, colIndex);
+                                                }
+                                            } else {
+                                                // User makes a capture move
+                                                moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
+                                                            {rowIndex: rowIndex, colIndex: colIndex});
+                                                handleMovedFromSquare(selectedSquare.row, selectedSquare.col);
+                                                handleMovedToSquare(rowIndex, colIndex);
+                                                nullifySelectedSquare();
+                                            }
+                                        } else {
+                                            // User clicks on a piece without a currently selected piece
+                                            handleSelectedSquare(rowIndex, colIndex);
+                                        }
+                                    } else {
+                                        if (selectedSquare) {
+                                            // User makes a non capture move
+                                            moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
+                                                        {rowIndex: rowIndex, colIndex: colIndex});
+                                            handleMovedFromSquare(selectedSquare.row, selectedSquare.col);
+                                            handleMovedToSquare(rowIndex, colIndex);
+                                            nullifySelectedSquare();
+                                        }
+                                    }
+                                }}
+                            >
                                 {piece && (
                                     <img
+                                        className="square-piece"
                                         src={pieceImages[piece.colour][piece.type]}
-                                        alt="k"
-                                        style={{width: "100%", height: "100%"}}
+                                        alt={`${piece.colour} ${piece.type}`}
                                     />
                                 )}
                             </div>
                         )
-                    }
-                    )}
+                    })}
                 </div>
             ))}
         </div>

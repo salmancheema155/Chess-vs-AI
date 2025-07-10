@@ -10,6 +10,13 @@
     display: flex;
 }
 
+.square-piece {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    position: relative;
+}
+
 .light-square,
 .dark-square {
     width: 100px;
@@ -18,6 +25,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .light-square {
@@ -26,4 +34,21 @@
 
 .dark-square {
     background-color: #BA7B58;
+}
+
+.selected-square {
+    background-color: rgba(255, 255, 0, 0.75);
+}
+
+.moved-from-square::after,
+.moved-to-square::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 0, 0.4);
+    pointer-events: none;
+    z-index: 0;
 }
