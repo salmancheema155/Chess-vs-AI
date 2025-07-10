@@ -1,0 +1,29 @@
+.chess-board {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #333;
+    width: fit-content;
+    margin: 20px auto;
+}
+
+.board-row {
+    display: flex;
+}
+
+.light-square,
+.dark-square {
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.light-square {
+    background-color: #FFF3BC;
+}
+
+.dark-square {
+    background-color: #BA7B58;
+}
