@@ -125,6 +125,9 @@ const ChessBoard = () => {
         });
     };
 
+    const fileLabels: string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const rankLabels: string[] = ["8", "7", "6", "5", "4", "3", "2", "1"];
+
     return (
         <div className="chess-board">
             {board.map((row, rowIndex) => (
@@ -175,6 +178,17 @@ const ChessBoard = () => {
                                     }
                                 }}
                             >
+                                {(rowIndex == 7 || colIndex == 0) && (
+                                    <>
+                                        <span className="file-corner-label">
+                                            {rowIndex === 7 ? fileLabels[colIndex] : ""}
+                                        </span>
+                                        <span className="rank-corner-label">
+                                            {colIndex === 0 ? rankLabels[rowIndex] : ""}
+                                        </span>
+                                    </>
+                                )}
+
                                 {piece && (
                                     <img
                                         className="square-piece"

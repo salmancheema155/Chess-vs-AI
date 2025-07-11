@@ -1,7 +1,7 @@
 .chess-board {
     display: flex;
     flex-direction: column;
-    border: 2px solid #333;
+    border: 2px solid rgb(51, 51, 51);
     width: fit-content;
     margin: 20px auto;
 }
@@ -29,11 +29,11 @@
 }
 
 .light-square {
-    background-color: #FFF3BC;
+    background-color: rgb(255, 243, 188);
 }
 
 .dark-square {
-    background-color: #BA7B58;
+    background-color: rgb(186, 123, 88);
 }
 
 .selected-square {
@@ -51,4 +51,23 @@
     background-color: rgba(255, 255, 0, 0.4);
     pointer-events: none;
     z-index: 0;
+}
+
+.rank-corner-label,
+.file-corner-label {
+    position: absolute;
+    font-size: 20px;
+    color: rgb(85, 79, 79);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.rank-corner-label {
+    top: 2px;
+    left: 2px;
+}
+
+.file-corner-label {
+    bottom: 2px;
+    right: 4px;
 }
