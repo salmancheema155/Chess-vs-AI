@@ -2,6 +2,7 @@
 .vs/
 
 frontend/public/wasm/
+build/
 build-wasm/
 build-tests/
 docs/
