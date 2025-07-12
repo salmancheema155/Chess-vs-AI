@@ -1,8 +1,9 @@
 .vscode/
 .vs/
 
-build/
-Build/
+frontend/public/wasm/
+build-wasm/
+build-tests/
 docs/
 out/
 bin/
