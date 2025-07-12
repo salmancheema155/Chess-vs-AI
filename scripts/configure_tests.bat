@@ -3,7 +3,7 @@
 echo [INFO] Configuring project with CMake
 
 cd /d "%~dp0.."
-cmake -S . -B build -DBUILD_TESTING=ON
+cmake -S . -B build-tests -DBUILD_TESTING=ON -DEMSCRIPTEN=OFF
 
 if %errorlevel% neq 0 (
 	echo [ERROR] CMake configuration failed

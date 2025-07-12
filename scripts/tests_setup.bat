@@ -5,17 +5,17 @@ cd /d "%~dp0.."
 
 set testName=%~1
 set testFolder=%~2
-set exePath=build/backend/tests/%testFolder%Debug/%testName%.exe
+set exePath=build-tests/backend/tests/%testFolder%Debug/%testName%.exe
 
 shift
 shift
 
-if not exist "build" (
-	echo [ERROR] build directory was not found - please run ./scripts/configure.bat first
+if not exist "build-tests" (
+	echo [ERROR] build-tests directory was not found - please run ./scripts/configure_tests.bat first
 	exit /b
 )
 
-cmake --build build --target %testName% --config Debug --parallel
+cmake --build build-tests --target %testName% --config Debug --parallel
 
 if exist "%exePath%" (
 	echo [INFO] "Running %testName%..."
