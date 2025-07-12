@@ -6,7 +6,7 @@ set(This Chess)
 project(${This} LANGUAGES CXX)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-option(BUILD_TESTING "Enable Test Builds" ON)
+option(BUILD_TESTING "Enable Test Builds" OFF)
 if(BUILD_TESTING)
 	enable_testing()
 endif()
