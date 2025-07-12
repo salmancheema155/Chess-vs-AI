@@ -3,6 +3,7 @@
 
 #include <stack>
 #include <string>
+#include <vector>
 #include "board/board.h"
 #include "game_state.h"
 #include "move/move.h"
@@ -29,20 +30,27 @@ public:
      */
     bool undo();
 
+    /**
+     * @brief Checks if the current player's turn piece occupies the square
+     * @param square Square to check if a piece occupies the square
+     * @return True if the current player's turn piece occupies the square, otherwise false
+     */
+    bool isCurrentPlayerOccupies(uint8_t square);
+
+    /**
+     * @brief Gets the legal moves for a piece on a square
+     * @param square Square which the piece is located on
+     * @return Vector of all legal moves for the piece
+     * @note If a piece does not occupy the square, this function returns an empty vector
+     */
+    std::vector<Move> getLegalMoves(uint8_t square);
+
 private:
     GameState currentState;
     Board board;
     std::stack<GameState> gameStateHistory;
     std::stack<Move> moveHistory;
-
-    // /**
-    //  * @brief Checks if a move is legal
-    //  * @param piece Piece to move
-    //  * @param colour Colour of piece
-    //  * @param fromSquare Square to move the piece from
-    //  * @param toSquare Square to move the piece to
-    //  */
-    // bool isLegalMove(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare);
+    Colour currentTurn;
 };
 
 #endif // GAME_H
