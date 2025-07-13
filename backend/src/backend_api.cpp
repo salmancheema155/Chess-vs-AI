@@ -20,26 +20,16 @@ namespace {
         json << "[";
 
         for (size_t i = 0; i < moves.size(); i++) {
-            uint8_t fromSquare = moves[i].getFromSquare();
             uint8_t toSquare = moves[i].getToSquare();
 
-            uint8_t fromRow = Board::getRank(fromSquare);
-            uint8_t fromCol = Board::getFile(fromSquare);
             uint8_t toRow = Board::getRank(toSquare);
             uint8_t toCol = Board::getFile(toSquare);
 
-            json << "{\"from\":";
-            json << "{\"row\":";
-            json << std::to_string(static_cast<int>(fromRow));
-            json << ",\"col\":";
-            json << std::to_string(static_cast<int>(fromCol));
-            json << "},";
-            json << "\"to\":";
             json << "{\"row\":";
             json << std::to_string(static_cast<int>(toRow));
             json << ",\"col\":";
             json << std::to_string(static_cast<int>(toCol));
-            json << "}}";
+            json << "}";
 
             if (i != moves.size() - 1) json << ",";
         }
@@ -48,21 +38,12 @@ namespace {
         return json.str();
     }
 
-    bool isValidSquare(const char* square) {
-        if (!square || strlen(square) != 2) return false;
-
-        char file = square[0];
-        char rank = square[1];
-
-        return file >= 'a' && file <= 'h' && 
-               rank >= '1' && rank <= '8';
+    bool isValidSquare(int row, int col) {
+        return (row >= 0 && row <= 7 && col >= 0 && col <= 7);
     }
 
-    uint8_t algebraicToSquare(const char* square) {
-        char file = square[0];
-        char rank = square[1];
-
-        return (file - 'a') + 8 * (rank - '1');
+    uint8_t getSquare(int row, int col) {
+        return 8 * row + col;
     }
 }
 
@@ -73,31 +54,31 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    bool isCurrentPlayerOccupies(const char* square) {
-        if (!isValidSquare(square)) return false;
+    bool isCurrentPlayerOccupies(int row, int col) {
+        if (!isValidSquare(row, col)) return false;
 
-        uint8_t currSquare = algebraicToSquare(square);
-        return game.isCurrentPlayerOccupies(currSquare);
+        uint8_t square = getSquare(row, col);
+        return game.isCurrentPlayerOccupies(square);
     }
 
     EMSCRIPTEN_KEEPALIVE
-    const char* getLegalMoves(const char* square) {
-        if (!isValidSquare(square)) return "{\"error\": \"Invalid square input\"}";
+    const char* getLegalMoves(int row, int col) {
+        if (!isValidSquare(row, col)) return "{\"error\": \"Invalid square input\"}";
 
-        uint8_t currSquare = algebraicToSquare(square);
-        legalMovesJson = movesToJson(game.getLegalMoves(currSquare));
+        uint8_t square = getSquare(row, col);
+        legalMovesJson = movesToJson(game.getLegalMoves(square));
         return legalMovesJson.c_str();
         
     }
 
     EMSCRIPTEN_KEEPALIVE
-    bool makeMove(const char* fromSquare, const char* toSquare) {
-        if (!isValidSquare(fromSquare) || !isValidSquare(toSquare)) return false;
+    bool makeMove(int fromRow, int fromCol, int toRow, int toCol) {
+        if (!isValidSquare(fromRow, fromCol) || !isValidSquare(toRow, toCol)) return false;
 
-        uint8_t from = algebraicToSquare(fromSquare);
-        uint8_t to = algebraicToSquare(toSquare);
+        uint8_t fromSquare = getSquare(fromRow, fromCol);
+        uint8_t toSquare = getSquare(toRow, toCol);
 
-        return game.makeMove(from, to);
+        return game.makeMove(fromSquare, toSquare);
     }
 
     EMSCRIPTEN_KEEPALIVE
