@@ -4,7 +4,7 @@ setlocal
 set EMSDK_PATH=%~1
 if "%EMSDK_PATH%"=="" (
 	echo [INFO] emsdk_env.bat path was not specified
-	echo [INFO] Using environment variable path
+	echo [INFO] Using environment variable path instead
 ) else (
 	if not exist "%EMSDK_PATH%" (
 		echo [ERROR] Could not find "%EMSDK_PATH%"
@@ -28,12 +28,11 @@ cmake --build . --config Release
 
 cd ..
 
-if not exist frontend\public\wasm (
-    mkdir frontend\public\wasm
+if not exist frontend\src\wasm (
+    mkdir frontend\src\wasm
 )
 
-copy /Y build-wasm\backend\chess_backend.js frontend\public\wasm\chess_backend.js
-copy /Y build-wasm\backend\chess_backend.wasm frontend\public\wasm\chess_backend.wasm
+copy /Y build-wasm\backend\wasm_module.mjs frontend\src\wasm\wasm_module.mjs
 
 echo [INFO] Compilation complete
 pause

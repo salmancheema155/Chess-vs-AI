@@ -6,7 +6,7 @@ echo [INFO] Configuring project with CMake
 set EMSDK_PATH=%~1
 if "%EMSDK_PATH%"=="" (
 	echo [INFO] emsdk_env.bat path was not specified
-	echo [INFO] Using environment variable path
+	echo [INFO] Using environment variable path instead
 ) else (
 	if not exist "%EMSDK_PATH%" (
 		echo [ERROR] Could not find "%EMSDK_PATH%"
