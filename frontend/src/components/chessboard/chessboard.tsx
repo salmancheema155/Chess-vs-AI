@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"
 //@ts-ignore
 import createModule from "../../wasm/wasm_module.mjs"
+import { promotionPieceToNumber } from "../../utils/promotion.ts"
+import { numberToMoveType } from "../../utils/move_type.ts"
 import whitePawn from "../../assets/pieces/white_pawn.svg"
 import whiteKnight from "../../assets/pieces/white_knight.svg"
 import whiteBishop from "../../assets/pieces/white_bishop.svg"
@@ -14,6 +16,7 @@ import blackRook from "../../assets/pieces/black_rook.svg"
 import blackQueen from "../../assets/pieces/black_queen.svg"
 import blackKing from "../../assets/pieces/black_king.svg"
 import type { Piece } from "../../types/piece.ts"
+import type { Move } from "../../types/move.ts"
 import "./chessboard.css"
 
 type BoardState = (Piece | null)[][];
@@ -130,38 +133,87 @@ const ChessBoard = () => {
 
         const ptr = wasm._getLegalMoves(rowIndex, colIndex);
         const jsonStr = wasm.UTF8ToString(ptr);
-        const parsedMoves = JSON.parse(jsonStr).map(
-            (square: {row: string, col: string}) => ({
-                row: parseInt(square.row, 10),
-                col: parseInt(square.col, 10)
+        const moves = JSON.parse(jsonStr).map(
+            (move: Move) => ({
+                row: move.to.row,
+                col: move.to.col
             })
         );
 
-        setLegalMoveSquares(parsedMoves);
+        setLegalMoveSquares(moves);
     }
 
     const resetLegalMoveSquares = () => {
         setLegalMoveSquares([]);
     }
 
+    const movePiece = (from: {rowIndex: number, colIndex: number}, 
+                        to: {rowIndex: number, colIndex: number}) => {
+            
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => row.slice());
+            newBoard[to.rowIndex][to.colIndex] = prevBoard[from.rowIndex][from.colIndex];
+            newBoard[from.rowIndex][from.colIndex] = null;
+            return newBoard;
+        });
+    }
+
+    const removePiece = (rowIndex: number, colIndex: number) => {
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => row.slice());
+            newBoard[rowIndex][colIndex] = null;
+            return newBoard;
+        });
+    }
+
     /**
      * Moves a piece on the interactive board from one square to another
      * @param {{rowIndex: number, colIndex: number}} from - from Row and column of the square that the piece is currently on
      * @param {{rowIndex: number, colIndex: number}} to - to Row and column of the square that the piece is moving to
+     * @param {string} promotionPiece - The piece that is gained from promotion if any with "NONE" specifying no promotion
      */
-    const moveSquare = (from: {rowIndex: number, colIndex: number}, to: {rowIndex: number, colIndex: number}) => {
+    const moveSquare = (from: {rowIndex: number, colIndex: number}, 
+                        to: {rowIndex: number, colIndex: number}, 
+                        promotionPiece: string = "NONE") => {
+
         if (!wasm) return;
 
-        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex)) {
-            setBoard(prevBoard => {
-                const newBoard = prevBoard.map(row => row.slice());
-                newBoard[to.rowIndex][to.colIndex] = prevBoard[from.rowIndex][from.colIndex];
-                newBoard[from.rowIndex][from.colIndex] = null;
-                return newBoard;
-            });
+        const moveTypeFlag = wasm._getMoveType(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
+        const moveType = numberToMoveType(moveTypeFlag);
+
+        if (moveType != "ILLEGAL") {
+            wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber(promotionPiece))
+            movePiece({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex: to.rowIndex, colIndex: to.colIndex});
 
             handleMovedFromSquare(from.rowIndex, from.colIndex);
             handleMovedToSquare(to.rowIndex, to.colIndex);
+
+            switch (moveType) {
+                case "KINGSIDE_CASTLE":
+                    // White
+                    if (from.rowIndex == 7) {
+                        movePiece({rowIndex: 7, colIndex: 7}, {rowIndex: 7, colIndex: 5});
+                    // BLACK
+                    } else {
+                        movePiece({rowIndex: 0, colIndex: 7}, {rowIndex: 0, colIndex: 5});
+                    }
+                    break;
+                case "QUEENSIDE_CASTLE":
+                    // White
+                    if (from.rowIndex == 7) {
+                        movePiece({rowIndex: 7, colIndex: 0}, {rowIndex: 7, colIndex: 3});
+                    // BLACK
+                    } else {
+                        movePiece({rowIndex: 0, colIndex: 0}, {rowIndex: 0, colIndex: 3});
+                    }
+                    break;
+                case "PROMOTION":
+
+                    break;
+                case "EN_PASSANT":
+                    removePiece(from.rowIndex, to.colIndex);
+                    break;
+            }
         }
 
         nullifySelectedSquare();
