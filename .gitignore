@@ -1,7 +1,7 @@
 .vscode/
 .vs/
 
-frontend/public/wasm/
+frontend/src/wasm/
 build/
 build-wasm/
 build-tests/
