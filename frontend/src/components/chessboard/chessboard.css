@@ -41,16 +41,25 @@
 }
 
 .moved-from-square::after,
-.moved-to-square::after {
+.moved-to-square::after,
+.legal-move-square::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 0, 0.4);
     pointer-events: none;
     z-index: 0;
+}
+
+.moved-from-square::after,
+.moved-to-square::after {
+    background-color: rgba(255, 255, 0, 0.4);
+}
+
+.legal-move-square::after {
+    background-color: rgba(255, 0, 0, 0.45);
 }
 
 .rank-corner-label,

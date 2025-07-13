@@ -1,4 +1,6 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+//@ts-ignore
+import createModule from "../../wasm/wasm_module.mjs"
 import whitePawn from "../../assets/pieces/white_pawn.svg"
 import whiteKnight from "../../assets/pieces/white_knight.svg"
 import whiteBishop from "../../assets/pieces/white_bishop.svg"
@@ -77,6 +79,18 @@ const ChessBoard = () => {
     const [movedFromSquare, setMovedFromSquare] = useState<{row: number, col: number} | null>(null);
     const [movedToSquare, setMovedToSquare] = useState<{row: number, col: number} | null>(null);
 
+    const [wasm, setWasm] = useState<any>(null);
+    const [legalMoveSquares, setLegalMoveSquares] = useState<Array<{row: number, col: number}>>([]);
+
+    useEffect(() => {
+        async function loadWasm() {
+            const module = await createModule();
+            module._initialiseGame();
+            setWasm(module);
+        }
+        loadWasm();
+    }, []);
+
     /**
      * Selects a square on the board
      * @param {number} rowIndex - Row the square is located in
@@ -111,18 +125,47 @@ const ChessBoard = () => {
         setMovedToSquare({row: rowIndex, col: colIndex});
     }
 
+    const handleLegalMoveSquares = (rowIndex: number, colIndex: number) => {
+        if (!wasm) return;
+
+        const ptr = wasm._getLegalMoves(rowIndex, colIndex);
+        const jsonStr = wasm.UTF8ToString(ptr);
+        const parsedMoves = JSON.parse(jsonStr).map(
+            (square: {row: string, col: string}) => ({
+                row: parseInt(square.row, 10),
+                col: parseInt(square.col, 10)
+            })
+        );
+
+        setLegalMoveSquares(parsedMoves);
+    }
+
+    const resetLegalMoveSquares = () => {
+        setLegalMoveSquares([]);
+    }
+
     /**
      * Moves a piece on the interactive board from one square to another
      * @param {{rowIndex: number, colIndex: number}} from - from Row and column of the square that the piece is currently on
      * @param {{rowIndex: number, colIndex: number}} to - to Row and column of the square that the piece is moving to
      */
     const moveSquare = (from: {rowIndex: number, colIndex: number}, to: {rowIndex: number, colIndex: number}) => {
-        setBoard(prevBoard => {
-            const newBoard = prevBoard.map(row => row.slice());
-            newBoard[to.rowIndex][to.colIndex] = prevBoard[from.rowIndex][from.colIndex];
-            newBoard[from.rowIndex][from.colIndex] = null;
-            return newBoard;
-        });
+        if (!wasm) return;
+
+        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex)) {
+            setBoard(prevBoard => {
+                const newBoard = prevBoard.map(row => row.slice());
+                newBoard[to.rowIndex][to.colIndex] = prevBoard[from.rowIndex][from.colIndex];
+                newBoard[from.rowIndex][from.colIndex] = null;
+                return newBoard;
+            });
+
+            handleMovedFromSquare(from.rowIndex, from.colIndex);
+            handleMovedToSquare(to.rowIndex, to.colIndex);
+        }
+
+        nullifySelectedSquare();
+        resetLegalMoveSquares();
     };
 
     const fileLabels: string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -134,6 +177,11 @@ const ChessBoard = () => {
                 <div className="board-row" key={rowIndex}>
                     {row.map((piece, colIndex) => {
                         const isLight = ((rowIndex + colIndex) % 2 === 0);
+                        
+                        const isLegalMoveSquare = legalMoveSquares.some(
+                            square => square.row === rowIndex && square.col === colIndex
+                        );
+
                         return (
                             <div 
                                 key={`${rowIndex}-${colIndex}`}
@@ -142,38 +190,36 @@ const ChessBoard = () => {
                                     ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
                                     ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
                                     ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
+                                    ${isLegalMoveSquare ? " legal-move-square" : ""}
                                 `}
                                 onClick={() => {
                                     if (piece) {
                                         if (selectedSquare) {
                                             if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
                                                 if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
-                                                    // User clicks on the piece that is already currently selected
+                                                    // User clicks the currently selected piece
                                                     nullifySelectedSquare();
+                                                    resetLegalMoveSquares();
                                                 } else {
                                                     // User clicks on a piece of the same colour as the currently selected piece
                                                     handleSelectedSquare(rowIndex, colIndex);
+                                                    handleLegalMoveSquares(rowIndex, colIndex);
                                                 }
                                             } else {
                                                 // User makes a capture move
                                                 moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
                                                             {rowIndex: rowIndex, colIndex: colIndex});
-                                                handleMovedFromSquare(selectedSquare.row, selectedSquare.col);
-                                                handleMovedToSquare(rowIndex, colIndex);
-                                                nullifySelectedSquare();
                                             }
                                         } else {
                                             // User clicks on a piece without a currently selected piece
                                             handleSelectedSquare(rowIndex, colIndex);
+                                            handleLegalMoveSquares(rowIndex, colIndex);
                                         }
                                     } else {
                                         if (selectedSquare) {
                                             // User makes a non capture move
                                             moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
                                                         {rowIndex: rowIndex, colIndex: colIndex});
-                                            handleMovedFromSquare(selectedSquare.row, selectedSquare.col);
-                                            handleMovedToSquare(rowIndex, colIndex);
-                                            nullifySelectedSquare();
                                         }
                                     }
                                 }}
