@@ -20,9 +20,11 @@ public:
      * @brief Makes a move updating the game state
      * @param fromSquare Square to move the piece from
      * @param toSquare Square to move the piece to
+     * @param promotion Promotion flag indicating what piece is gained from promotion if any
      * @return True if the move is legal, false otherwise
+     * @note Promotion flags are defined and documented in the Move class
      */
-    bool makeMove(uint8_t fromSquare, uint8_t toSquare);
+    bool makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion);
 
     /**
      * @brief Reverts the game state to the previous position before the most recent move
@@ -44,6 +46,15 @@ public:
      * @note If a piece does not occupy the square, this function returns an empty vector
      */
     std::vector<Move> getLegalMoves(uint8_t square);
+
+    /**
+     * @brief Gets the type of move
+     * @param fromSquare Square which the piece moves from
+     * @param toSquare Square which the piece moves to
+     * @return Type of move flag denoting which type of move is played
+     * @note See game.cpp documentation for move flags
+     */
+    int getMoveType(uint8_t fromSquare, uint8_t toSquare);
 
 private:
     GameState currentState;

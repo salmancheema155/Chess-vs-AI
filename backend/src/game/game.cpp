@@ -12,14 +12,33 @@
 
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
+using Chess::Castling;
+using Chess::toIndex;
+
+enum class MoveType : int {
+    ILLEGAL = -1,
+    NORMAL = 0,
+    KINGSIDE_CASTLE = 1,
+    QUEENSIDE_CASTLE = 2,
+    PROMOTION = 3,
+    EN_PASSANT = 4
+};
 
 namespace {
-    std::optional<Move> searchLegalMoves(const std::vector<Move>& legalMoves, uint8_t fromSquare, uint8_t toSquare) {
+    std::optional<Move> searchLegalMoves(const std::vector<Move>& legalMoves, 
+                                            uint8_t fromSquare, 
+                                            uint8_t toSquare, 
+                                            std::optional<uint8_t> promotion = std::nullopt) {
+
         for (const Move& move : legalMoves) {
-            if (move.getFromSquare() == fromSquare && move.getToSquare() == toSquare) {
-                return std::optional<Move>(move);
+            if (move.getFromSquare() == fromSquare && 
+                move.getToSquare() == toSquare && 
+                (!promotion.has_value() || move.getPromotionPiece() == *promotion)) {
+
+                return move;
             }
         }
+
         return std::nullopt;
     }
 }
@@ -29,7 +48,7 @@ Game::Game() : currentTurn(Colour::WHITE) {
     gameStateHistory.push(createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash));
 }
 
-bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare) {
+bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
     if (!pieceOpt.has_value() || !colourOpt.has_value()) return false;
 
@@ -37,7 +56,7 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare) {
     Colour colour = *colourOpt;
 
     std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare);
+    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, promotion);
 
     if (!moveOpt.has_value()) return false;
 
@@ -89,4 +108,25 @@ std::vector<Move> Game::getLegalMoves(uint8_t square) {
     if (!pieceOpt.has_value() || !colourOpt.has_value()) return {};
 
     return MoveGenerator::legalMoves(board, *pieceOpt, *colourOpt, square);
+}
+
+int Game::getMoveType(uint8_t fromSquare, uint8_t toSquare) {
+    auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
+    if (!pieceOpt.has_value() || !colourOpt.has_value()) return static_cast<int>(MoveType::ILLEGAL);
+
+    Piece piece = *pieceOpt;
+    Colour colour = *colourOpt;
+
+    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
+    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare);
+
+    if (!moveOpt.has_value()) return static_cast<int>(MoveType::ILLEGAL);
+
+    Move move = *moveOpt;
+    if (move.getCastling() == toIndex(Castling::KINGSIDE)) return static_cast<int>(MoveType::KINGSIDE_CASTLE);
+    if (move.getCastling() == toIndex(Castling::QUEENSIDE)) return static_cast<int>(MoveType::QUEENSIDE_CASTLE);
+    if (move.getPromotionPiece() != Move::NO_PROMOTION) return static_cast<int>(MoveType::PROMOTION);
+    if (move.getEnPassant() != Move::NO_EN_PASSANT) return static_cast<int>(MoveType::EN_PASSANT);
+
+    return static_cast<int>(MoveType::NORMAL);
 }
