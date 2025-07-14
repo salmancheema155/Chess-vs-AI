@@ -1,7 +1,11 @@
 export interface Move {
     from: {row: number, col: number};
     to: {row: number, col: number};
-    promotionPiece: string;
+    piece: string;
+    colour: string;
+    capturedPiece: string;
+    capturedColour: string;
     castling: string;
-    enPassant: string;
+    promotion: boolean;
+    enPassant: boolean;
 };

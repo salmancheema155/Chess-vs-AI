@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react"
 //@ts-ignore
 import createModule from "../../wasm/wasm_module.mjs"
 import { promotionPieceToNumber } from "../../utils/promotion.ts"
-import { numberToMoveType } from "../../utils/move_type.ts"
 import whitePawn from "../../assets/pieces/white_pawn.svg"
 import whiteKnight from "../../assets/pieces/white_knight.svg"
 import whiteBishop from "../../assets/pieces/white_bishop.svg"
@@ -133,12 +132,7 @@ const ChessBoard = () => {
 
         const ptr = wasm._getLegalMoves(rowIndex, colIndex);
         const jsonStr = wasm.UTF8ToString(ptr);
-        const moves = JSON.parse(jsonStr).map(
-            (move: Move) => ({
-                row: move.to.row,
-                col: move.to.col
-            })
-        );
+        const moves : [{row: number, col: number}] = JSON.parse(jsonStr);
 
         setLegalMoveSquares(moves);
     }
@@ -178,41 +172,32 @@ const ChessBoard = () => {
 
         if (!wasm) return;
 
-        const moveTypeFlag = wasm._getMoveType(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
-        const moveType = numberToMoveType(moveTypeFlag);
+        const ptr = wasm._getMoveInfo(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
+        const jsonStr = wasm.UTF8ToString(ptr);
+        const move: Move = JSON.parse(jsonStr); 
 
-        if (moveType != "ILLEGAL") {
-            wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber(promotionPiece))
+        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber(promotionPiece))) {
             movePiece({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex: to.rowIndex, colIndex: to.colIndex});
 
             handleMovedFromSquare(from.rowIndex, from.colIndex);
             handleMovedToSquare(to.rowIndex, to.colIndex);
 
-            switch (moveType) {
-                case "KINGSIDE_CASTLE":
-                    // White
-                    if (from.rowIndex == 7) {
-                        movePiece({rowIndex: 7, colIndex: 7}, {rowIndex: 7, colIndex: 5});
-                    // BLACK
-                    } else {
-                        movePiece({rowIndex: 0, colIndex: 7}, {rowIndex: 0, colIndex: 5});
-                    }
-                    break;
-                case "QUEENSIDE_CASTLE":
-                    // White
-                    if (from.rowIndex == 7) {
-                        movePiece({rowIndex: 7, colIndex: 0}, {rowIndex: 7, colIndex: 3});
-                    // BLACK
-                    } else {
-                        movePiece({rowIndex: 0, colIndex: 0}, {rowIndex: 0, colIndex: 3});
-                    }
-                    break;
-                case "PROMOTION":
+            if (move.castling == "KINGSIDE") {
+                if (move.colour == "WHITE") {
+                    movePiece({rowIndex: 7, colIndex: 7}, {rowIndex: 7, colIndex: 5});
+                } else if (move.colour == "BLACK") {
+                    movePiece({rowIndex: 0, colIndex: 7}, {rowIndex: 0, colIndex: 5});
+                }
+            } else if (move.castling == "QUEENSIDE") {
+                if (move.colour == "WHITE") {
+                    movePiece({rowIndex: 7, colIndex: 0}, {rowIndex: 7, colIndex: 3});
+                } else if (move.colour == "BLACK") {
+                    movePiece({rowIndex: 0, colIndex: 0}, {rowIndex: 0, colIndex: 3});
+                }
+            }
 
-                    break;
-                case "EN_PASSANT":
-                    removePiece(from.rowIndex, to.colIndex);
-                    break;
+            if (move.enPassant) {
+                removePiece(move.from.row, move.to.col);
             }
         }
 
