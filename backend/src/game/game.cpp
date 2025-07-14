@@ -6,23 +6,14 @@
 #include "game/game_state.h"
 #include "board/board.h"
 #include "move/move.h"
+#include "move/move_info.h"
 #include "move/move_generator.h"
 #include "zobrist_hash.h"
 #include "chess_types.h"
 
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
-using Chess::Castling;
 using Chess::toIndex;
-
-enum class MoveType : int {
-    ILLEGAL = -1,
-    NORMAL = 0,
-    KINGSIDE_CASTLE = 1,
-    QUEENSIDE_CASTLE = 2,
-    PROMOTION = 3,
-    EN_PASSANT = 4
-};
 
 namespace {
     std::optional<Move> searchLegalMoves(const std::vector<Move>& legalMoves, 
@@ -110,9 +101,9 @@ std::vector<Move> Game::getLegalMoves(uint8_t square) {
     return MoveGenerator::legalMoves(board, *pieceOpt, *colourOpt, square);
 }
 
-int Game::getMoveType(uint8_t fromSquare, uint8_t toSquare) {
+std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare) {
     auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
-    if (!pieceOpt.has_value() || !colourOpt.has_value()) return static_cast<int>(MoveType::ILLEGAL);
+    if (!pieceOpt.has_value() || !colourOpt.has_value()) return std::nullopt;
 
     Piece piece = *pieceOpt;
     Colour colour = *colourOpt;
@@ -120,13 +111,16 @@ int Game::getMoveType(uint8_t fromSquare, uint8_t toSquare) {
     std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
     std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare);
 
-    if (!moveOpt.has_value()) return static_cast<int>(MoveType::ILLEGAL);
+    if (!moveOpt) return std::nullopt;
 
     Move move = *moveOpt;
-    if (move.getCastling() == toIndex(Castling::KINGSIDE)) return static_cast<int>(MoveType::KINGSIDE_CASTLE);
-    if (move.getCastling() == toIndex(Castling::QUEENSIDE)) return static_cast<int>(MoveType::QUEENSIDE_CASTLE);
-    if (move.getPromotionPiece() != Move::NO_PROMOTION) return static_cast<int>(MoveType::PROMOTION);
-    if (move.getEnPassant() != Move::NO_EN_PASSANT) return static_cast<int>(MoveType::EN_PASSANT);
+    auto [capturedPieceOpt, capturedColourOpt] = board.getPieceAndColour(toSquare);
+    uint8_t capturedPiece = (capturedPieceOpt.has_value()) ? 
+                            toIndex(*capturedPieceOpt) :
+                            Move::NO_CAPTURE;
+    uint8_t capturedColour = (capturedColourOpt.has_value()) ? 
+                            toIndex(*capturedColourOpt) :
+                            Move::NO_CAPTURE;
 
-    return static_cast<int>(MoveType::NORMAL);
+    return std::optional<MoveInfo>({move, toIndex(piece), toIndex(colour), capturedPiece, capturedColour});
 }

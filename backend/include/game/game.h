@@ -4,9 +4,11 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <optional>
 #include "board/board.h"
 #include "game_state.h"
 #include "move/move.h"
+#include "move/move_info.h"
 #include "chess_types.h"
 
 class Game {
@@ -48,13 +50,13 @@ public:
     std::vector<Move> getLegalMoves(uint8_t square);
 
     /**
-     * @brief Gets the type of move
+     * @brief Gets information about a move
      * @param fromSquare Square which the piece moves from
      * @param toSquare Square which the piece moves to
-     * @return Type of move flag denoting which type of move is played
-     * @note See game.cpp documentation for move flags
+     * @return Move object wrapped in std::optional containing move info if the move is legal, std::nullopt otherwise
+     * @note See move_info.h for Moveinfo flags and move.h for more move flags
      */
-    int getMoveType(uint8_t fromSquare, uint8_t toSquare);
+    std::optional<MoveInfo> getMoveInfo(uint8_t fromSquare, uint8_t toSquare);
 
 private:
     GameState currentState;
