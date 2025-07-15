@@ -9,6 +9,7 @@
 #include "game_state.h"
 #include "move/move.h"
 #include "move/move_info.h"
+#include "check/check.h"
 #include "chess_types.h"
 
 class Game {
@@ -23,6 +24,14 @@ public:
      * @return The current player's turn
      */
     Colour getCurrentTurn();
+
+    /**
+     * @brief Gets the current game state evaluation for the opposite player of the player who just made their move
+     * @return Current game state evaluation of the board
+     * @note This function should be called after a move has been made to determine whether the opposing player
+     * has been checkmated, stalemated, etc
+     */
+    GameStateEvaluation getCurrentGameStateEvaluation();
 
     /**
      * @brief Makes a move updating the game state

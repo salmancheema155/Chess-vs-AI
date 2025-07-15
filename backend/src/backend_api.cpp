@@ -10,6 +10,7 @@
 #include "move/move_info.h"
 #include "board/board.h"
 #include "game/game.h"
+#include "check/check.h"
 #include "chess_types.h"
 
 static Game game;
@@ -120,6 +121,11 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     int getCurrentTurn() {
         return Chess::toIndex(game.getCurrentTurn());
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    int getCurrentGameStateEvaluation() {
+        return Chess::toIndex(game.getCurrentGameStateEvaluation());
     }
 
     EMSCRIPTEN_KEEPALIVE

@@ -8,6 +8,7 @@
 #include "move/move.h"
 #include "move/move_info.h"
 #include "move/move_generator.h"
+#include "check/check.h"
 #include "zobrist_hash.h"
 #include "chess_types.h"
 
@@ -37,6 +38,10 @@ namespace {
 Game::Game() : currentTurn(Colour::WHITE) {
     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
     gameStateHistory.push(createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash));
+}
+
+GameStateEvaluation Game::getCurrentGameStateEvaluation() {
+    return Check::evaluateGameState(board, currentTurn);
 }
 
 Colour Game::getCurrentTurn() {
