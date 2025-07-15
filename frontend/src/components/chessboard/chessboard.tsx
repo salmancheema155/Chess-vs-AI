@@ -17,6 +17,7 @@ import blackKing from "../../assets/pieces/black_king.svg"
 import type { Piece, Colour } from "../../types/piece.ts"
 import type { Move } from "../../types/move.ts"
 import { promotionPieceToNumber } from "../../utils/promotion.ts"
+import { numberToColour } from "../../utils/colour.ts"
 import "./chessboard.css"
 
 type BoardState = (Piece | null)[][];
@@ -106,7 +107,13 @@ const ChessBoard = () => {
      * @param {number} colIndex - Column the square is located in 
      */
     const handleSelectedSquare = (rowIndex: number, colIndex: number) => {
-        setSelectedSquare({row: rowIndex, col: colIndex});
+        if (!wasm) return;
+
+        const currentTurnNum: number = wasm._getCurrentTurn();
+        const currentTurn = numberToColour(currentTurnNum);
+        if (currentTurn == board[rowIndex][colIndex]?.colour) {
+            setSelectedSquare({row: rowIndex, col: colIndex});
+        }
     };
 
     /**
@@ -170,7 +177,11 @@ const ChessBoard = () => {
         const jsonStr = wasm.UTF8ToString(ptr);
         const moves : [{row: number, col: number}] = JSON.parse(jsonStr);
 
-        setLegalMoveSquares(moves);
+        const currentTurnNum: number = wasm._getCurrentTurn();
+        const currentTurn = numberToColour(currentTurnNum);
+        if (currentTurn == board[rowIndex][colIndex]?.colour) {
+            setLegalMoveSquares(moves);
+        }
     }
 
     /**
