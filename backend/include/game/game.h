@@ -19,6 +19,12 @@ public:
     Game();
 
     /**
+     * @brief Gets the current player turn
+     * @return The current player's turn
+     */
+    Colour getCurrentTurn();
+
+    /**
      * @brief Makes a move updating the game state
      * @param fromSquare Square to move the piece from
      * @param toSquare Square to move the piece to

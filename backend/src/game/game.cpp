@@ -39,6 +39,10 @@ Game::Game() : currentTurn(Colour::WHITE) {
     gameStateHistory.push(createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash));
 }
 
+Colour Game::getCurrentTurn() {
+    return currentTurn;
+}
+
 bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
     if (!pieceOpt.has_value() || !colourOpt.has_value()) return false;

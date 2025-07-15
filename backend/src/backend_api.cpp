@@ -118,6 +118,11 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
+    int getCurrentTurn() {
+        return Chess::toIndex(game.getCurrentTurn());
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     bool isCurrentPlayerOccupies(int row, int col) {
         if (!isValidSquare(row, col)) return false;
 
