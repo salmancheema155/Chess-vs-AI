@@ -134,6 +134,10 @@ const ChessBoard = () => {
         setMovedToSquare({row: rowIndex, col: colIndex});
     }
 
+    /**
+     * Promotes a pawn to the given piece
+     * @param {string} piece - String representation of piece to promote to
+     */
     const handleSelectPromotion = (piece: string) => {
         if (!promotionInfo || !wasm) return;
 
@@ -154,6 +158,11 @@ const ChessBoard = () => {
         setPromotionInfo(null);
     }
 
+    /**
+     * 
+     * @param {number} rowIndex - Row of piece to find legal moves for
+     * @param {number} colIndex - Column of piece to find legal moves for
+     */
     const handleLegalMoveSquares = (rowIndex: number, colIndex: number) => {
         if (!wasm) return;
 
@@ -164,10 +173,18 @@ const ChessBoard = () => {
         setLegalMoveSquares(moves);
     }
 
+    /**
+     * Removes the highlighted legal squares from the board
+     */
     const resetLegalMoveSquares = () => {
         setLegalMoveSquares([]);
     }
 
+    /**
+     * Moves a piece from one square to another
+     * @param {{rowIndex: number, colIndex: number}} from - Row and column of the piece before moving 
+     * @param {{rowIndex: number, colIndex: number}} to - Row and column of the piece after moving
+     */
     const movePiece = (from: {rowIndex: number, colIndex: number}, 
                         to: {rowIndex: number, colIndex: number}) => {
             
@@ -179,6 +196,11 @@ const ChessBoard = () => {
         });
     }
 
+    /**
+     * Removes a piece from the board
+     * @param rowIndex - Row that the piece is located on
+     * @param colIndex - Column that the piece is located on
+     */
     const removePiece = (rowIndex: number, colIndex: number) => {
         setBoard(prevBoard => {
             const newBoard = prevBoard.map(row => row.slice());

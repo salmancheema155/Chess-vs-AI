@@ -18,6 +18,13 @@ interface promotionModalProps {
     position: {top: number, left: number};
 }
 
+/**
+ * Promotion overlay to select which piece to promote to
+ * @param {promotionModalProps} param0 - promotionModalProps with colour of the piece, 
+ *                                       function to execute after selecting the piece and 
+ *                                       position to place the overlay
+ * @returns {JSX.element} Promotion overlay react component
+ */
 const PromotionModal = ({colour, onSelect, position}: promotionModalProps) => {
     const pieces: PromotionPiece[] = ["queen", "rook", "bishop", "knight"];
 
