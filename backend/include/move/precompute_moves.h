@@ -25,8 +25,8 @@ namespace {
             for (int j = 0; j < 8; j++) {
                 Bitboard moves = 0ULL;
                 for (auto& offset : offsets) {
-                    int row = i + offset[0];
-                    int col = j + offset[1];
+                    int row = i + offset[1];
+                    int col = j + offset[0];
                     if (0 <= row && row < 8 && 0 <= col && col < 8) {
                         // Set square bit in bitboard
                         moves |= (1ULL << (8 * row + col));                    
@@ -58,12 +58,12 @@ public:
     }();
 
     inline static constexpr std::array<Bitboard, 64> whitePawnCaptureTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{-1, 1}, {1, 1}}};
+        std::array<std::array<int, 2>, 8> offsets = {{{-1, -1}, {1, -1}}};
         return generateMoveTable(offsets);
     }();
 
     inline static constexpr std::array<Bitboard, 64> blackPawnCaptureTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{-1, -1}, {1, -1}}};
+        std::array<std::array<int, 2>, 8> offsets = {{{-1, 1}, {1, 1}}};
         return generateMoveTable(offsets);
     }();
 };
