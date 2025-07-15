@@ -18,6 +18,7 @@ import type { Piece, Colour } from "../../types/piece.ts"
 import type { Move } from "../../types/move.ts"
 import { promotionPieceToNumber } from "../../utils/promotion.ts"
 import { numberToColour } from "../../utils/colour.ts"
+import { numberToGameState } from "../../utils/game_state.ts"
 import "./chessboard.css"
 
 type BoardState = (Piece | null)[][];
@@ -82,6 +83,8 @@ const ChessBoard = () => {
     const [selectedSquare, setSelectedSquare] = useState<{row: number, col: number} | null>(null);
     const [movedFromSquare, setMovedFromSquare] = useState<{row: number, col: number} | null>(null);
     const [movedToSquare, setMovedToSquare] = useState<{row: number, col: number} | null>(null);
+    const [currentTurn, setCurrentTurn] = useState<Colour>("white");
+    const [gameState, setGameState] = useState<string>("IN_PROGRESS");
 
     const [wasm, setWasm] = useState<any>(null);
     const [legalMoveSquares, setLegalMoveSquares] = useState<Array<{row: number, col: number}>>([]);
@@ -101,6 +104,32 @@ const ChessBoard = () => {
         loadWasm();
     }, []);
 
+    const getGameEvaluationMessage = () => {
+        switch (gameState) {
+            case "STALEMATE": return "Draw by stalemate";
+            case "CHECK": return "Check";
+            case "DRAW_BY_REPETITION": return "Draw by repetition";
+            case "DRAW_BY_INSUFFICIENT_MATERIAL": return "Draw by insufficient material";
+            case "DRAW_BY_FIFTY_MOVE_RULE": return "Draw by fifty move rule";
+            case "CHECKMATE":
+                const winner = (currentTurn == "white") ? "Black" : "White";
+                return winner + " wins by checkmate!";
+        }
+    }
+
+    const handleGameState = () => {
+        if (!wasm) return;
+        const gameStateNum : number = wasm._getCurrentGameStateEvaluation();
+        const gameState = numberToGameState(gameStateNum);
+        setGameState(gameState);
+    }
+
+    const handleCurrentTurn = () => {
+        const currentTurnNum: number = wasm._getCurrentTurn();
+        const currentTurnString = numberToColour(currentTurnNum);
+        setCurrentTurn(currentTurnString as Colour);
+    }
+
     /**
      * Selects a square on the board
      * @param {number} rowIndex - Row the square is located in
@@ -109,8 +138,6 @@ const ChessBoard = () => {
     const handleSelectedSquare = (rowIndex: number, colIndex: number) => {
         if (!wasm) return;
 
-        const currentTurnNum: number = wasm._getCurrentTurn();
-        const currentTurn = numberToColour(currentTurnNum);
         if (currentTurn == board[rowIndex][colIndex]?.colour) {
             setSelectedSquare({row: rowIndex, col: colIndex});
         }
@@ -160,9 +187,13 @@ const ChessBoard = () => {
 
         handleMovedFromSquare(from.rowIndex, from.colIndex);
         handleMovedToSquare(to.rowIndex, to.colIndex);
+
         nullifySelectedSquare();
         resetLegalMoveSquares();
         setPromotionInfo(null);
+
+        handleCurrentTurn();
+        handleGameState();
     }
 
     /**
@@ -177,8 +208,6 @@ const ChessBoard = () => {
         const jsonStr = wasm.UTF8ToString(ptr);
         const moves : [{row: number, col: number}] = JSON.parse(jsonStr);
 
-        const currentTurnNum: number = wasm._getCurrentTurn();
-        const currentTurn = numberToColour(currentTurnNum);
         if (currentTurn == board[rowIndex][colIndex]?.colour) {
             setLegalMoveSquares(moves);
         }
@@ -269,6 +298,9 @@ const ChessBoard = () => {
             if (move.enPassant) {
                 removePiece(move.from.row, move.to.col);
             }
+
+            handleCurrentTurn();
+            handleGameState();
         }
 
         nullifySelectedSquare();
@@ -301,8 +333,10 @@ const ChessBoard = () => {
                                         ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
                                         ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
                                         ${isLegalMoveSquare ? " legal-move-square" : ""}
+                                        ${piece && piece.colour === currentTurn ? " clickable-square" : ""}
                                     `}
                                     onClick={() => {
+                                        if (gameState !== "IN_PROGRESS" && gameState !== "CHECK") return;
                                         if (piece) {
                                             if (selectedSquare) {
                                                 if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
@@ -373,6 +407,12 @@ const ChessBoard = () => {
                         position={promotionInfo.position}
                         onSelect={handleSelectPromotion}
                     />
+                </div>
+            )}
+
+            {gameState !== "IN_PROGRESS" && (
+                <div className="game-state-banner">
+                    {getGameEvaluationMessage()}
                 </div>
             )}
         </>
