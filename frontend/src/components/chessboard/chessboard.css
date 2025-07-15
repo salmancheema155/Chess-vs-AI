@@ -1,7 +1,6 @@
 .chess-board {
     display: flex;
     flex-direction: column;
-    border: 2px solid rgb(51, 51, 51);
     width: fit-content;
     margin: 20px auto;
 }

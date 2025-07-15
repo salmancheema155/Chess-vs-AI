@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 //@ts-ignore
 import createModule from "../../wasm/wasm_module.mjs"
-import { promotionPieceToNumber } from "../../utils/promotion.ts"
+import PromotionModal from "../promotion_modal/promotion_modal.tsx"
 import whitePawn from "../../assets/pieces/white_pawn.svg"
 import whiteKnight from "../../assets/pieces/white_knight.svg"
 import whiteBishop from "../../assets/pieces/white_bishop.svg"
@@ -14,8 +14,9 @@ import blackBishop from "../../assets/pieces/black_bishop.svg"
 import blackRook from "../../assets/pieces/black_rook.svg"
 import blackQueen from "../../assets/pieces/black_queen.svg"
 import blackKing from "../../assets/pieces/black_king.svg"
-import type { Piece } from "../../types/piece.ts"
+import type { Piece, Colour } from "../../types/piece.ts"
 import type { Move } from "../../types/move.ts"
+import { promotionPieceToNumber } from "../../utils/promotion.ts"
 import "./chessboard.css"
 
 type BoardState = (Piece | null)[][];
@@ -83,6 +84,12 @@ const ChessBoard = () => {
 
     const [wasm, setWasm] = useState<any>(null);
     const [legalMoveSquares, setLegalMoveSquares] = useState<Array<{row: number, col: number}>>([]);
+    const [promotionInfo, setPromotionInfo] = useState<{
+        from: {rowIndex: number, colIndex: number};
+        to: {rowIndex: number, colIndex: number};
+        colour: Colour;
+        position: {top: number, left: number};
+    } | null>(null);
 
     useEffect(() => {
         async function loadWasm() {
@@ -127,6 +134,26 @@ const ChessBoard = () => {
         setMovedToSquare({row: rowIndex, col: colIndex});
     }
 
+    const handleSelectPromotion = (piece: string) => {
+        if (!promotionInfo || !wasm) return;
+
+        const {from, to, colour, ..._} = promotionInfo;
+        wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber(piece));
+
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => row.slice());
+            newBoard[to.rowIndex][to.colIndex] = {type: piece as Piece["type"], colour};
+            newBoard[from.rowIndex][from.colIndex] = null;
+            return newBoard;
+        });
+
+        handleMovedFromSquare(from.rowIndex, from.colIndex);
+        handleMovedToSquare(to.rowIndex, to.colIndex);
+        nullifySelectedSquare();
+        resetLegalMoveSquares();
+        setPromotionInfo(null);
+    }
+
     const handleLegalMoveSquares = (rowIndex: number, colIndex: number) => {
         if (!wasm) return;
 
@@ -166,17 +193,27 @@ const ChessBoard = () => {
      * @param {{rowIndex: number, colIndex: number}} to - to Row and column of the square that the piece is moving to
      * @param {string} promotionPiece - The piece that is gained from promotion if any with "NONE" specifying no promotion
      */
-    const moveSquare = (from: {rowIndex: number, colIndex: number}, 
-                        to: {rowIndex: number, colIndex: number}, 
-                        promotionPiece: string = "NONE") => {
+    const moveSquare = (from: {rowIndex: number, colIndex: number}, to: {rowIndex: number, colIndex: number}) => {
 
         if (!wasm) return;
 
         const ptr = wasm._getMoveInfo(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
         const jsonStr = wasm.UTF8ToString(ptr);
-        const move: Move = JSON.parse(jsonStr); 
+        const move: Move = JSON.parse(jsonStr);
 
-        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber(promotionPiece))) {
+        if (move.promotion && boardRef.current) {
+            const squareSize = boardRef.current.offsetWidth / 8;
+            const boardRect = boardRef.current.getBoundingClientRect();
+
+            let top = boardRect.top + to.rowIndex * squareSize;
+            if (move.colour == "BLACK") top = top + squareSize - 340;
+            const left = boardRect.left + to.colIndex * squareSize;
+
+            setPromotionInfo({from, to, colour: move.colour.toLowerCase() as Colour, position: {top, left}});
+            return;
+        }
+
+        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber("NONE"))) {
             movePiece({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex: to.rowIndex, colIndex: to.colIndex});
 
             handleMovedFromSquare(from.rowIndex, from.colIndex);
@@ -208,83 +245,104 @@ const ChessBoard = () => {
     const fileLabels: string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const rankLabels: string[] = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
-    return (
-        <div className="chess-board">
-            {board.map((row, rowIndex) => (
-                <div className="board-row" key={rowIndex}>
-                    {row.map((piece, colIndex) => {
-                        const isLight = ((rowIndex + colIndex) % 2 === 0);
-                        
-                        const isLegalMoveSquare = legalMoveSquares.some(
-                            square => square.row === rowIndex && square.col === colIndex
-                        );
+    const boardRef = useRef<HTMLDivElement | null>(null);
 
-                        return (
-                            <div 
-                                key={`${rowIndex}-${colIndex}`}
-                                className={`
-                                    ${isLight ? "light" : "dark"}-square
-                                    ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
-                                    ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
-                                    ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
-                                    ${isLegalMoveSquare ? " legal-move-square" : ""}
-                                `}
-                                onClick={() => {
-                                    if (piece) {
-                                        if (selectedSquare) {
-                                            if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
-                                                if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
-                                                    // User clicks the currently selected piece
-                                                    nullifySelectedSquare();
-                                                    resetLegalMoveSquares();
+    return (
+        <>
+            <div className="chess-board" ref={boardRef}>
+                {board.map((row, rowIndex) => (
+                    <div className="board-row" key={rowIndex}>
+                        {row.map((piece, colIndex) => {
+                            const isLight = ((rowIndex + colIndex) % 2 === 0);
+                            
+                            const isLegalMoveSquare = legalMoveSquares.some(
+                                square => square.row === rowIndex && square.col === colIndex
+                            );
+
+                            return (
+                                <div 
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className={`
+                                        ${isLight ? "light" : "dark"}-square
+                                        ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
+                                        ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
+                                        ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
+                                        ${isLegalMoveSquare ? " legal-move-square" : ""}
+                                    `}
+                                    onClick={() => {
+                                        if (piece) {
+                                            if (selectedSquare) {
+                                                if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
+                                                    if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
+                                                        // User clicks the currently selected piece
+                                                        nullifySelectedSquare();
+                                                        resetLegalMoveSquares();
+                                                    } else {
+                                                        // User clicks on a piece of the same colour as the currently selected piece
+                                                        handleSelectedSquare(rowIndex, colIndex);
+                                                        handleLegalMoveSquares(rowIndex, colIndex);
+                                                    }
                                                 } else {
-                                                    // User clicks on a piece of the same colour as the currently selected piece
-                                                    handleSelectedSquare(rowIndex, colIndex);
-                                                    handleLegalMoveSquares(rowIndex, colIndex);
+                                                    // User makes a capture move
+                                                    moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
+                                                                {rowIndex: rowIndex, colIndex: colIndex});
                                                 }
                                             } else {
-                                                // User makes a capture move
+                                                // User clicks on a piece without a currently selected piece
+                                                handleSelectedSquare(rowIndex, colIndex);
+                                                handleLegalMoveSquares(rowIndex, colIndex);
+                                            }
+                                        } else {
+                                            if (selectedSquare) {
+                                                // User makes a non capture move
                                                 moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
                                                             {rowIndex: rowIndex, colIndex: colIndex});
                                             }
-                                        } else {
-                                            // User clicks on a piece without a currently selected piece
-                                            handleSelectedSquare(rowIndex, colIndex);
-                                            handleLegalMoveSquares(rowIndex, colIndex);
                                         }
-                                    } else {
-                                        if (selectedSquare) {
-                                            // User makes a non capture move
-                                            moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
-                                                        {rowIndex: rowIndex, colIndex: colIndex});
-                                        }
-                                    }
-                                }}
-                            >
-                                {(rowIndex == 7 || colIndex == 0) && (
-                                    <>
-                                        <span className="file-corner-label">
-                                            {rowIndex === 7 ? fileLabels[colIndex] : ""}
-                                        </span>
-                                        <span className="rank-corner-label">
-                                            {colIndex === 0 ? rankLabels[rowIndex] : ""}
-                                        </span>
-                                    </>
-                                )}
+                                    }}
+                                >
+                                    {(rowIndex == 7 || colIndex == 0) && (
+                                        <>
+                                            <span className="file-corner-label">
+                                                {rowIndex === 7 ? fileLabels[colIndex] : ""}
+                                            </span>
+                                            <span className="rank-corner-label">
+                                                {colIndex === 0 ? rankLabels[rowIndex] : ""}
+                                            </span>
+                                        </>
+                                    )}
 
-                                {piece && (
-                                    <img
-                                        className="square-piece"
-                                        src={pieceImages[piece.colour][piece.type]}
-                                        alt={`${piece.colour} ${piece.type}`}
-                                    />
-                                )}
-                            </div>
-                        )
-                    })}
+                                    {piece && (
+                                        <img
+                                            className="square-piece"
+                                            src={pieceImages[piece.colour][piece.type]}
+                                            alt={`${piece.colour} ${piece.type}`}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+
+            {promotionInfo && (
+                <div
+                    className="promotion-backdrop"
+                    onClick={() => {
+                        setPromotionInfo(null);
+                        nullifySelectedSquare();
+                        resetLegalMoveSquares();
+                    }}
+                >
+                    <PromotionModal
+                        colour={promotionInfo.colour}
+                        position={promotionInfo.position}
+                        onSelect={handleSelectPromotion}
+                    />
                 </div>
-            ))}
-        </div>
+            )}
+        </>
     )
 };
 
