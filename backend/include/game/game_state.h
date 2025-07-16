@@ -17,14 +17,14 @@ struct GameState {
 
     std::array<std::array<bool, 2>, 2> castleRights; ///< Indexed as [colour][kingside/queenside] with kingside before queenside.
 
-    uint16_t halfMoveClock; ///< Number of half moves elapsed since a pawn move or capture
+    uint8_t halfMoveClock; ///< Number of half moves elapsed since a pawn move or capture
     uint16_t fullMoves; ///< Number of moves elapsed since the start of the game starting at 1 and incremented after black's move
 
     uint64_t hash; ///< Zobrist hash of current board state
 };
 
 inline GameState createGameState(Chess::PieceColour playerTurn, std::optional<uint8_t> enPassantSquare, 
-                            const std::array<std::array<bool, 2>, 2>& castleRights, uint16_t halfMoveClock, uint16_t fullMoves, uint64_t hash) {
+                                const std::array<std::array<bool, 2>, 2>& castleRights, uint8_t halfMoveClock, uint16_t fullMoves, uint64_t hash) {
 
     return {
         .playerTurn = playerTurn,
