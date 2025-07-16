@@ -12,6 +12,16 @@
 #include "check/check.h"
 #include "chess_types.h"
 
+enum class GameStateEvaluation : uint8_t {
+    IN_PROGRESS = 0,
+    CHECKMATE = 1,
+    STALEMATE = 2,
+    CHECK = 3,
+    DRAW_BY_REPETITION = 4,
+    DRAW_BY_INSUFFICIENT_MATERIAL = 5,
+    DRAW_BY_FIFTY_MOVE_RULE = 6
+};
+
 class Game {
 public:
     using Piece = Chess::PieceType;
@@ -79,6 +89,24 @@ private:
     std::stack<GameState> gameStateHistory;
     std::stack<Move> moveHistory;
     Colour currentTurn;
+
+    /**
+     * @brief Calculates if the game is a draw by the fifty move rule
+     * @return True if the game is a draw, false otherwise
+     */
+    bool isDrawByFiftyMoveRule();
+
+    /**
+     * @brief Calculates if the game is a draw by three fold repetition
+     * @return True if the game is a draw, false otherwise
+     */
+    bool isDrawByRepetition();
+
+    /**
+     * @brief Calculates if the game is a draw by insufficient material
+     * @return True if the game is a draw, false otherwise
+     */
+    bool isDrawByInsufficientMaterial();
 };
 
 #endif // GAME_H

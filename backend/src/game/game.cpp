@@ -2,6 +2,7 @@
 #include <vector>
 #include <optional>
 #include <cstdint>
+#include <bit>
 #include "game/game.h"
 #include "game/game_state.h"
 #include "board/board.h"
@@ -14,6 +15,7 @@
 
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
+using Chess::Bitboard;
 using Chess::toIndex;
 
 namespace {
@@ -35,13 +37,55 @@ namespace {
     }
 }
 
+namespace {
+    bool containsOnePiece(const Bitboard bitboard) {
+        return (bitboard != 0ULL && (bitboard & (bitboard - 1)) == 0ULL);
+    }
+
+    bool insufficientMaterialHelper(const Board& board, const Colour colour1, const Colour colour2) {
+        if (containsOnePiece(board.getBitboard(colour1))) {
+            // King vs King + Bishop
+            if (board.getBitboard(Piece::KNIGHT, colour2) == 0ULL &&
+                containsOnePiece(board.getBitboard(Piece::BISHOP, colour2))) {
+                    return true;
+                }
+            // King vs King + Knight
+            if (board.getBitboard(Piece::BISHOP, colour2) == 0ULL &&
+                containsOnePiece(board.getBitboard(Piece::KNIGHT, colour2))) {
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
+    bool isSameColourBishopSquares(Bitboard bitboard1, Bitboard bitboard2) {
+        uint8_t square1 = std::countr_zero(bitboard1);
+        uint8_t square2 = std::countr_zero(bitboard2);
+
+        uint8_t rank1 = Board::getRank(square1), file1 = Board::getFile(square1);
+        uint8_t rank2 = Board::getRank(square2), file2 = Board::getFile(square2);
+
+        return (((rank1 + file1) & 0x1) == ((rank2 + file2) & 0x1));
+    }
+}
+
 Game::Game() : currentTurn(Colour::WHITE) {
     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
     gameStateHistory.push(createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash));
 }
 
 GameStateEvaluation Game::getCurrentGameStateEvaluation() {
-    return Check::evaluateGameState(board, currentTurn);
+    if (isDrawByFiftyMoveRule()) return GameStateEvaluation::DRAW_BY_FIFTY_MOVE_RULE;
+    if (isDrawByInsufficientMaterial()) return GameStateEvaluation::DRAW_BY_INSUFFICIENT_MATERIAL;
+
+    CheckEvaluation checkEvaluation = Check::evaluateGameState(board, currentTurn);
+    switch (checkEvaluation) {
+        case CheckEvaluation::CHECKMATE: return GameStateEvaluation::CHECKMATE;
+        case CheckEvaluation::STALEMATE: return GameStateEvaluation::STALEMATE;
+        case CheckEvaluation::CHECK: return GameStateEvaluation::CHECK;
+        case CheckEvaluation::NONE: return GameStateEvaluation::IN_PROGRESS;
+    }
 }
 
 Colour Game::getCurrentTurn() {
@@ -132,4 +176,46 @@ std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare) 
                             Move::NO_CAPTURE;
 
     return std::optional<MoveInfo>({move, toIndex(piece), toIndex(colour), capturedPiece, capturedColour});
+}
+
+bool Game::isDrawByFiftyMoveRule() {
+    return (currentState.halfMoveClock == 100);
+}
+
+bool Game::isDrawByRepetition() {
+
+}
+
+bool Game::isDrawByInsufficientMaterial() {
+    if (board.getBitboard(Piece::PAWN, Colour::WHITE) != 0ULL || 
+        board.getBitboard(Piece::PAWN, Colour::BLACK) != 0ULL ||
+        board.getBitboard(Piece::ROOK, Colour::WHITE) != 0ULL || 
+        board.getBitboard(Piece::ROOK, Colour::BLACK) != 0ULL ||
+        board.getBitboard(Piece::QUEEN, Colour::WHITE) != 0ULL || 
+        board.getBitboard(Piece::QUEEN, Colour::BLACK) != 0ULL) {
+            
+        return false;
+    }
+
+    // King vs King
+    if (containsOnePiece(board.getBitboard(Colour::WHITE)) && 
+        containsOnePiece(board.getBitboard(Colour::BLACK))) {
+
+        return true;
+    }
+
+    // King + Bishop vs King + Bishop with same colour squared bishops
+    Bitboard whiteBishop = board.getBitboard(Piece::BISHOP, Colour::WHITE);
+    Bitboard blackBishop = board.getBitboard(Piece::BISHOP, Colour::BLACK);
+    if (board.getBitboard(Piece::KNIGHT, Colour::WHITE) == 0ULL &&
+        board.getBitboard(Piece::KNIGHT, Colour::BLACK) == 0ULL &&
+        containsOnePiece(whiteBishop) &&
+        containsOnePiece(blackBishop) &&
+        isSameColourBishopSquares(whiteBishop, blackBishop)) {
+
+        return true;
+    }
+
+    return insufficientMaterialHelper(board, Colour::WHITE, Colour::BLACK) || 
+           insufficientMaterialHelper(board, Colour::BLACK, Colour::WHITE);
 }

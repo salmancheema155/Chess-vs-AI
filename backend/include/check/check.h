@@ -5,14 +5,11 @@
 #include "board/board.h"
 #include "chess_types.h"
 
-enum class GameStateEvaluation : uint8_t {
-    IN_PROGRESS = 0,
-    CHECKMATE = 1,
-    STALEMATE = 2,
-    CHECK = 3,
-    DRAW_BY_REPETITION = 4,
-    DRAW_BY_INSUFFICIENT_MATERIAL = 5,
-    DRAW_BY_FIFTY_MOVE_RULE = 6
+enum class CheckEvaluation {
+    CHECKMATE,
+    STALEMATE,
+    CHECK,
+    NONE
 };
 
 class Check {
@@ -24,9 +21,9 @@ public:
      * @brief Evaluates the current game state for a player
      * @param board Board object representing the current board state
      * @param colour Colour of the player to check the current game state for
-     * @return GameStateEvaluation enum values representing the evaluation of the current game state for the specified player
+     * @return CheckEvaluation enum values representing the evaluation of the current game state for the specified player
      */
-    static GameStateEvaluation evaluateGameState(Board& board, Colour colour);
+    static CheckEvaluation evaluateGameState(Board& board, Colour colour);
 
     /**
      * @brief Checks if there is a check on the specified coloured king

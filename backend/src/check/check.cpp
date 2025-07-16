@@ -10,15 +10,15 @@ using Bitboard = Chess::Bitboard;
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 
-GameStateEvaluation Check::evaluateGameState(Board& board, Colour colour) {
+CheckEvaluation Check::evaluateGameState(Board& board, Colour colour) {
     bool isCheck = isInCheck(board, colour);
     bool hasLegalMove = hasMove(board, colour);
 
-    if (isCheck && !hasLegalMove) return GameStateEvaluation::CHECKMATE;
-    if (!hasLegalMove) return GameStateEvaluation::STALEMATE;
-    if (isCheck) return GameStateEvaluation::CHECK;
+    if (isCheck && !hasLegalMove) return CheckEvaluation::CHECKMATE;
+    if (!hasLegalMove) return CheckEvaluation::STALEMATE;
+    if (isCheck) return CheckEvaluation::CHECK;
 
-    return GameStateEvaluation::IN_PROGRESS;
+    return CheckEvaluation::NONE;
 }
 
 bool Check::isInDanger(const Board& board, Colour colour, uint8_t targetSquare) {
