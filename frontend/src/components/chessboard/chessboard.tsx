@@ -76,7 +76,7 @@ const initialBoard: BoardState = [
 
 /**
  * Chess board UI with interactive pieces
- * @returns {JSX.elmeent} Chess board react component
+ * @returns {JSX.Element} Chess board react component
  */
 const ChessBoard = () => {
     const [board, setBoard] = useState<BoardState>(initialBoard);
@@ -104,6 +104,10 @@ const ChessBoard = () => {
         loadWasm();
     }, []);
 
+    /**
+     * Checks the current game state evaluation and returns a corresponding message
+     * @returns {string} Message to display current game state if any, otherwise returns nothing
+     */
     const getGameEvaluationMessage = () => {
         switch (gameState) {
             case "STALEMATE": return "Draw by stalemate";
@@ -117,6 +121,9 @@ const ChessBoard = () => {
         }
     }
 
+    /**
+     * Updates the current game state evaluation
+     */
     const handleGameState = () => {
         if (!wasm) return;
         const gameStateNum : number = wasm._getCurrentGameStateEvaluation();
@@ -124,6 +131,9 @@ const ChessBoard = () => {
         setGameState(gameState);
     }
 
+    /**
+     * Updates the current player's turn
+     */
     const handleCurrentTurn = () => {
         const currentTurnNum: number = wasm._getCurrentTurn();
         const currentTurnString = numberToColour(currentTurnNum);
@@ -389,13 +399,11 @@ const ChessBoard = () => {
                                             className="square-piece"
                                             src={pieceImages[piece.colour][piece.type]}
                                             alt={`${piece.colour} ${piece.type}`}
-                                            draggable={true}
+                                            draggable={(gameState === "IN_PROGRESS" || gameState === "CHECK") && currentTurn === piece.colour}
                                             onDragStart={(e) => {
-                                                if (currentTurn == board[rowIndex][colIndex]?.colour) {
-                                                    e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
-                                                    handleSelectedSquare(rowIndex, colIndex);
-                                                    handleLegalMoveSquares(rowIndex, colIndex);
-                                                }
+                                                e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
+                                                handleSelectedSquare(rowIndex, colIndex);
+                                                handleLegalMoveSquares(rowIndex, colIndex);
                                             }}
                                         />
                                     )}
