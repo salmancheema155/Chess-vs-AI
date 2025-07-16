@@ -110,11 +110,11 @@ const ChessBoard = () => {
      */
     const getGameEvaluationMessage = () => {
         switch (gameState) {
-            case "STALEMATE": return "Draw by stalemate";
+            case "STALEMATE": return "Draw by Stalemate";
             case "CHECK": return "Check";
-            case "DRAW_BY_REPETITION": return "Draw by repetition";
-            case "DRAW_BY_INSUFFICIENT_MATERIAL": return "Draw by insufficient material";
-            case "DRAW_BY_FIFTY_MOVE_RULE": return "Draw by fifty move rule";
+            case "DRAW_BY_REPETITION": return "Draw by Repetition";
+            case "DRAW_BY_INSUFFICIENT_MATERIAL": return "Draw by Insufficient Material";
+            case "DRAW_BY_FIFTY_MOVE_RULE": return "Draw by Fifty Move Rule";
             case "CHECKMATE":
                 const winner = (currentTurn == "white") ? "Black" : "White";
                 return winner + " wins by checkmate!";
