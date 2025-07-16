@@ -335,6 +335,11 @@ const ChessBoard = () => {
                                         ${isLegalMoveSquare ? " legal-move-square" : ""}
                                         ${piece && piece.colour === currentTurn ? " clickable-square" : ""}
                                     `}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => {
+                                        const from = JSON.parse(e.dataTransfer.getData("text/plain"));
+                                        moveSquare({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex, colIndex});
+                                    }}
                                     onClick={() => {
                                         if (gameState !== "IN_PROGRESS" && gameState !== "CHECK") return;
                                         if (piece) {
@@ -384,6 +389,14 @@ const ChessBoard = () => {
                                             className="square-piece"
                                             src={pieceImages[piece.colour][piece.type]}
                                             alt={`${piece.colour} ${piece.type}`}
+                                            draggable={true}
+                                            onDragStart={(e) => {
+                                                if (currentTurn == board[rowIndex][colIndex]?.colour) {
+                                                    e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
+                                                    handleSelectedSquare(rowIndex, colIndex);
+                                                    handleLegalMoveSquares(rowIndex, colIndex);
+                                                }
+                                            }}
                                         />
                                     )}
                                 </div>
