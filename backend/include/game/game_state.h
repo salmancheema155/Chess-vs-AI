@@ -24,7 +24,8 @@ struct GameState {
 };
 
 inline GameState createGameState(Chess::PieceColour playerTurn, std::optional<uint8_t> enPassantSquare, 
-                                const std::array<std::array<bool, 2>, 2>& castleRights, uint8_t halfMoveClock, uint16_t fullMoves, uint64_t hash) {
+                                const std::array<std::array<bool, 2>, 2>& castleRights, uint8_t halfMoveClock, 
+                                uint16_t fullMoves, uint64_t hash) {
 
     return {
         .playerTurn = playerTurn,

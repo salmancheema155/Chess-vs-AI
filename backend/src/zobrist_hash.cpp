@@ -45,11 +45,11 @@ namespace Zobrist {
         return hash;
     }
 
-        uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
-                            const std::optional<uint8_t> newEnPassantSquare, 
-                            const std::array<std::array<bool, 2>, 2> oldCastleRights, 
-                            const std::array<std::array<bool, 2>, 2> newCastleRights, 
-                            Chess::PieceColour playerTurn, Chess::PieceType movedPiece) {
+    uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
+                        const std::optional<uint8_t> newEnPassantSquare, 
+                        const std::array<std::array<bool, 2>, 2> oldCastleRights, 
+                        const std::array<std::array<bool, 2>, 2> newCastleRights, 
+                        Chess::PieceColour playerTurn, Chess::PieceType movedPiece) {
 
         uint8_t fromSquare = move.getFromSquare();
         uint8_t toSquare = move.getToSquare();
