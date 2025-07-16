@@ -72,10 +72,13 @@ namespace {
 
 Game::Game() : currentTurn(Colour::WHITE) {
     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
-    gameStateHistory.push(createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash));
+    positionHistory[hash] = 1;
+    currentState = createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash);
+    gameStateHistory.push(currentState);
 }
 
 GameStateEvaluation Game::getCurrentGameStateEvaluation() {
+    if (isDrawByRepetition()) return GameStateEvaluation::DRAW_BY_REPETITION;
     if (isDrawByFiftyMoveRule()) return GameStateEvaluation::DRAW_BY_FIFTY_MOVE_RULE;
     if (isDrawByInsufficientMaterial()) return GameStateEvaluation::DRAW_BY_INSUFFICIENT_MATERIAL;
 
@@ -118,6 +121,7 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
                                             currentState.castleRights, newCastlingRights, colour, piece);
 
     currentState = createGameState(newPlayerTurn, newEnPassantSquare, newCastlingRights, newHalfMoves, newFullMoves, newHash);
+    positionHistory[newHash]++;
     moveHistory.push(move);
     gameStateHistory.push(currentState);
     currentTurn = newPlayerTurn;
@@ -131,12 +135,18 @@ bool Game::undo() {
     const GameState& previousState = gameStateHistory.top();
     board.undo(previousMove, previousState.playerTurn, previousState.castleRights, previousState.enPassantSquare);
 
+    undoHash(currentState.hash);
     currentState = previousState;
     gameStateHistory.pop();
     moveHistory.pop();
     currentTurn = (currentTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
 
     return true;    
+}
+
+void Game::undoHash(uint64_t hash) {
+    if (positionHistory[hash] == 0) positionHistory.erase(hash);
+    else positionHistory[hash]--;
 }
 
 bool Game::isCurrentPlayerOccupies(uint8_t square) {
@@ -179,11 +189,11 @@ std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare) 
 }
 
 bool Game::isDrawByFiftyMoveRule() {
-    return (currentState.halfMoveClock == 100);
+    return (currentState.halfMoveClock >= 100);
 }
 
 bool Game::isDrawByRepetition() {
-
+    return (positionHistory[currentState.hash] >= 3);
 }
 
 bool Game::isDrawByInsufficientMaterial() {

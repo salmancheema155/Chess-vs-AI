@@ -1,10 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <cstdint>
 #include <stack>
 #include <string>
 #include <vector>
 #include <optional>
+#include <unordered_map>
 #include "board/board.h"
 #include "game_state.h"
 #include "move/move.h"
@@ -88,6 +90,7 @@ private:
     Board board;
     std::stack<GameState> gameStateHistory;
     std::stack<Move> moveHistory;
+    std::unordered_map<uint64_t, uint8_t> positionHistory;
     Colour currentTurn;
 
     /**
@@ -107,6 +110,11 @@ private:
      * @return True if the game is a draw, false otherwise
      */
     bool isDrawByInsufficientMaterial();
+
+    /**
+     * @brief Removes a hash from the positionHistory
+     */
+    void undoHash(uint64_t hash);
 };
 
 #endif // GAME_H
