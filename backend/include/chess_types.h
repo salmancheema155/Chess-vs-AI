@@ -17,7 +17,7 @@ namespace Chess {
         ROOK = 3,
         QUEEN = 4,
         KING = 5,
-        COUNT ///< Number of pieces
+        NONE = 6
     };
 
     /**
@@ -25,7 +25,8 @@ namespace Chess {
      */
     enum class PieceColour : uint8_t {
         WHITE = 0,
-        BLACK = 1
+        BLACK = 1,
+        NONE = 2
     };
 
     /**

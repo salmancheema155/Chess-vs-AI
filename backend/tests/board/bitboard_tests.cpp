@@ -39,7 +39,7 @@ TEST(BitboardTest, checkInitialBitboards) {
     EXPECT_EQ(b.getPiecesBitboard(), b.getWhitePiecesBitboard() | b.getBlackPiecesBitboard());
 
     for (uint8_t i = 0; i < 2; i++) {
-        for (uint8_t j = 0; j < toIndex(Piece::COUNT); j++) {
+        for (uint8_t j = 0; j < 6; j++) {
             EXPECT_EQ(b.getBitboard(fromIndex<Piece>(j), fromIndex<Colour>(i)), initialPieceBitboards[i][j]);
         }
     }

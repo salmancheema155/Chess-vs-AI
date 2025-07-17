@@ -37,8 +37,8 @@ namespace {
 
     void printSquare(const Board& board, uint8_t square) {
         auto [piece, colour] = board.getPieceAndColour(square);
-        if (piece) { // piece exists at this square
-            std::cout << pieces[toIndex(*colour)][toIndex(*piece)];
+        if (piece != Piece::NONE) { // piece exists at this square
+            std::cout << pieces[toIndex(colour)][toIndex(piece)];
         } else {
             std::cout << " ";
         }

@@ -47,8 +47,8 @@ public:
     using Piece = Chess::PieceType;
     using Colour = Chess::PieceColour;
 
-    inline static constexpr uint8_t NO_CAPTURE = 7; ///< Flag to represent moves does not capture
-    inline static constexpr uint8_t NO_PROMOTION = 7; ///< Flag to represent move does not promote
+    inline static constexpr uint8_t NO_CAPTURE = 6; ///< Flag to represent moves does not capture
+    inline static constexpr uint8_t NO_PROMOTION = 6; ///< Flag to represent move does not promote
     inline static constexpr uint8_t NO_CASTLE = 2; ///< Flag to represent move does not castle
     inline static constexpr uint8_t NO_EN_PASSANT = 0; ///< Flag to represent move does not en passant
 

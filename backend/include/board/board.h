@@ -107,25 +107,32 @@ public:
     /**
      * @brief Gets the colour of the piece that occupies the square
      * @param square Square of the piece (0-63)
-     * @return Colour of piece that occupies that square if it exists
-     * else returns std::nullopt
+     * @return Colour of piece that occupies that square
      */
-    std::optional<Colour> getColour(uint8_t square) const;
+    Colour getColour(uint8_t square) const;
 
     /**
      * @brief Gets the piece that occupies the square
      * @param square Square of the piece (0-63)
-     * @return Piece that occupies that square if it exists
-     * else returns std::nullopt
+     * @return Piece that occupies that square
      */
-    std::optional<Piece> getPiece(uint8_t square) const;
+    Piece getPiece(uint8_t square) const;
+
+    /**
+     * @brief Gets the piece that occupies the square
+     * @param colour Colour of the piece
+     * @param square Square of the piece (0-63)
+     * @return Piece that occupies the square if it exists
+     * else returns Chess::PieceType::NONE
+     */
+    Piece getPiece(Colour colour, uint8_t square) const;
 
     /**
      * @brief Gets the piece that occupies the square and the colour of the piece
      * @param square Square on the board (0-63)
      * @return std::pair with first element being the Piece and the second being the colour
      */
-    std::pair<std::optional<Piece>, std::optional<Colour>> getPieceAndColour(uint8_t square) const;
+    std::pair<Piece, Colour> getPieceAndColour(uint8_t square) const;
 
     /**
      * @brief Gets the square that the king occupies
@@ -378,7 +385,7 @@ private:
     Bitboard piecesBitboard;
 
     /// Indexed as [colour][pieceType]
-    std::array<std::array<Bitboard, Chess::toIndex(Piece::COUNT)>, 2> pieceBitboards;
+    std::array<std::array<Bitboard, 6>, 2> pieceBitboards;
 
     /**
      * @brief Resets the pieces back to their original starting position

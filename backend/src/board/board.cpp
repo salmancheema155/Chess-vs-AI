@@ -25,34 +25,46 @@ Board::Board() : castlingRights{{{true, true}, {true, true}}},
     resetPieces();
 }
 
-std::optional<Colour> Board::getColour(uint8_t square) const {
+Colour Board::getColour(uint8_t square) const {
     assert(square < 64 && "square must be between 0-63");
     uint64_t mask = 1ULL << square;
     if (whitePiecesBitboard & mask) {
-        return std::optional<Colour>(Colour::WHITE);
+        return Colour::WHITE;
     } else if (blackPiecesBitboard & mask) {
-        return std::optional<Colour>(Colour::BLACK);
+        return Colour::BLACK;
     }
-    return std::nullopt;
+    return Colour::NONE;
 }
 
-std::pair<std::optional<Piece>, std::optional<Colour>> Board::getPieceAndColour(uint8_t square) const {
+std::pair<Piece, Colour> Board::getPieceAndColour(uint8_t square) const {
     assert(square < 64 && "square must be between 0-63");
     uint64_t mask = 1ULL << square;
     for (uint8_t i = 0; i < 6; i++) {
         for (uint8_t j = 0; j < 2; j++) {
             if (getBitboard(fromIndex<Piece>(i), fromIndex<Colour>(j)) & mask) {
-                return {std::optional<Piece>(fromIndex<Piece>(i)), 
-                        std::optional<Colour>(fromIndex<Colour>(j))};
+                return {fromIndex<Piece>(i), 
+                        fromIndex<Colour>(j)};
             }
         }
     }
 
-    return {};
+    return {Piece::NONE, Colour::NONE};
 }
 
-std::optional<Piece> Board::getPiece(uint8_t square) const {
+Piece Board::getPiece(uint8_t square) const {
     return getPieceAndColour(square).first;
+}
+
+Piece Board::getPiece(Colour colour, uint8_t square) const {
+    assert(square < 64 && "square must be between 0-63");
+    uint64_t mask = 1ULL << square;
+    for (uint8_t i = 0; i < 6; i++) {
+        if (getBitboard(fromIndex<Piece>(i), colour) & mask) {
+            return fromIndex<Piece>(i);
+        }
+    }
+
+    return Piece::NONE;
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
@@ -75,9 +87,9 @@ void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
 
 void Board::removePiece(uint8_t square) {
     auto [piece, colour] = getPieceAndColour(square);
-    assert(piece.has_value() && "No piece seems to occupy fromSquare");
-    assert(colour.has_value() && "No colour seems to occupy fromSquare");
-    removePiece(*piece, *colour, square);
+    assert(piece != Piece::NONE && "No piece seems to occupy fromSquare");
+    assert(colour != Colour::NONE && "No colour seems to occupy fromSquare");
+    removePiece(piece, colour, square);
 }
 
 void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t toSquare) {
@@ -87,15 +99,15 @@ void Board::movePiece(Piece piece, Colour colour, uint8_t fromSquare, uint8_t to
 
 void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
     auto [piece, colour] = getPieceAndColour(fromSquare);
-    assert(piece.has_value() && "No piece seems to occupy fromSquare");
-    assert(colour.has_value() && "No colour seems to occupy fromSquare");
-    movePiece(*piece, *colour, fromSquare, toSquare);
+    assert(piece != Piece::NONE && "No piece seems to occupy fromSquare");
+    assert(colour != Colour::NONE && "No colour seems to occupy fromSquare");
+    movePiece(piece, colour, fromSquare, toSquare);
 }
 
 void Board::makeMove(const Move& move, Colour playerTurn) {
     uint8_t fromSquare = move.getFromSquare();
     uint8_t toSquare = move.getToSquare();
-    Piece piece = *getPiece(fromSquare);
+    Piece piece = getPiece(fromSquare);
 
     // Remove castling rights if rook has moved
     if (castlingRights[toIndex(playerTurn)][toIndex(Castling::KINGSIDE)] && piece == Piece::ROOK) {
@@ -174,7 +186,7 @@ void Board::undo(const Move& move, Colour oldPlayerTurn, std::array<std::array<b
         removePiece(fromIndex<Piece>(promotion), oldPlayerTurn, toSquare);
         addPiece(Piece::PAWN, oldPlayerTurn, fromSquare);
     } else {
-        Piece movedPiece = *getPiece(toSquare);
+        Piece movedPiece = getPiece(toSquare);
 
         // Move piece back
         movePiece(movedPiece, oldPlayerTurn, toSquare, fromSquare);
@@ -219,20 +231,20 @@ void Board::resetPieces() {
     constexpr uint8_t white = toIndex(Colour::WHITE);
     constexpr uint8_t black = toIndex(Colour::BLACK);
 
-    constexpr std::array<std::array<Bitboard, toIndex(Piece::COUNT)>, 2> initialBitboards = 
+    constexpr std::array<std::array<Bitboard, 6>, 2> initialBitboards = 
         {{{0x000000000000FF00ULL, 0x0000000000000042ULL, 0x0000000000000024ULL, 
           0x0000000000000081ULL, 0x0000000000000008ULL, 0x0000000000000010ULL}, 
          {0x00FF000000000000ULL, 0x4200000000000000ULL, 0x2400000000000000ULL, 
           0x8100000000000000ULL, 0x0800000000000000ULL, 0x1000000000000000ULL}}};
 
     whitePiecesBitboard = 0ULL;
-    for (int i = 0; i < toIndex(Piece::COUNT); i++) {
+    for (int i = 0; i < 6; i++) {
         pieceBitboards[white][i] = initialBitboards[white][i];
         whitePiecesBitboard |= initialBitboards[white][i];
     }
 
     blackPiecesBitboard = 0ULL;
-    for (int i = 0; i < toIndex(Piece::COUNT); i++) {
+    for (int i = 0; i < 6; i++) {
         pieceBitboards[black][i] = initialBitboards[black][i];
         blackPiecesBitboard |= initialBitboards[black][i];
     }

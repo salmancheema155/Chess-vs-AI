@@ -2,6 +2,7 @@
 #define ZOBRIST_HASH_H
 
 #include <cstdint>
+#include <optional>
 #include "board/board.h"
 #include "game/game_state.h"
 #include "chess_types.h"

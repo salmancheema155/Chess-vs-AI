@@ -17,7 +17,7 @@ using Chess::Castling;
 using BoardUtils::getExpectedInitialStartingSquares;
 
 void checkInitialBoard(Board& b) {
-    for (uint8_t i = 0; i < toIndex(Piece::COUNT); i++) {
+    for (uint8_t i = 0; i < 6; i++) {
         for (uint8_t j = 0; j < 2; j++) {
             Piece piece = fromIndex<Piece>(i);
             Colour colour = fromIndex<Colour>(j);
@@ -81,34 +81,28 @@ TEST(BoardTest, CheckOccupiedSquares) {
 
 TEST(BoardTest, CheckGetColour) {
     Board b;
-    ASSERT_TRUE(b.getColour(0).has_value());
-    EXPECT_EQ(b.getColour(0).value(), Colour::WHITE);
+    EXPECT_EQ(b.getColour(0), Colour::WHITE);
 
-    ASSERT_FALSE(b.getColour(16).has_value());
+    EXPECT_EQ(b.getColour(16), Colour::NONE);
 
-    ASSERT_FALSE(b.getColour(34).has_value());
+    EXPECT_EQ(b.getColour(34), Colour::NONE);
 
-    ASSERT_TRUE(b.getColour(48).has_value());
-    EXPECT_EQ(b.getColour(48).value(), Colour::BLACK);
+    EXPECT_EQ(b.getColour(48), Colour::BLACK);
 
-    ASSERT_TRUE(b.getColour(63).has_value());
-    EXPECT_EQ(b.getColour(63).value(), Colour::BLACK);
+    EXPECT_EQ(b.getColour(63), Colour::BLACK);
 }
 
 TEST(BoardTest, CheckGetPiece) {
     Board b;
-    ASSERT_TRUE(b.getPiece(0).has_value());
-    EXPECT_EQ(b.getPiece(0).value(), Piece::ROOK);
+    EXPECT_EQ(b.getPiece(0), Piece::ROOK);
 
-    ASSERT_FALSE(b.getPiece(16).has_value());
+    EXPECT_EQ(b.getPiece(16), Piece::NONE);
 
-    ASSERT_FALSE(b.getPiece(34).has_value());
+    EXPECT_EQ(b.getPiece(34), Piece::NONE);
 
-    ASSERT_TRUE(b.getPiece(48).has_value());
-    EXPECT_EQ(b.getPiece(48).value(), Piece::PAWN);
+    EXPECT_EQ(b.getPiece(48), Piece::PAWN);
 
-    ASSERT_TRUE(b.getPiece(61).has_value());
-    EXPECT_EQ(b.getPiece(61).value(), Piece::BISHOP);
+    EXPECT_EQ(b.getPiece(61), Piece::BISHOP);
 }
 
 TEST(BoardTest, CheckGetEnPassantSquare) {

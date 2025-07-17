@@ -89,6 +89,8 @@ GameStateEvaluation Game::getCurrentGameStateEvaluation() {
         case CheckEvaluation::CHECK: return GameStateEvaluation::CHECK;
         case CheckEvaluation::NONE: return GameStateEvaluation::IN_PROGRESS;
     }
+
+    return GameStateEvaluation::IN_PROGRESS;
 }
 
 Colour Game::getCurrentTurn() {
@@ -96,11 +98,8 @@ Colour Game::getCurrentTurn() {
 }
 
 bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
-    auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
-    if (!pieceOpt.has_value() || !colourOpt.has_value()) return false;
-
-    Piece piece = *pieceOpt;
-    Colour colour = *colourOpt;
+    auto [piece, colour] = board.getPieceAndColour(fromSquare);
+    if (piece == Piece::NONE || colour == Colour::NONE) return false;
 
     std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
     std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, promotion);
@@ -158,18 +157,15 @@ bool Game::isCurrentPlayerOccupies(uint8_t square) {
 }
 
 std::vector<Move> Game::getLegalMoves(uint8_t square) {
-    auto [pieceOpt, colourOpt] = board.getPieceAndColour(square);
-    if (!pieceOpt.has_value() || !colourOpt.has_value()) return {};
+    auto [piece, colour] = board.getPieceAndColour(square);
+    if (piece == Piece::NONE || colour == Colour::NONE) return {};
 
-    return MoveGenerator::legalMoves(board, *pieceOpt, *colourOpt, square);
+    return MoveGenerator::legalMoves(board, piece, colour, square);
 }
 
 std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare) {
-    auto [pieceOpt, colourOpt] = board.getPieceAndColour(fromSquare);
-    if (!pieceOpt.has_value() || !colourOpt.has_value()) return std::nullopt;
-
-    Piece piece = *pieceOpt;
-    Colour colour = *colourOpt;
+    auto [piece, colour] = board.getPieceAndColour(fromSquare);
+    if (piece == Piece::NONE || colour == Colour::NONE) return std::nullopt;
 
     std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
     std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare);
@@ -177,15 +173,9 @@ std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare) 
     if (!moveOpt) return std::nullopt;
 
     Move move = *moveOpt;
-    auto [capturedPieceOpt, capturedColourOpt] = board.getPieceAndColour(toSquare);
-    uint8_t capturedPiece = (capturedPieceOpt.has_value()) ? 
-                            toIndex(*capturedPieceOpt) :
-                            Move::NO_CAPTURE;
-    uint8_t capturedColour = (capturedColourOpt.has_value()) ? 
-                            toIndex(*capturedColourOpt) :
-                            Move::NO_CAPTURE;
+    auto [capturedPiece, capturedColour] = board.getPieceAndColour(toSquare);
 
-    return std::optional<MoveInfo>({move, toIndex(piece), toIndex(colour), capturedPiece, capturedColour});
+    return std::optional<MoveInfo>({move, toIndex(piece), toIndex(colour), toIndex(capturedPiece), toIndex(capturedColour)});
 }
 
 bool Game::isDrawByFiftyMoveRule() {

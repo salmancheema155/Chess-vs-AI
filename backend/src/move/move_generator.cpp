@@ -49,7 +49,7 @@ namespace {
         while (precomputedMoveBitboard) {
             uint8_t bitIndex = std::countr_zero(precomputedMoveBitboard); // Square on board
             // Check if valid move is a capture (capture bit is set)
-            uint8_t capture = bitSet(captureBitboard, bitIndex) ? toIndex(*(board.getPiece(bitIndex))) : Move::NO_CAPTURE;
+            uint8_t capture = bitSet(captureBitboard, bitIndex) ? toIndex(board.getPiece(bitIndex)) : Move::NO_CAPTURE;
             moves.push_back(Move(currSquare, bitIndex, capture));
             precomputedMoveBitboard &= precomputedMoveBitboard - 1; // Remove trailing set bit
         }
@@ -143,7 +143,7 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
             uint8_t captureSquare = captureSquares[i];
             // Opponent piece at capture square
             if (board.isOpponentOccupied(colour, captureSquare)) {
-                uint8_t capture = toIndex(*board.getPiece(captureSquare));
+                uint8_t capture = toIndex(board.getPiece(captureSquare));
 
                 // Possible promotion
                 if (Board::getRank(currSquare) == promotionPawnRank) {
@@ -192,11 +192,11 @@ void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Piece piece, Colo
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
-            std::optional<Colour> finalSquareColour = board.getColour(square);
-            if (!finalSquareColour || finalSquareColour == opposingColour) {
+            Colour finalSquareColour = board.getColour(square);
+            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
                 // Capture if final square is of the opposing colour
                 uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(*board.getPiece(square)) :
+                                    toIndex(board.getPiece(square)) :
                                     Move::NO_CAPTURE;
 
                 moves.push_back(Move(currSquare, square, capture));
@@ -226,11 +226,11 @@ void MoveGenerator::pseudoLegalRookMoves(const Board& board, Piece piece, Colour
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
-            std::optional<Colour> finalSquareColour = board.getColour(square);
-            if (!finalSquareColour || finalSquareColour == opposingColour) {
+            Colour finalSquareColour = board.getColour(square);
+            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
                 // Capture if final square is of the opposing colour
                 uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(*board.getPiece(square)) :
+                                    toIndex(board.getPiece(square)) :
                                     Move::NO_CAPTURE;
 
                 moves.push_back(Move(currSquare, square, capture));

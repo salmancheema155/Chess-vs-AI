@@ -8,7 +8,7 @@ using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::toIndex;
 
-static const std::array<std::array<std::vector<uint8_t>, 2>, toIndex(Piece::COUNT)> expectedInitialStartingSquares = {{
+static const std::array<std::array<std::vector<uint8_t>, 2>, 6> expectedInitialStartingSquares = {{
     // Pawns
     {{
         {8, 9, 10, 11, 12, 13, 14, 15},

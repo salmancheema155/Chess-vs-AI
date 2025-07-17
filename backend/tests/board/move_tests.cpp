@@ -12,20 +12,20 @@ TEST(MovePiece, checkMovePiece) {
     b.movePiece(12, 28);
     EXPECT_EQ(b.getPieceAndColour(28).first, Piece::PAWN);
     EXPECT_EQ(b.getPieceAndColour(28).second, Colour::WHITE);
-    ASSERT_FALSE(b.getPieceAndColour(12).first.has_value());
-    ASSERT_FALSE(b.getPieceAndColour(12).second.has_value());
+    EXPECT_EQ(b.getPieceAndColour(12).first, Piece::NONE);
+    EXPECT_EQ(b.getPieceAndColour(12).second, Colour::NONE);
 
     b.movePiece(0, 22);
     EXPECT_EQ(b.getPiece(22), Piece::ROOK);
     EXPECT_EQ(b.getColour(22), Colour::WHITE);
-    ASSERT_FALSE(b.getPiece(0).has_value());
-    ASSERT_FALSE(b.getColour(0).has_value());
+    EXPECT_EQ(b.getPiece(0), Piece::NONE);
+    EXPECT_EQ(b.getColour(0), Colour::NONE);
 
     b.movePiece(61, 37);
     EXPECT_EQ(b.getPiece(37), Piece::BISHOP);
     EXPECT_EQ(b.getColour(37), Colour::BLACK);
-    ASSERT_FALSE(b.getPiece(61).has_value());
-    ASSERT_FALSE(b.getColour(61).has_value());
+    EXPECT_EQ(b.getPiece(61), Piece::NONE);
+    EXPECT_EQ(b.getColour(61), Colour::NONE);
 }
 
 TEST(MovePiece, checkAddAndRemovePiece) {
@@ -35,8 +35,8 @@ TEST(MovePiece, checkAddAndRemovePiece) {
     EXPECT_EQ(b.getColour(34), Colour::BLACK);
 
     b.removePiece(34);
-    ASSERT_FALSE(b.getPiece(34).has_value());
-    ASSERT_FALSE(b.getColour(34).has_value());
+    EXPECT_EQ(b.getPiece(34), Piece::NONE);
+    EXPECT_EQ(b.getColour(34), Colour::NONE);
 
     b.addPiece(Piece::QUEEN, Colour::BLACK, 27);
     EXPECT_EQ(b.getPiece(27), Piece::QUEEN);
@@ -51,18 +51,18 @@ TEST(MovePiece, checkAddAndRemovePiece) {
     EXPECT_EQ(b.getColour(45), Colour::WHITE);
 
     b.removePiece(0);
-    ASSERT_FALSE(b.getPiece(0).has_value());
-    ASSERT_FALSE(b.getColour(0).has_value());
+    EXPECT_EQ(b.getPiece(0), Piece::NONE);
+    EXPECT_EQ(b.getColour(0), Colour::NONE);
 
     b.removePiece(15);
-    ASSERT_FALSE(b.getPiece(15).has_value());
-    ASSERT_FALSE(b.getColour(15).has_value());
+    EXPECT_EQ(b.getPiece(15), Piece::NONE);
+    EXPECT_EQ(b.getColour(15), Colour::NONE);
 
     b.removePiece(54);
-    ASSERT_FALSE(b.getPiece(54).has_value());
-    ASSERT_FALSE(b.getColour(54).has_value());
+    EXPECT_EQ(b.getPiece(54), Piece::NONE);
+    EXPECT_EQ(b.getColour(54), Colour::NONE);
 
     b.removePiece(62);
-    ASSERT_FALSE(b.getPiece(62).has_value());
-    ASSERT_FALSE(b.getColour(62).has_value());
+    EXPECT_EQ(b.getPiece(62), Piece::NONE);
+    EXPECT_EQ(b.getColour(62), Colour::NONE);
 }

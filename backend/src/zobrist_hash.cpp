@@ -24,8 +24,8 @@ namespace Zobrist {
         for (uint8_t square = 0; square < 64; square++) {
             auto [piece, colour] = board.getPieceAndColour(square);
             
-            if (piece.has_value() && colour.has_value()) {
-                uint64_t key = zobristTable[toIndex(*colour)][toIndex(*piece)][square];
+            if (piece != Piece::NONE && colour != Colour::NONE) {
+                uint64_t key = zobristTable[toIndex(colour)][toIndex(piece)][square];
                 hash ^= key;
             }
         }
