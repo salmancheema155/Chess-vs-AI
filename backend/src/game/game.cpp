@@ -118,7 +118,7 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     board.makeMove(move, colour);
     Colour newPlayerTurn = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     uint16_t newFullMoves = (colour == Colour::BLACK) ? currentState.fullMoves + 1 : currentState.fullMoves;
-    uint16_t newHalfMoves = (move.getCapturedPiece() == Move::NO_CAPTURE && piece != Piece::PAWN) ?
+    uint8_t newHalfMoves = (move.getCapturedPiece() == Move::NO_CAPTURE && piece != Piece::PAWN) ?
                             currentState.halfMoveClock + 1 :
                             0;
 
