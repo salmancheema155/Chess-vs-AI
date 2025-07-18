@@ -38,6 +38,19 @@ public:
     Colour getCurrentTurn();
 
     /**
+     * @brief Gets the current board state
+     * @return Board object representing current board state
+     */
+    Board getBoard();
+
+    /**
+     * @brief Gets the colour that occupies a square
+     * @param square Square to get the colour for
+     * @return Colour that occupies the square
+     */
+    Colour getColour(uint8_t square);
+
+    /**
      * @brief Gets the current game state evaluation for the opposite player of the player who just made their move
      * @return Current game state evaluation of the board
      * @note This function should be called after a move has been made to determine whether the opposing player
@@ -80,10 +93,19 @@ public:
      * @brief Gets information about a move
      * @param fromSquare Square which the piece moves from
      * @param toSquare Square which the piece moves to
+     * @param promotion Promotion piece flag
      * @return Move object wrapped in std::optional containing move info if the move is legal, std::nullopt otherwise
      * @note See move_info.h for Moveinfo flags and move.h for more move flags
      */
-    std::optional<MoveInfo> getMoveInfo(uint8_t fromSquare, uint8_t toSquare);
+    std::optional<MoveInfo> getMoveInfo(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion);
+
+    /**
+     * @brief Checks if the move is a promotion move
+     * @param fromSquare Square which the piece moves from
+     * @param toSquare Square which the piece moves to
+     * @return True if the move is a promotion move, false otherwise
+     */
+    bool isPromotionMove(uint8_t fromSquare, uint8_t toSquare);
 
 private:
     GameState currentState;

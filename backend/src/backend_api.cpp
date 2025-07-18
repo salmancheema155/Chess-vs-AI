@@ -10,6 +10,7 @@
 #include "move/move_info.h"
 #include "board/board.h"
 #include "game/game.h"
+#include "engine/engine.h"
 #include "check/check.h"
 #include "chess_types.h"
 
@@ -72,7 +73,7 @@ namespace {
         const char* pieceStr = pieceToString(moveInfo.movedPiece);
         const char* colourStr = colourToString(moveInfo.movedPieceColour);
         const char* capturedPieceStr = pieceToString(moveInfo.capturedPiece);
-        const char* capturedColourStr = pieceToString(moveInfo.capturedPieceColour);
+        const char* capturedColourStr = colourToString(moveInfo.capturedPieceColour);
         
         uint8_t fromSquare = moveInfo.move.getFromSquare();
         uint8_t toSquare = moveInfo.move.getToSquare();
@@ -83,7 +84,7 @@ namespace {
         int toCol = static_cast<int>(Board::getFile(toSquare));
 
         const char* castlingStr = castlingToString(moveInfo.move.getCastling());
-        bool promotion = (moveInfo.move.getPromotionPiece() != Move::NO_PROMOTION);
+        const char* promotionStr = pieceToString(moveInfo.move.getPromotionPiece());
         bool enPassant = (moveInfo.move.getEnPassant() != Move::NO_EN_PASSANT);
 
         std::ostringstream json;
@@ -96,7 +97,7 @@ namespace {
         "\"capturedPiece\":\"" << capturedPieceStr << "\"," <<
         "\"capturedColour\":\"" << capturedColourStr << "\"," <<
         "\"castling\":\"" << castlingStr << "\"," <<
-        "\"promotion\":" << (promotion ? "true": "false") << "," <<
+        "\"promotion\":\"" << promotionStr << "\"," <<
         "\"enPassant\":" << (enPassant ? "true": "false") <<
         "}";
 
@@ -124,6 +125,14 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
+    int getColour(int row, int col) {
+        if (!isValidSquare(row, col)) return -1;
+
+        uint8_t square = getSquare(row, col);
+        return Chess::toIndex(game.getColour(square));
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     int getCurrentGameStateEvaluation() {
         return Chess::toIndex(game.getCurrentGameStateEvaluation());
     }
@@ -147,13 +156,23 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    const char* getMoveInfo(int fromRow, int fromCol, int toRow, int toCol) {
+    bool isPromotionMove(int fromRow, int fromCol, int toRow, int toCol) {
+        if (!isValidSquare(fromRow, fromCol) | !isValidSquare(toRow, toCol)) return false;
+
+        uint8_t fromSquare = getSquare(fromRow, fromCol);
+        uint8_t toSquare = getSquare(toRow, toCol);
+
+        return game.isPromotionMove(fromSquare, toSquare);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    const char* getMoveInfo(int fromRow, int fromCol, int toRow, int toCol, int promotion) {
         if (!isValidSquare(fromRow, fromCol) | !isValidSquare(toRow, toCol)) return "{\"error\": \"Invalid square input\"}";
 
         uint8_t fromSquare = getSquare(fromRow, fromCol);
         uint8_t toSquare = getSquare(toRow, toCol);
 
-        std::optional<MoveInfo> moveInfoOpt = game.getMoveInfo(fromSquare, toSquare);
+        std::optional<MoveInfo> moveInfoOpt = game.getMoveInfo(fromSquare, toSquare, promotion);
         if (!moveInfoOpt.has_value()) return "{\"error\": \"No legal move exists\"}";
 
         moveInfoJson = moveInfoToJson(*moveInfoOpt);
@@ -173,6 +192,21 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void undo() {
         game.undo();
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    const char* getEngineMove() {
+        Move move = Engine::getMove(game, 0);
+        
+        uint8_t fromSquare = move.getFromSquare();
+        uint8_t toSquare = move.getToSquare();
+
+        int fromRow = 7 - static_cast<int>(Board::getRank(fromSquare));
+        int fromCol = static_cast<int>(Board::getFile(fromSquare));
+        int toRow = 7 - static_cast<int>(Board::getRank(toSquare));
+        int toCol = static_cast<int>(Board::getFile(toSquare));
+
+        return getMoveInfo(fromRow, fromCol, toRow, toCol, move.getPromotionPiece());
     }
 }
 
