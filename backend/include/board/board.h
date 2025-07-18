@@ -147,6 +147,24 @@ public:
     }
 
     /**
+     * @brief Gets the squares that a colour occupies
+     * @param colour Colour of player
+     * @return Vector of squares that the colour occupies
+     */
+    inline std::vector<uint8_t> getSquares(Colour colour) const {
+        std::vector<uint8_t> squares;
+        squares.reserve(20);
+        Bitboard bitboard = getBitboard(colour);
+
+        while (bitboard) {
+            squares.push_back(std::countr_zero(bitboard));
+            bitboard &= bitboard - 1;
+        }
+
+        return squares;
+    }
+
+    /**
      * @brief Gets the squares that a given type of piece of a given colour occupies
      * @param piece Piece to find squares for
      * @param colour Colour of piece
