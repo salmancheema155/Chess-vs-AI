@@ -110,10 +110,14 @@ void Board::makeMove(const Move& move, Colour playerTurn) {
     Piece piece = getPiece(fromSquare);
 
     // Remove castling rights if rook has moved
-    if (castlingRights[toIndex(playerTurn)][toIndex(Castling::KINGSIDE)] && piece == Piece::ROOK) {
-        nullifyCastlingRights(playerTurn, Castling::KINGSIDE);
-    } else if (castlingRights[toIndex(playerTurn)][toIndex(Castling::QUEENSIDE)] && piece == Piece::ROOK) {
-        nullifyCastlingRights(playerTurn, Castling::QUEENSIDE);
+    std::array<std::array<uint8_t, 2>, 2> startingRookSquares = {{{7, 0}, {63, 56}}};
+    if (castlingRights[toIndex(playerTurn)][toIndex(Castling::KINGSIDE)] && 
+        fromSquare == startingRookSquares[toIndex(playerTurn)][toIndex(Castling::KINGSIDE)]) {
+            nullifyCastlingRights(playerTurn, Castling::KINGSIDE);
+            
+    } else if (castlingRights[toIndex(playerTurn)][toIndex(Castling::QUEENSIDE)] && 
+        fromSquare == startingRookSquares[toIndex(playerTurn)][toIndex(Castling::QUEENSIDE)]) {
+            nullifyCastlingRights(playerTurn, Castling::QUEENSIDE);
     }
 
     // Remove castling rights if king has moved
