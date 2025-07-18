@@ -6,6 +6,6 @@ export interface Move {
     capturedPiece: string;
     capturedColour: string;
     castling: string;
-    promotion: boolean;
+    promotion: string;
     enPassant: boolean;
 };

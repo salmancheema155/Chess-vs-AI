@@ -104,6 +104,19 @@ const ChessBoard = () => {
         loadWasm();
     }, []);
 
+    useEffect(() => {
+        if (!wasm) return;
+
+        const newGameStateNum : number = wasm._getCurrentGameStateEvaluation();
+        const newGameState = numberToGameState(newGameStateNum);
+        setGameState(newGameState);
+
+        if ((newGameState === "IN_PROGRESS" || newGameState === "CHECK") && currentTurn === engineColour) {
+            handleEngineMove();
+        }
+
+    }, [currentTurn]);
+
     /**
      * Checks the current game state evaluation and returns a corresponding message
      * @returns {string} Message to display current game state if any, otherwise returns nothing
@@ -119,16 +132,6 @@ const ChessBoard = () => {
                 const winner = (currentTurn == "white") ? "Black" : "White";
                 return winner + " wins by checkmate!";
         }
-    }
-
-    /**
-     * Updates the current game state evaluation
-     */
-    const handleGameState = () => {
-        if (!wasm) return;
-        const gameStateNum : number = wasm._getCurrentGameStateEvaluation();
-        const gameState = numberToGameState(gameStateNum);
-        setGameState(gameState);
     }
 
     /**
@@ -203,7 +206,6 @@ const ChessBoard = () => {
         setPromotionInfo(null);
 
         handleCurrentTurn();
-        handleGameState();
     }
 
     /**
@@ -259,33 +261,85 @@ const ChessBoard = () => {
         });
     }
 
+    const handleEngineMove = () => {
+        const ptr = wasm._getEngineMove();
+        const jsonStr = wasm.UTF8ToString(ptr);
+        const move: Move = JSON.parse(jsonStr);
+
+        moveEngineSquare(move);
+    }
+
+    const moveEngineSquare = (move: Move) => {
+        if (!wasm) return;
+
+        wasm._makeMove(move.from.row, move.from.col, move.to.row, move.to.col, promotionPieceToNumber(move.promotion));
+        movePiece({rowIndex: move.from.row, colIndex: move.from.col}, {rowIndex: move.to.row, colIndex: move.to.col});
+
+        handleMovedFromSquare(move.from.row, move.from.col);
+        handleMovedToSquare(move.to.row, move.to.col);
+
+        if (move.promotion != "NONE") {
+            setBoard(prevBoard => {
+                const newBoard = prevBoard.map(row => row.slice());
+                newBoard[move.to.row][move.to.col] = {type: move.promotion.toLowerCase() as Piece["type"], colour: move.colour.toLowerCase() as Piece["colour"]};
+                newBoard[move.from.row][move.from.col] = null;
+                return newBoard;
+            });
+        }
+
+        if (move.castling == "KINGSIDE") {
+            if (move.colour == "WHITE") {
+                movePiece({rowIndex: 7, colIndex: 7}, {rowIndex: 7, colIndex: 5});
+            } else if (move.colour == "BLACK") {
+                movePiece({rowIndex: 0, colIndex: 7}, {rowIndex: 0, colIndex: 5});
+            }
+        } else if (move.castling == "QUEENSIDE") {
+            if (move.colour == "WHITE") {
+                movePiece({rowIndex: 7, colIndex: 0}, {rowIndex: 7, colIndex: 3});
+            } else if (move.colour == "BLACK") {
+                movePiece({rowIndex: 0, colIndex: 0}, {rowIndex: 0, colIndex: 3});
+            }
+        }
+
+        if (move.enPassant) {
+            removePiece(move.from.row, move.to.col);
+        }
+
+        handleCurrentTurn();
+
+        nullifySelectedSquare();
+        resetLegalMoveSquares();
+    }
+
     /**
      * Moves a piece on the interactive board from one square to another
      * @param {{rowIndex: number, colIndex: number}} from - from Row and column of the square that the piece is currently on
      * @param {{rowIndex: number, colIndex: number}} to - to Row and column of the square that the piece is moving to
-     * @param {string} promotionPiece - The piece that is gained from promotion if any with "NONE" specifying no promotion
+     * @attention This function is designed to be used for a human move, not an engine move
      */
     const moveSquare = (from: {rowIndex: number, colIndex: number}, to: {rowIndex: number, colIndex: number}) => {
-
         if (!wasm) return;
 
-        const ptr = wasm._getMoveInfo(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
-        const jsonStr = wasm.UTF8ToString(ptr);
-        const move: Move = JSON.parse(jsonStr);
+        const isPromotion : boolean = wasm._isPromotionMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex);
 
-        if (move.promotion && boardRef.current) {
+        if (isPromotion && boardRef.current) {
             const squareSize = boardRef.current.offsetWidth / 8;
             const boardRect = boardRef.current.getBoundingClientRect();
+            const colour = numberToColour(wasm._getColour(from.rowIndex, from.colIndex));
 
             let top = boardRect.top + to.rowIndex * squareSize;
-            if (move.colour == "BLACK") top = top + squareSize - 340;
+            if (colour === "black") top = top + squareSize - 340;
             const left = boardRect.left + to.colIndex * squareSize;
 
-            setPromotionInfo({from, to, colour: move.colour.toLowerCase() as Colour, position: {top, left}});
+            setPromotionInfo({from, to, colour: colour as Colour, position: {top, left}});
             return;
         }
 
-        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber("NONE"))) {
+        const ptr = wasm._getMoveInfo(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber("NONE"));
+        const jsonStr = wasm.UTF8ToString(ptr);
+        const move: Move = JSON.parse(jsonStr);
+
+        if (wasm._makeMove(from.rowIndex, from.colIndex, to.rowIndex, to.colIndex, promotionPieceToNumber("NONE")) ) {
             movePiece({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex: to.rowIndex, colIndex: to.colIndex});
 
             handleMovedFromSquare(from.rowIndex, from.colIndex);
@@ -310,7 +364,6 @@ const ChessBoard = () => {
             }
 
             handleCurrentTurn();
-            handleGameState();
         }
 
         nullifySelectedSquare();
@@ -321,6 +374,8 @@ const ChessBoard = () => {
     const rankLabels: string[] = ["8", "7", "6", "5", "4", "3", "2", "1"];
 
     const boardRef = useRef<HTMLDivElement | null>(null);
+
+    const engineColour : Colour = "black";
 
     return (
         <>
@@ -343,16 +398,26 @@ const ChessBoard = () => {
                                         ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
                                         ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
                                         ${isLegalMoveSquare ? " legal-move-square" : ""}
-                                        ${piece && piece.colour === currentTurn ? " clickable-square" : ""}
+                                        ${piece && piece.colour !== engineColour && piece.colour === currentTurn ? " clickable-square" : ""}
                                     `}
-                                    onDragOver={(e) => e.preventDefault()}
+                                    onDragOver={(e) => {
+                                        if (selectedSquare && 
+                                            board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
+                                            board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
+                                                e.preventDefault();
+                                            }
+                                    }}
                                     onDrop={(e) => {
-                                        const from = JSON.parse(e.dataTransfer.getData("text/plain"));
-                                        moveSquare({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex, colIndex});
+                                        if (selectedSquare && 
+                                            board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
+                                            board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
+                                                const from = JSON.parse(e.dataTransfer.getData("text/plain"));
+                                                moveSquare({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex, colIndex});
+                                        }
                                     }}
                                     onClick={() => {
                                         if (gameState !== "IN_PROGRESS" && gameState !== "CHECK") return;
-                                        if (piece) {
+                                        if (piece && piece.colour === currentTurn && piece.colour !== engineColour) {
                                             if (selectedSquare) {
                                                 if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
                                                     if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
@@ -399,11 +464,13 @@ const ChessBoard = () => {
                                             className="square-piece"
                                             src={pieceImages[piece.colour][piece.type]}
                                             alt={`${piece.colour} ${piece.type}`}
-                                            draggable={(gameState === "IN_PROGRESS" || gameState === "CHECK") && currentTurn === piece.colour}
+                                            draggable={(gameState === "IN_PROGRESS" || gameState === "CHECK") && piece.colour !== engineColour && currentTurn === piece.colour}
                                             onDragStart={(e) => {
-                                                e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
-                                                handleSelectedSquare(rowIndex, colIndex);
-                                                handleLegalMoveSquares(rowIndex, colIndex);
+                                                if (piece && piece.colour !== engineColour && piece.colour === currentTurn) {
+                                                    e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
+                                                    handleSelectedSquare(rowIndex, colIndex);
+                                                    handleLegalMoveSquares(rowIndex, colIndex);
+                                                }
                                             }}
                                         />
                                     )}
