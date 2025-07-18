@@ -157,10 +157,9 @@ void Game::undoHash(uint64_t hash) {
 }
 
 bool Game::isCurrentPlayerOccupies(uint8_t square) {
-    std::optional<Colour> colourOpt = board.getColour(square);
-    if (!colourOpt.has_value()) return false;
+    Colour colour = board.getColour(square);
+    if (colour == Colour::NONE) return false;
 
-    Colour colour = *colourOpt;
     return colour == currentTurn;
 }
 
