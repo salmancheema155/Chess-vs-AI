@@ -35,8 +35,9 @@ private:
      * @brief Evaluates the current game state
      * @param game Game object
      * @param state The current game state evaluation
+     * @param depth Current depth remaining (typically 0)
      */
-    static int evaluate(Game& game, GameStateEvaluation& state);
+    static int evaluate(Game& game, GameStateEvaluation& state, int depth);
 };
 
 #endif // ENGINE_H
