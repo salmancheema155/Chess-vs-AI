@@ -112,7 +112,9 @@ const ChessBoard = () => {
         setGameState(newGameState);
 
         if ((newGameState === "IN_PROGRESS" || newGameState === "CHECK") && currentTurn === engineColour) {
-            handleEngineMove();
+            setTimeout(() => {
+                handleEngineMove();
+            }, 0)
         }
 
     }, [currentTurn]);
