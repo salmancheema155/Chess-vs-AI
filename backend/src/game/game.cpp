@@ -29,7 +29,7 @@ namespace {
                 move.getToSquare() == toSquare && 
                 (!promotion.has_value() || move.getPromotionPiece() == *promotion)) {
 
-                return move;
+                return std::optional<Move>(move);
             }
         }
 
@@ -93,28 +93,12 @@ GameStateEvaluation Game::getCurrentGameStateEvaluation() {
     return GameStateEvaluation::IN_PROGRESS;
 }
 
-Colour Game::getCurrentTurn() {
-    return currentTurn;
-}
-
-Board Game::getBoard() {
-    return board;
-}
-
 Colour Game::getColour(uint8_t square) {
     return board.getColour(square);
 }
 
-bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
-    auto [piece, colour] = board.getPieceAndColour(fromSquare);
-    if (piece == Piece::NONE || colour == Colour::NONE) return false;
-
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, promotion);
-
-    if (!moveOpt.has_value()) return false;
-
-    Move move = *moveOpt;
+void Game::makeMove(const Move& move) {
+    auto [piece, colour] = board.getPieceAndColour(move.getFromSquare());
     board.makeMove(move, colour);
     Colour newPlayerTurn = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     uint16_t newFullMoves = (colour == Colour::BLACK) ? currentState.fullMoves + 1 : currentState.fullMoves;
@@ -132,21 +116,35 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     moveHistory.push(move);
     gameStateHistory.push(currentState);
     currentTurn = newPlayerTurn;
+}
+
+bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
+    auto [piece, colour] = board.getPieceAndColour(fromSquare);
+    if (piece == Piece::NONE || colour == Colour::NONE) return false;
+
+    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
+    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, std::optional<uint8_t>(promotion));
+
+    if (!moveOpt.has_value()) return false;
+
+    Move move = *moveOpt;
+    this->makeMove(move);
+
     return true;
 }
 
-bool Game::undo() {
-    if (gameStateHistory.size() == 1) return false;
+bool Game::undo() {       
+    if (gameStateHistory.size() == 1 || moveHistory.size() == 0) return false;
 
+    gameStateHistory.pop();
     const Move& previousMove = moveHistory.top();
     const GameState& previousState = gameStateHistory.top();
     board.undo(previousMove, previousState.playerTurn, previousState.castleRights, previousState.enPassantSquare);
 
     undoHash(currentState.hash);
+    currentTurn = previousState.playerTurn;
     currentState = previousState;
-    gameStateHistory.pop();
     moveHistory.pop();
-    currentTurn = (currentTurn == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
 
     return true;    
 }
@@ -175,7 +173,7 @@ std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare, 
     if (piece == Piece::NONE || colour == Colour::NONE) return std::nullopt;
 
     std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, promotion);
+    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, std::optional<uint8_t>(promotion));
 
     if (!moveOpt) return std::nullopt;
 

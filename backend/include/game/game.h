@@ -35,13 +35,17 @@ public:
      * @brief Gets the current player turn
      * @return The current player's turn
      */
-    Colour getCurrentTurn();
+    inline Colour getCurrentTurn() {
+        return currentTurn;
+    }
 
     /**
      * @brief Gets the current board state
-     * @return Board object representing current board state
+     * @return Reference to board object representing current board state
      */
-    Board getBoard();
+    inline Board& getBoard() {
+        return board;
+    }
 
     /**
      * @brief Gets the colour that occupies a square
@@ -57,6 +61,14 @@ public:
      * has been checkmated, stalemated, etc
      */
     GameStateEvaluation getCurrentGameStateEvaluation();
+
+    /**
+     * @brief Makes a move updating the game state
+     * @param move Move to make
+     * @note Promotion flags are defined and documented in the Move class
+     * @attention This function does not check whether or not the move is legal
+     */
+    void makeMove(const Move& move);
 
     /**
      * @brief Makes a move updating the game state
