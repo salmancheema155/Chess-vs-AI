@@ -26,9 +26,16 @@ private:
      * @brief Searches through game tree to find the best evaluation for a player assuming optimal moves from both sides
      * @param game Game object
      * @param depth Depth to search in game tree
+     * @param alpha Minimax alpha variable for alpha-beta pruning
+     * @param beta Minimax beta variable for alpha-beta pruning
      */
-    static int minimax(Game& game, int depth);
+    static int minimax(Game& game, int depth, int alpha, int beta);
 
+    /**
+     * @brief Evaluates the current game state
+     * @param game Game object
+     * @param state The current game state evaluation
+     */
     static int evaluate(Game& game, GameStateEvaluation& state);
 };
 

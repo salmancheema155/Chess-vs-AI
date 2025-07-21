@@ -55,7 +55,7 @@ Move Engine::getMove(Game& game, int depth) {
             
             for (const Move& move : moves) {
                 game.makeMove(move);
-                int eval = minimax(game, depth - 1);
+                int eval = minimax(game, depth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
                 game.undo();
 
                 if (colour == Colour::WHITE) {
@@ -78,7 +78,7 @@ Move Engine::getMove(Game& game, int depth) {
     return bestMove;
 }
 
-int Engine::minimax(Game& game, int depth) {
+int Engine::minimax(Game& game, int depth, int alpha, int beta) {
     GameStateEvaluation state = game.getCurrentGameStateEvaluation();
     if (depth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
         return evaluate(game, state);
@@ -98,17 +98,20 @@ int Engine::minimax(Game& game, int depth) {
 
                 for (const Move& move : moves) {
                     game.makeMove(move);
-                    int eval = minimax(game, depth - 1);
+                    int eval = minimax(game, depth - 1, alpha, beta);
                     game.undo();
 
                     if (eval > maxEval) maxEval = eval;
+                    if (eval > alpha) alpha = eval;
+                    if (beta <= alpha) goto pruning_max_finish;
                 }
 
                 bitboard &= (bitboard - 1);
             }
         }
 
-        return maxEval;
+        pruning_max_finish:
+            return maxEval;
 
     } else {
         int minEval = std::numeric_limits<int>::max();
@@ -120,17 +123,20 @@ int Engine::minimax(Game& game, int depth) {
 
                 for (const Move& move : moves) {
                     game.makeMove(move);
-                    int eval = minimax(game, depth - 1);
+                    int eval = minimax(game, depth - 1, alpha, beta);
                     game.undo();
 
                     if (eval < minEval) minEval = eval;
+                    if (eval < beta) beta = eval;
+                    if (beta <= alpha) goto pruning_min_finish;
                 }
 
                 bitboard &= (bitboard - 1);
             }
         }
 
-        return minEval;
+        pruning_min_finish:
+            return minEval;
     }
 }
 
