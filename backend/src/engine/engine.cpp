@@ -45,33 +45,23 @@ Move Engine::getMove(Game& game, int depth) {
     Colour colour = game.getCurrentTurn();
     Move bestMove;
     int bestEval = (colour == Colour::WHITE) ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
+    std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
+    
+    for (const Move& move : moves) {
+        game.makeMove(move);
+        int eval = minimax(game, depth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        game.undo();
 
-    for (const Piece piece : pieces) {
-        Bitboard bitboard = board.getBitboard(piece, colour);
-        while (bitboard != 0) {
-            uint8_t square = std::countr_zero(bitboard);
-            std::vector<Move> moves = MoveGenerator::legalMoves(board, piece, colour, square);
-            
-            for (const Move& move : moves) {
-                game.makeMove(move);
-                int eval = minimax(game, depth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
-                game.undo();
-
-                if (colour == Colour::WHITE) {
-                    if (eval >= bestEval) {
-                        bestEval = eval;
-                        bestMove = move;
-                    }
-                } else {
-                    if (eval <= bestEval) {
-                        bestEval = eval;
-                        bestMove = move;
-                    }
-                }
+        if (colour == Colour::WHITE) {
+            if (eval >= bestEval) {
+                bestEval = eval;
+                bestMove = move;
             }
-
-            bitboard &= (bitboard - 1);
+        } else {
+            if (eval <= bestEval) {
+                bestEval = eval;
+                bestMove = move;
+            }
         }
     }
 
@@ -86,57 +76,35 @@ int Engine::minimax(Game& game, int depth, int alpha, int beta) {
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
+    std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
 
     if (colour == Colour::WHITE) {
         int maxEval = std::numeric_limits<int>::min();
-        for (const Piece piece : pieces) {
-            Bitboard bitboard = board.getBitboard(piece, colour);
-            while (bitboard != 0) {
-                uint8_t square = std::countr_zero(bitboard);
-                std::vector<Move> moves = MoveGenerator::legalMoves(board, piece, colour, square);
+        for (const Move& move : moves) {
+            game.makeMove(move);
+            int eval = minimax(game, depth - 1, alpha, beta);
+            game.undo();
 
-                for (const Move& move : moves) {
-                    game.makeMove(move);
-                    int eval = minimax(game, depth - 1, alpha, beta);
-                    game.undo();
-
-                    if (eval > maxEval) maxEval = eval;
-                    if (eval > alpha) alpha = eval;
-                    if (beta <= alpha) goto pruning_max_finish;
-                }
-
-                bitboard &= (bitboard - 1);
-            }
+            if (eval > maxEval) maxEval = eval;
+            if (eval > alpha) alpha = eval;
+            if (beta <= alpha) break;
         }
-
-        pruning_max_finish:
-            return maxEval;
+        
+        return maxEval;
 
     } else {
         int minEval = std::numeric_limits<int>::max();
-        for (const Piece piece : pieces) {
-            Bitboard bitboard = board.getBitboard(piece, colour);
-            while (bitboard != 0) {
-                uint8_t square = std::countr_zero(bitboard);
-                std::vector<Move> moves = MoveGenerator::legalMoves(board, piece, colour, square);
+        for (const Move& move : moves) {
+            game.makeMove(move);
+            int eval = minimax(game, depth - 1, alpha, beta);
+            game.undo();
 
-                for (const Move& move : moves) {
-                    game.makeMove(move);
-                    int eval = minimax(game, depth - 1, alpha, beta);
-                    game.undo();
-
-                    if (eval < minEval) minEval = eval;
-                    if (eval < beta) beta = eval;
-                    if (beta <= alpha) goto pruning_min_finish;
-                }
-
-                bitboard &= (bitboard - 1);
-            }
+            if (eval < minEval) minEval = eval;
+            if (eval < beta) beta = eval;
+            if (beta <= alpha) break;
         }
 
-        pruning_min_finish:
-            return minEval;
+        return minEval;
     }
 }
 
@@ -152,8 +120,6 @@ int Engine::evaluate(Game& game, GameStateEvaluation& state) {
     }
 
     Board& board = game.getBoard();
-    Bitboard whiteBitboard = board.getBitboard(Colour::WHITE);
-    Bitboard blackBitboard = board.getBitboard(Colour::BLACK);
     int eval = pieceValueEvaluation(board, Colour::WHITE) - pieceValueEvaluation(board, Colour::BLACK);
 
     return eval;
