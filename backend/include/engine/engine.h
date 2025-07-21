@@ -14,13 +14,22 @@ public:
      * @brief Calculates the best move according to the engine
      * @param game Game object representing current game state
      * @param depth Depth to search in game tree
+     * @attention 
+     * This function assumes that at least one legal move exists
+     * If no legal move exists, then the function returns an empty move
+     * Win/draw checks should be done before calling this function
      */
     static Move getMove(Game& game, int depth);
 
 private:
-    int minimax(Game& game, Board& board, int depth, int alpha, int beta, Chess::PieceColour colour);
+    /**
+     * @brief Searches through game tree to find the best evaluation for a player assuming optimal moves from both sides
+     * @param game Game object
+     * @param depth Depth to search in game tree
+     */
+    static int minimax(Game& game, int depth);
 
-    int evaluate(Game& game, Board& board);
+    static int evaluate(Game& game, GameStateEvaluation& state);
 };
 
 #endif // ENGINE_H

@@ -55,6 +55,13 @@ public:
     auto operator<=>(const Move& other) const = default;
 
     /**
+     * Default constructor for Move class
+     * @warning This constructor creates a meaningless move and should ideally be avoided
+     * It should only be used as a placeholder
+     */
+    Move() : move(0) {};
+
+    /**
      * @brief Initialise a Move object
      * @param fromSquare Square that the piece moves from
      * @param toSquare Square that the piece moves to

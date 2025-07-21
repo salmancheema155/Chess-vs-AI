@@ -196,7 +196,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     const char* getEngineMove() {
-        Move move = Engine::getMove(game, 0);
+        Move move = Engine::getMove(game, 3);
         
         uint8_t fromSquare = move.getFromSquare();
         uint8_t toSquare = move.getToSquare();
