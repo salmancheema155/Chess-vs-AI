@@ -17,13 +17,22 @@ public:
     using Colour = Chess::PieceColour;
 
     /**
-     * @brief Gets the legal moves for a given piece
+     * @brief Gets the legal moves for a given piece and colour
      * @param board Board object representing the current board state
      * @param piece Piece to find legal moves for
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
+     * @return Vector containing all legal moves for the given piece and colour
      */
     static std::vector<Move> legalMoves(Board& board, Piece piece, Colour colour, uint8_t currSquare);
+
+    /**
+     * @brief Gets the legal moves for a given colour
+     * @param board Board object representing the current board state
+     * @param colour Colour of player
+     * @return Vector containing all legal moves for the given colour
+     */
+    static std::vector<Move> legalMoves(Board& board, Colour colour);
 
 private:
     /**

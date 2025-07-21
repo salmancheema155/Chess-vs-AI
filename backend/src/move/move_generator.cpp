@@ -61,6 +61,7 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
 
     assert(currSquare < 64 && "currSquare must be between 0-63");
     std::vector<Move> moves;
+    moves.reserve(16);
     switch (piece) {
         case Piece::PAWN:
             pseudoLegalPawnMoves(board, piece, colour, currSquare, moves);
@@ -95,6 +96,25 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
 
         if (inCheck) {
             moves.erase(moves.begin() + i);
+        }
+    }
+
+    return moves;
+}
+
+std::vector<Move> MoveGenerator::legalMoves(Board& board, Colour colour) {
+    std::vector<Move> moves;
+    moves.reserve(256);
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
+                                Piece::ROOK, Piece::QUEEN, Piece::KING};
+    
+    for (Piece piece : pieces) {
+        Bitboard bitboard = board.getBitboard(piece, colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            std::vector<Move> pieceMoves = MoveGenerator::legalMoves(board, piece, colour, square);
+            moves.insert(moves.end(), pieceMoves.begin(), pieceMoves.end());
+            bitboard &= (bitboard - 1);
         }
     }
 
