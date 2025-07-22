@@ -28,9 +28,8 @@ namespace {
     }
 
     /**
-     * @brief Generates legal moves for a piece using a precomputed table of moves
+     * @brief Generates pseudo legal moves using a precomputed table of moves
      * @param board Board object representing current board state
-     * @param piece Piece to find legal moves for
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
      * @param moves Vector to append legal moves to
@@ -39,8 +38,8 @@ namespace {
      * It is possible that the moves generated from this function can put the king in direct danger
      * Use MoveGenerator::legalMoves instead to take into account king safety
      */
-    static void legalMovesFromTable(const Board& board, Piece piece, Colour colour, uint8_t currSquare, 
-                                    std::vector<Move>& moves, Bitboard precomputedMoveBitboard) {
+    static void pseudoLegalMovesFromTable(const Board& board, Colour colour, uint8_t currSquare, 
+                                        std::vector<Move>& moves, Bitboard precomputedMoveBitboard) {
 
         assert(currSquare < 64 && "currSquare must be between 0-63");
         precomputedMoveBitboard &= ~board.getBitboard(colour); // Remove moves which land onto same colour pieces
@@ -64,22 +63,22 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
     moves.reserve(16);
     switch (piece) {
         case Piece::PAWN:
-            pseudoLegalPawnMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalPawnMoves(board, colour, currSquare, moves);
             break;
         case Piece::KNIGHT:
-            pseudoLegalKnightMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalKnightMoves(board, colour, currSquare, moves);
             break;
         case Piece::BISHOP:
-            pseudoLegalBishopMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalBishopMoves(board, colour, currSquare, moves);
             break;
         case Piece::ROOK:
-            pseudoLegalRookMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalRookMoves(board, colour, currSquare, moves);
             break;
         case Piece::QUEEN:
-            pseudoLegalQueenMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalQueenMoves(board, colour, currSquare, moves);
             break;
         case Piece::KING:
-            pseudoLegalKingMoves(board, piece, colour, currSquare, moves);
+            pseudoLegalKingMoves(board, colour, currSquare, moves);
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
@@ -121,8 +120,73 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Colour colour) {
     return moves;
 }
 
-void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour colour, 
-                                   uint8_t currSquare, std::vector<Move>& moves) {
+std::vector<Move> MoveGenerator::legalCaptures(Board& board, Piece piece, 
+                                                Colour colour, uint8_t currSquare) {
+
+    assert(currSquare < 64 && "currSquare must be between 0-63");
+    std::vector<Move> moves;
+    moves.reserve(8);
+    switch (piece) {
+        case Piece::PAWN:
+            pseudoLegalPawnCaptures(board, colour, currSquare, moves);
+            break;
+        case Piece::KNIGHT:
+            pseudoLegalKnightCaptures(board, colour, currSquare, moves);
+            break;
+        case Piece::BISHOP:
+            pseudoLegalBishopCaptures(board, colour, currSquare, moves);
+            break;
+        case Piece::ROOK:
+            pseudoLegalRookCaptures(board, colour, currSquare, moves);
+            break;
+        case Piece::QUEEN:
+            pseudoLegalQueenCaptures(board, colour, currSquare, moves);
+            break;
+        case Piece::KING:
+            pseudoLegalKingCaptures(board, colour, currSquare, moves);
+            break;
+        default:
+            assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
+            return {};
+    }
+
+    auto castlingRightsBeforeMove = board.getCastlingRights();
+    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
+    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
+        const Move& move = moves[i];
+        board.makeMove(move, colour);
+        bool inCheck = Check::isInCheck(board, colour);
+        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
+
+        if (inCheck) {
+            moves.erase(moves.begin() + i);
+        }
+    }
+
+    return moves;
+}
+
+std::vector<Move> MoveGenerator::legalCaptures(Board& board, Colour colour) {
+    std::vector<Move> moves;
+    moves.reserve(48);
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
+                                Piece::ROOK, Piece::QUEEN, Piece::KING};
+    
+    for (Piece piece : pieces) {
+        Bitboard bitboard = board.getBitboard(piece, colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            std::vector<Move> pieceMoves = MoveGenerator::legalCaptures(board, piece, colour, square);
+            moves.insert(moves.end(), pieceMoves.begin(), pieceMoves.end());
+            bitboard &= (bitboard - 1);
+        }
+    }
+
+    return moves;
+}
+
+void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Colour colour, 
+                                        uint8_t currSquare, std::vector<Move>& moves) {
 
     int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
     uint8_t nextSquare = currSquare + 8 * direction;
@@ -149,6 +213,125 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
         }
     }
 
+    pseudoLegalPawnCaptures(board, colour, currSquare, moves);
+}
+
+void MoveGenerator::pseudoLegalKnightMoves(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
+
+    pseudoLegalMovesFromTable(board, colour, currSquare, moves, PrecomputeMoves::knightMoveTable[currSquare]);
+}
+
+void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
+
+    Colour opposingColour = (colour == Colour::WHITE) ?
+                            Colour::BLACK :
+                            Colour::WHITE;
+    
+    constexpr int directions[4] = {7, 9, -9, -7}; // ↖, ↗, ↙, ↘
+    constexpr uint8_t rankChecks[4] = {7, 7, 0, 0}; // Boundaries depending on direction
+    constexpr uint8_t fileChecks[4] = {0, 7, 0, 7}; // Boundaries depending on direction
+
+    for (int i = 0; i < 4; i++) {
+        if (Board::getFile(currSquare) != fileChecks[i] && Board::getRank(currSquare) != rankChecks[i]) {
+            uint8_t square = currSquare + directions[i];
+            // Not at edge of the board and square is empty
+            while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && board.isEmpty(square)) {
+                moves.push_back(Move(currSquare, square));
+                square += directions[i];
+            }
+            // Final square is either an empty square on the edge of the board or an occupied square
+            Colour finalSquareColour = board.getColour(square);
+            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
+                // Capture if final square is of the opposing colour
+                uint8_t capture = (finalSquareColour == opposingColour) ?
+                                    toIndex(board.getPiece(square)) :
+                                    Move::NO_CAPTURE;
+
+                moves.push_back(Move(currSquare, square, capture));
+            }
+        }
+    }
+}
+
+void MoveGenerator::pseudoLegalRookMoves(const Board& board, Colour colour, 
+                                        uint8_t currSquare, std::vector<Move>& moves) {
+
+    using Function = uint8_t(*)(uint8_t);
+    Colour opposingColour = (colour == Colour::WHITE) ?
+                        Colour::BLACK :
+                        Colour::WHITE;
+    
+    constexpr int directions[4] = {-1, 8, 1, -8}; // ←, ↑, →, ↓
+    constexpr uint8_t boundaryChecks[4] = {0, 7, 7, 0}; // file, rank, file, rank
+    Function functions[2] = {Board::getFile, Board::getRank}; // Alternate between file and rank checks
+
+    for (int i = 0; i < 4; i++) {
+        if (functions[i & 0x1](currSquare) != boundaryChecks[i]) { // toggle between checking file and rank
+            uint8_t square = currSquare + directions[i];
+            // Not at edge of the board and square is empty
+            while (functions[i & 0x1](square) != boundaryChecks[i] && board.isEmpty(square)) {
+                moves.push_back(Move(currSquare, square));
+                square += directions[i];
+            }
+            // Final square is either an empty square on the edge of the board or an occupied square
+            Colour finalSquareColour = board.getColour(square);
+            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
+                // Capture if final square is of the opposing colour
+                uint8_t capture = (finalSquareColour == opposingColour) ?
+                                    toIndex(board.getPiece(square)) :
+                                    Move::NO_CAPTURE;
+
+                moves.push_back(Move(currSquare, square, capture));
+            }
+        }
+    }
+}
+
+void MoveGenerator::pseudoLegalQueenMoves(const Board& board, Colour colour, 
+                                        uint8_t currSquare, std::vector<Move>& moves) {
+
+    pseudoLegalBishopMoves(board, colour, currSquare, moves);
+    pseudoLegalRookMoves(board, colour, currSquare, moves);
+}
+
+void MoveGenerator::pseudoLegalKingMoves(const Board& board, Colour colour, 
+                                        uint8_t currSquare, std::vector<Move>& moves) {
+
+    // Regular moves
+    pseudoLegalMovesFromTable(board, colour, currSquare, moves, PrecomputeMoves::kingMoveTable[currSquare]);
+
+    // Castling moves
+    bool canQueensideCastle = board.getCastlingRights(colour, Castling::QUEENSIDE);
+    bool canKingsideCastle = board.getCastlingRights(colour, Castling::KINGSIDE);
+
+    if (canQueensideCastle) {
+        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0xE : 0x0E00000000000000; // Squares between king and rook are empty
+        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
+            // Cannot pass through attacked square and cannot castle if in check
+            if (!Check::isInDanger(board, colour, currSquare - 1) && !Check::isInCheck(board, colour)) {
+                moves.push_back(Move(currSquare, currSquare - 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::QUEENSIDE)));
+            }
+        }
+    }
+
+    if (canKingsideCastle) {
+        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0x60 : 0x6000000000000000; // Squares between king and rook are empty
+        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
+            // Cannot pass through attacked square and cannot castle if in check
+            if (!Check::isInDanger(board, colour, currSquare + 1) && !Check::isInCheck(board, colour)) {
+                moves.push_back(Move(currSquare, currSquare + 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::KINGSIDE)));
+            }
+        }
+    }
+}
+
+void MoveGenerator::pseudoLegalPawnCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
+                            
+    int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
+    uint8_t promotionPawnRank = (colour == Colour::WHITE) ? 6 : 1;
     constexpr uint8_t files[2] = {0, 7}; // Boundaries for left and right captures respectively
     // Diagonal capture squares
     int captureSquares[2] = {
@@ -186,14 +369,22 @@ void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Piece piece, Colour
     }
 }
 
-void MoveGenerator::pseudoLegalKnightMoves(const Board& board, Piece piece, Colour colour, 
-                                     uint8_t currSquare, std::vector<Move>& moves) {
+void MoveGenerator::pseudoLegalKnightCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
 
-    legalMovesFromTable(board, piece, colour, currSquare, moves, PrecomputeMoves::knightMoveTable[currSquare]);
+    Bitboard precomputedMoveBitboard = PrecomputeMoves::knightMoveTable[currSquare];
+    precomputedMoveBitboard &= ~board.getBitboard(colour); // Remove moves which land onto same colour pieces
+    Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
+
+    while (captureBitboard) {
+        uint8_t square = std::countr_zero(captureBitboard);
+        moves.push_back(Move(currSquare, square, toIndex(board.getPiece(square))));
+        captureBitboard &= captureBitboard - 1; // Remove trailing set bit
+    }
 }
 
-void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Piece piece, Colour colour, 
-                                     uint8_t currSquare, std::vector<Move>& moves) {
+void MoveGenerator::pseudoLegalBishopCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
 
     Colour opposingColour = (colour == Colour::WHITE) ?
                             Colour::BLACK :
@@ -208,25 +399,19 @@ void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Piece piece, Colo
             uint8_t square = currSquare + directions[i];
             // Not at edge of the board and square is empty
             while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && board.isEmpty(square)) {
-                moves.push_back(Move(currSquare, square));
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
             Colour finalSquareColour = board.getColour(square);
-            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
-                // Capture if final square is of the opposing colour
-                uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(board.getPiece(square)) :
-                                    Move::NO_CAPTURE;
-
-                moves.push_back(Move(currSquare, square, capture));
+            if (finalSquareColour == opposingColour) {
+                moves.push_back(Move(currSquare, square, toIndex(board.getPiece(square))));
             }
         }
     }
 }
 
-void MoveGenerator::pseudoLegalRookMoves(const Board& board, Piece piece, Colour colour, 
-                                   uint8_t currSquare, std::vector<Move>& moves) {
+void MoveGenerator::pseudoLegalRookCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
 
     using Function = uint8_t(*)(uint8_t);
     Colour opposingColour = (colour == Colour::WHITE) ?
@@ -242,57 +427,34 @@ void MoveGenerator::pseudoLegalRookMoves(const Board& board, Piece piece, Colour
             uint8_t square = currSquare + directions[i];
             // Not at edge of the board and square is empty
             while (functions[i & 0x1](square) != boundaryChecks[i] && board.isEmpty(square)) {
-                moves.push_back(Move(currSquare, square));
                 square += directions[i];
             }
             // Final square is either an empty square on the edge of the board or an occupied square
             Colour finalSquareColour = board.getColour(square);
-            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
-                // Capture if final square is of the opposing colour
-                uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(board.getPiece(square)) :
-                                    Move::NO_CAPTURE;
-
-                moves.push_back(Move(currSquare, square, capture));
+            if (finalSquareColour == opposingColour) {
+                moves.push_back(Move(currSquare, square, toIndex(board.getPiece(square))));
             }
         }
     }
 }
 
-void MoveGenerator::pseudoLegalQueenMoves(const Board& board, Piece piece, Colour colour, 
-                                    uint8_t currSquare, std::vector<Move>& moves) {
+void MoveGenerator::pseudoLegalQueenCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
 
-    pseudoLegalBishopMoves(board, piece, colour, currSquare, moves);
-    pseudoLegalRookMoves(board, piece, colour, currSquare, moves);
+    pseudoLegalBishopCaptures(board, colour, currSquare, moves);
+    pseudoLegalRookCaptures(board, colour, currSquare, moves);
 }
 
-void MoveGenerator::pseudoLegalKingMoves(const Board& board, Piece piece, Colour colour, 
-                                   uint8_t currSquare, std::vector<Move>& moves) {
+void MoveGenerator::pseudoLegalKingCaptures(const Board& board, Colour colour, 
+                                            uint8_t currSquare, std::vector<Move>& moves) {
 
-    // Regular moves
-    legalMovesFromTable(board, piece, colour, currSquare, moves, PrecomputeMoves::kingMoveTable[currSquare]);
+    Bitboard precomputedMoveBitboard = PrecomputeMoves::kingMoveTable[currSquare];
+    precomputedMoveBitboard &= ~board.getBitboard(colour); // Remove moves which land onto same colour pieces
+    Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
 
-    // Castling moves
-    bool canQueensideCastle = board.getCastlingRights(colour, Castling::QUEENSIDE);
-    bool canKingsideCastle = board.getCastlingRights(colour, Castling::KINGSIDE);
-
-    if (canQueensideCastle) {
-        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0xE : 0x0E00000000000000; // Squares between king and rook are empty
-        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
-            // Cannot pass through attacked square and cannot castle if in check
-            if (!Check::isInDanger(board, colour, currSquare - 1) && !Check::isInCheck(board, colour)) {
-                moves.push_back(Move(currSquare, currSquare - 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::QUEENSIDE)));
-            }
-        }
-    }
-
-    if (canKingsideCastle) {
-        uint64_t emptySquareMask = (colour == Colour::WHITE) ? 0x60 : 0x6000000000000000; // Squares between king and rook are empty
-        if ((board.getPiecesBitboard() & emptySquareMask) == 0) {
-            // Cannot pass through attacked square and cannot castle if in check
-            if (!Check::isInDanger(board, colour, currSquare + 1) && !Check::isInCheck(board, colour)) {
-                moves.push_back(Move(currSquare, currSquare + 2, Move::NO_CAPTURE, Move::NO_PROMOTION, toIndex(Castling::KINGSIDE)));
-            }
-        }
+    while (captureBitboard) {
+        uint8_t square = std::countr_zero(captureBitboard);
+        moves.push_back(Move(currSquare, square, toIndex(board.getPiece(square))));
+        captureBitboard &= captureBitboard - 1; // Remove trailing set bit
     }
 }
