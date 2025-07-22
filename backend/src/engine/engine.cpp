@@ -69,77 +69,54 @@ Move Engine::getMove(Game& game, int depth) {
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     Move bestMove;
-    int bestEval = (colour == Colour::WHITE) ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
+    int bestEval = std::numeric_limits<int>::min();
+
     std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
     orderMoves(moves, board);
     
     for (const Move& move : moves) {
         game.makeMove(move);
-        int eval = minimax(game, depth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+        int eval = -negamax(game, depth - 1, std::numeric_limits<int>::min() + 1, std::numeric_limits<int>::max());
         game.undo();
 
-        if (colour == Colour::WHITE) {
-            if (eval >= bestEval) {
-                bestEval = eval;
-                bestMove = move;
-            }
-        } else {
-            if (eval <= bestEval) {
-                bestEval = eval;
-                bestMove = move;
-            }
+        if (eval > bestEval) {
+            bestEval = eval;
+            bestMove = move;
         }
     }
 
     return bestMove;
 }
 
-int Engine::minimax(Game& game, int depth, int alpha, int beta) {
+int Engine::negamax(Game& game, int depth, int alpha, int beta) {
     GameStateEvaluation state = game.getCurrentGameStateEvaluation();
-    if (depth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
+    if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
         return evaluate(game, state, depth);
     }
+
+    if (depth == 0) return quiescence(game, alpha, beta, 8, state);
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
     orderMoves(moves, board);
 
-    if (colour == Colour::WHITE) {
-        int maxEval = std::numeric_limits<int>::min();
-        for (const Move& move : moves) {
-            game.makeMove(move);
-            int eval = minimax(game, depth - 1, alpha, beta);
-            game.undo();
+    int maxEval = std::numeric_limits<int>::min();
+    for (const Move& move : moves) {
+        game.makeMove(move);
+        int eval = -negamax(game, depth - 1, -beta, -alpha);
+        game.undo();
 
-            if (eval > maxEval) maxEval = eval;
-            if (eval > alpha) alpha = eval;
-            if (beta <= alpha) break;
-        }
-        
-        return maxEval;
-
-    } else {
-        int minEval = std::numeric_limits<int>::max();
-        for (const Move& move : moves) {
-            game.makeMove(move);
-            int eval = minimax(game, depth - 1, alpha, beta);
-            game.undo();
-
-            if (eval < minEval) minEval = eval;
-            if (eval < beta) beta = eval;
-            if (beta <= alpha) break;
-        }
-
-        return minEval;
+        if (eval > maxEval) maxEval = eval;
+        if (eval > alpha) alpha = eval;
+        if (beta <= alpha) break;
     }
+    
+    return maxEval;
 }
 
-int Engine::evaluate(Game& game, GameStateEvaluation& state, int depth) {
-    if (state == GameStateEvaluation::CHECKMATE) {
-        // Current turn = white means turn just switched to white after last move
-        return (game.getCurrentTurn() == Colour::WHITE) ? -CHECKMATE_VALUE - depth: CHECKMATE_VALUE + depth;
-    }
+int Engine::evaluate(Game& game, GameStateEvaluation state, int depth) {
+    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE - depth;
     
     // Stalemate / Draw by either fifty move rule, repetition or insufficient material
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
@@ -147,7 +124,36 @@ int Engine::evaluate(Game& game, GameStateEvaluation& state, int depth) {
     }
 
     Board& board = game.getBoard();
-    int eval = pieceValueEvaluation(board, Colour::WHITE) - pieceValueEvaluation(board, Colour::BLACK);
+    Colour currentColour = game.getCurrentTurn();
+    Colour opposingColour = (currentColour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+    int eval = pieceValueEvaluation(board, currentColour) - pieceValueEvaluation(board, opposingColour);
 
     return eval;
+}
+
+int Engine::quiescence(Game& game, int alpha, int beta, int qdepth, GameStateEvaluation state) {
+    if (qdepth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
+        return evaluate(game, state, qdepth);
+    }
+
+    int currentEval = evaluate(game, state, 0);
+    if (currentEval >= beta) return beta;
+    if (currentEval > alpha) alpha = currentEval;
+
+    Board& board = game.getBoard();
+    Colour colour = game.getCurrentTurn();
+    std::vector<Move> captureMoves = MoveGenerator::legalCaptures(board, colour);
+    orderMoves(captureMoves, board);
+
+    for (const Move& move : captureMoves) {
+        game.makeMove(move);
+        state = game.getCurrentGameStateEvaluation();
+        int eval = -quiescence(game, -beta, -alpha, qdepth - 1, state);
+        game.undo();
+
+        if (eval >= beta) return beta;
+        if (eval > alpha) alpha = eval;
+    }
+
+    return alpha;
 }

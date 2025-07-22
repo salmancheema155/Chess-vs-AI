@@ -27,7 +27,6 @@ if(EMSCRIPTEN)
 		"-sSINGLE_FILE=1"
 		"-sEXPORTED_FUNCTIONS=['_initialiseGame', '_getLegalMoves', '_makeMove', '_undo', '_getCurrentTurn', '_getColour', '_getCurrentGameStateEvaluation', '_isCurrentPlayerOccupies', '_isPromotionMove', '_getMoveInfo', '_getEngineMove']"
 		"-sEXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'UTF8ToString']"
-		"-sASSERTIONS=0"
 		"-sINITIAL_MEMORY=33554432"
 		"-sALLOW_MEMORY_GROWTH=1"
 	)
