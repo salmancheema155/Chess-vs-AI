@@ -1,6 +1,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <cstdint>
+#include <unordered_map>
+#include "engine/transposition_table.h"
 #include "move/move.h"
 #include "game/game.h"
 #include "board/board.h"
@@ -20,7 +23,7 @@ public:
      * If no legal move exists, then the function returns an empty move
      * Win/draw checks should be done before calling this function
      */
-    static Move getMove(Game& game, int depth);
+    static Move getMove(Game& game, uint8_t depth);
 
 private:
     /**
@@ -31,7 +34,7 @@ private:
      * @param beta Minimax beta variable for alpha-beta pruning
      * @return Evaluation of current game state at a specified depth
      */
-    static int negamax(Game& game, int depth, int alpha, int beta);
+    static int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta);
 
     /**
      * @brief Evaluates the current game state
@@ -40,7 +43,7 @@ private:
      * @param depth Current depth remaining (typically 0)
      * @return Evaluation of current game state (at depth 0)
      */
-    static int evaluate(Game& game, GameStateEvaluation state, int depth);
+    static int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t depth);
 
     /**
      * @brief Performs a quiescence search at leaf nodes of minimax
@@ -50,7 +53,10 @@ private:
      * @param state The current game state evaluation
      * @return Evaluation of current game state taking into account quiescence search
      */
-    static int quiescence(Game& game, int alpha, int beta, int qdepth, GameStateEvaluation state);
+    static int16_t quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state);
+
+    static TranspositionTable transpositionTable;
+    static TranspositionTable quiescenceTranspositionTable;
 };
 
 #endif // ENGINE_H
