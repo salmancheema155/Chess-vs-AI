@@ -47,6 +47,10 @@ public:
         return board;
     }
 
+    inline uint64_t getHash() {
+        return gameStateHistory.top().hash;
+    }
+
     /**
      * @brief Gets the colour that occupies a square
      * @param square Square to get the colour for
@@ -120,7 +124,6 @@ public:
     bool isPromotionMove(uint8_t fromSquare, uint8_t toSquare);
 
 private:
-    GameState currentState;
     Board board;
     std::stack<GameState> gameStateHistory;
     std::stack<Move> moveHistory;

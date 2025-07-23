@@ -73,7 +73,7 @@ namespace {
 Game::Game() : currentTurn(Colour::WHITE) {
     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
     positionHistory[hash] = 1;
-    currentState = createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash);
+    GameState currentState = createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash);
     gameStateHistory.push(currentState);
 }
 
@@ -100,6 +100,7 @@ Colour Game::getColour(uint8_t square) {
 void Game::makeMove(const Move& move) {
     auto [piece, colour] = board.getPieceAndColour(move.getFromSquare());
     board.makeMove(move, colour);
+    GameState& currentState = gameStateHistory.top();
     Colour newPlayerTurn = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     uint16_t newFullMoves = (colour == Colour::BLACK) ? currentState.fullMoves + 1 : currentState.fullMoves;
     uint8_t newHalfMoves = (move.getCapturedPiece() == Move::NO_CAPTURE && piece != Piece::PAWN) ?
@@ -111,10 +112,10 @@ void Game::makeMove(const Move& move) {
     uint64_t newHash = Zobrist::updateHash(currentState.hash, move, currentState.enPassantSquare, newEnPassantSquare,
                                             currentState.castleRights, newCastlingRights, colour, piece);
 
-    currentState = createGameState(newPlayerTurn, newEnPassantSquare, newCastlingRights, newHalfMoves, newFullMoves, newHash);
+    GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, newCastlingRights, newHalfMoves, newFullMoves, newHash);
     positionHistory[newHash]++;
     moveHistory.push(move);
-    gameStateHistory.push(currentState);
+    gameStateHistory.push(newState);
     currentTurn = newPlayerTurn;
 }
 
@@ -136,14 +137,13 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
 bool Game::undo() {       
     if (gameStateHistory.size() == 1 || moveHistory.size() == 0) return false;
 
+    undoHash(gameStateHistory.top().hash);
     gameStateHistory.pop();
     const Move& previousMove = moveHistory.top();
     const GameState& previousState = gameStateHistory.top();
     board.undo(previousMove, previousState.playerTurn, previousState.castleRights, previousState.enPassantSquare);
 
-    undoHash(currentState.hash);
     currentTurn = previousState.playerTurn;
-    currentState = previousState;
     moveHistory.pop();
 
     return true;    
@@ -197,11 +197,11 @@ bool Game::isPromotionMove(uint8_t fromSquare, uint8_t toSquare) {
 }
 
 bool Game::isDrawByFiftyMoveRule() {
-    return (currentState.halfMoveClock >= 100);
+    return (gameStateHistory.top().halfMoveClock >= 100);
 }
 
 bool Game::isDrawByRepetition() {
-    return (positionHistory[currentState.hash] >= 3);
+    return (positionHistory[gameStateHistory.top().hash] >= 3);
 }
 
 bool Game::isDrawByInsufficientMaterial() {
