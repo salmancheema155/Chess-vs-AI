@@ -11,13 +11,17 @@
 #include "move/move_generator.h"
 #include "chess_types.h"
 
+// #include <iostream>
+
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::Bitboard;
 using Chess::toIndex;
 
-TranspositionTable Engine::transpositionTable(256);
+TranspositionTable Engine::transpositionTable(1024);
 TranspositionTable Engine::quiescenceTranspositionTable(32);
+
+// uint64_t probes = 0, hits = 0;
 
 namespace {
     constexpr int16_t CHECKMATE_VALUE = 32000;
@@ -27,6 +31,8 @@ namespace {
     constexpr int16_t ROOK_VALUE = 500;
     constexpr int16_t QUEEN_VALUE = 900;
     constexpr int16_t pieceEvals[5] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE};
+
+    constexpr int16_t BEST_MOVE_VALUE = 30000;
 }
 
 namespace {
@@ -67,6 +73,12 @@ namespace {
             return orderingScore(a, board) > orderingScore(b, board); 
         });
     }
+
+    void orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
+        std::sort(moves.begin(), moves.end(), [&board](const Move& a, const Move& b) {
+            return orderingScore(a, board) > orderingScore(b, board); 
+        });
+    }
 }
 
 Move Engine::getMove(Game& game, uint8_t depth) {
@@ -89,13 +101,22 @@ Move Engine::getMove(Game& game, uint8_t depth) {
         }
     }
 
+    transpositionTable.incrementGeneration();
+    quiescenceTranspositionTable.incrementGeneration();
+
+    // std::cout << "Probes: " << probes << std::endl;
+    // std::cout << "Hits: " << hits << std::endl;
+    // std::cout << "Hit rate: " << 100 * (double)hits / (double)probes << "%" << std::endl;
+
     return bestMove;
 }
 
 int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta) {
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
+    // probes++;
     if (entry && entry->depth >= depth) {
+        // hits++;
         if (entry->flag == TTFlag::EXACT) return entry->eval;
         if (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) return entry->eval;
         if (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha) return entry->eval;
@@ -134,6 +155,7 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta) 
     newEntry.zobristKey = hash;
     newEntry.depth = depth;
     newEntry.eval = maxEval;
+    newEntry.generation = transpositionTable.getGeneration();
     newEntry.bestMove = bestMove;
 
     if (maxEval <= originalAlpha) newEntry.flag = TTFlag::UPPER_BOUND;
@@ -181,7 +203,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     std::vector<Move> captureMoves = MoveGenerator::legalCaptures(board, colour);
-    orderMoves(captureMoves, board);
+    orderQuiescenceMoves(captureMoves, board);
 
     Move bestMove;
 
@@ -196,6 +218,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
             newEntry.zobristKey = hash;
             newEntry.depth = qdepth;
             newEntry.eval = beta;
+            newEntry.generation = quiescenceTranspositionTable.getGeneration();
             newEntry.flag = TTFlag::LOWER_BOUND;
             newEntry.bestMove = move;
 
@@ -213,6 +236,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     newEntry.zobristKey = hash;
     newEntry.depth = qdepth;
     newEntry.eval = alpha;
+    newEntry.generation = quiescenceTranspositionTable.getGeneration();
     newEntry.flag = TTFlag::EXACT;
     newEntry.bestMove = bestMove;
 
