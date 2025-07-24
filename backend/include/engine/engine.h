@@ -16,14 +16,12 @@ public:
     /**
      * @brief Calculates the best move according to the engine
      * @param game Game object representing current game state
-     * @param depth Depth to search in game tree
      * @return Best move according to the engine
      * @attention 
      * This function assumes that at least one legal move exists
-     * If no legal move exists, then the function returns an empty move
-     * Win/draw checks should be done before calling this function
+     * Win/draw checks must be done before calling this function
      */
-    static Move getMove(Game& game, uint8_t depth);
+    static Move getMove(Game& game);
 
 private:
     /**
@@ -32,9 +30,10 @@ private:
      * @param depth Depth to search in game tree
      * @param alpha Minimax alpha variable for alpha-beta pruning
      * @param beta Minimax beta variable for alpha-beta pruning
+     * @param timeUp Function to check if current search time has exceeded
      * @return Evaluation of current game state at a specified depth
      */
-    static int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta);
+    static int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
 
     /**
      * @brief Evaluates the current game state

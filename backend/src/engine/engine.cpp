@@ -2,7 +2,9 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <functional>
 #include <bit>
+#include <chrono>
 #include "engine/engine.h"
 #include "engine/transposition_table.h"
 #include "board/board.h"
@@ -11,17 +13,17 @@
 #include "move/move_generator.h"
 #include "chess_types.h"
 
-// #include <iostream>
+#include <iostream>
 
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::Bitboard;
 using Chess::toIndex;
 
-TranspositionTable Engine::transpositionTable(1024);
+TranspositionTable Engine::transpositionTable(256);
 TranspositionTable Engine::quiescenceTranspositionTable(32);
 
-// uint64_t probes = 0, hits = 0;
+uint64_t probes = 0, hits = 0;
 
 namespace {
     constexpr int16_t CHECKMATE_VALUE = 32000;
@@ -32,7 +34,7 @@ namespace {
     constexpr int16_t QUEEN_VALUE = 900;
     constexpr int16_t pieceEvals[5] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE};
 
-    constexpr int16_t BEST_MOVE_VALUE = 30000;
+    constexpr int16_t BEST_MOVE_VALUE = 20000;
 }
 
 namespace {
@@ -51,9 +53,10 @@ namespace {
         return eval;
     }
 
-    int16_t orderingScore(const Move& move, Board& board) {
+    int16_t orderingScore(const Move& move, Board& board, const Move* bestMove = nullptr) {
         int16_t score = 0;
 
+        // MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
         uint8_t capturedPiece = move.getCapturedPiece();
         if (capturedPiece != Move::NO_CAPTURE) {
             Piece attacker = board.getPiece(move.getFromSquare());
@@ -65,12 +68,16 @@ namespace {
             score += pieceEvals[promotionPiece] + 800;
         }
 
+        if (bestMove && move == *bestMove) {
+            score += BEST_MOVE_VALUE;
+        }
+
         return score;
     }
 
-    void orderMoves(std::vector<Move>& moves, Board& board) {
-        std::sort(moves.begin(), moves.end(), [&board](const Move& a, const Move& b) {
-            return orderingScore(a, board) > orderingScore(b, board); 
+    void orderMoves(std::vector<Move>& moves, Board& board, const Move* bestMove = nullptr) {
+        std::sort(moves.begin(), moves.end(), [&board, bestMove](const Move& a, const Move& b) {
+            return orderingScore(a, board, bestMove) > orderingScore(b, board, bestMove); 
         });
     }
 
@@ -81,42 +88,69 @@ namespace {
     }
 }
 
-Move Engine::getMove(Game& game, uint8_t depth) {
+Move Engine::getMove(Game& game) {
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     Move bestMove;
-    int16_t bestEval = std::numeric_limits<int16_t>::min();
 
-    std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
-    orderMoves(moves, board);
-    
-    for (const Move& move : moves) {
-        game.makeMove(move);
-        int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max());
-        game.undo();
+    auto start = std::chrono::steady_clock::now();
+    int timeLimit = 3000; // In ms
 
-        if (eval > bestEval) {
-            bestEval = eval;
-            bestMove = move;
+    auto timeUp = [&]() {
+        auto now = std::chrono::steady_clock::now();
+        return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= timeLimit;
+    };
+
+    probes = 0;
+    hits = 0;
+
+    uint8_t depth;
+    uint8_t maxDepth = 0xFF;
+    for (depth = 1; depth <= maxDepth; depth++) {
+        if (timeUp()) break;
+        
+        std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
+        orderMoves(moves, board);
+
+        int16_t bestEval = std::numeric_limits<int16_t>::min();
+        Move currentBest;
+        
+        for (const Move& move : moves) {
+            if (timeUp()) break;
+            game.makeMove(move);
+            int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), timeUp);
+            game.undo();
+
+            if (eval > bestEval) {
+                bestEval = eval;
+                currentBest = move;
+            }
         }
+
+        if (!timeUp()) bestMove = currentBest;
+        if (bestMove == Move()) bestMove = moves[0];
     }
 
     transpositionTable.incrementGeneration();
     quiescenceTranspositionTable.incrementGeneration();
 
-    // std::cout << "Probes: " << probes << std::endl;
-    // std::cout << "Hits: " << hits << std::endl;
-    // std::cout << "Hit rate: " << 100 * (double)hits / (double)probes << "%" << std::endl;
+    std::cout << "Probes: " << probes << std::endl;
+    std::cout << "Hits: " << hits << std::endl;
+    std::cout << "Hit rate: " << 100 * (double)hits / (double)probes << "%" << std::endl;
+
+    std::cout << "Depth Completed: " << static_cast<int>(depth - 1) << std::endl;
 
     return bestMove;
 }
 
-int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta) {
+int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp) {
+    if (timeUp()) return alpha;
+
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
-    // probes++;
+    probes++;
     if (entry && entry->depth >= depth) {
-        // hits++;
+        hits++;
         if (entry->flag == TTFlag::EXACT) return entry->eval;
         if (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) return entry->eval;
         if (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha) return entry->eval;
@@ -130,17 +164,23 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta) 
     if (depth == 0) return quiescence(game, alpha, beta, 4, state);
 
     int16_t originalAlpha = alpha;
-    int16_t maxEval = std::numeric_limits<int16_t>::min();
+    int16_t maxEval = std::numeric_limits<int16_t>::min() + 1;
     Move bestMove;
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
-    orderMoves(moves, board);
+
+    Move* ttMove = nullptr;
+    if (entry && entry->generation == transpositionTable.getGeneration() && entry->depth >= depth) {
+        ttMove = &entry->bestMove;
+    }
+    orderMoves(moves, board, ttMove);
 
     for (const Move& move : moves) {
+        if (timeUp()) return alpha;
         game.makeMove(move);
-        int16_t eval = -negamax(game, depth - 1, -beta, -alpha);
+        int16_t eval = -negamax(game, depth - 1, -beta, -alpha, timeUp);
         game.undo();
 
         if (eval > maxEval) {
