@@ -123,8 +123,9 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     auto [piece, colour] = board.getPieceAndColour(fromSquare);
     if (piece == Piece::NONE || colour == Colour::NONE) return false;
 
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, std::optional<uint8_t>(promotion));
+    moveBuffer.clear();
+    MoveGenerator::legalMoves(board, piece, colour, fromSquare, moveBuffer);
+    std::optional<Move> moveOpt = searchLegalMoves(moveBuffer, fromSquare, toSquare, std::optional<uint8_t>(promotion));
 
     if (!moveOpt.has_value()) return false;
 
@@ -150,7 +151,7 @@ bool Game::undo() {
 }
 
 void Game::undoHash(uint64_t hash) {
-    if (positionHistory[hash] == 0) positionHistory.erase(hash);
+    if (positionHistory[hash] == 1) positionHistory.erase(hash);
     else positionHistory[hash]--;
 }
 
@@ -165,15 +166,18 @@ std::vector<Move> Game::getLegalMoves(uint8_t square) {
     auto [piece, colour] = board.getPieceAndColour(square);
     if (piece == Piece::NONE || colour == Colour::NONE) return {};
 
-    return MoveGenerator::legalMoves(board, piece, colour, square);
+    moveBuffer.clear();
+    MoveGenerator::legalMoves(board, piece, colour, square, moveBuffer);
+    return moveBuffer;
 }
 
 std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     auto [piece, colour] = board.getPieceAndColour(fromSquare);
     if (piece == Piece::NONE || colour == Colour::NONE) return std::nullopt;
 
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare, std::optional<uint8_t>(promotion));
+    moveBuffer.clear();
+    MoveGenerator::legalMoves(board, piece, colour, fromSquare, moveBuffer);
+    std::optional<Move> moveOpt = searchLegalMoves(moveBuffer, fromSquare, toSquare, std::optional<uint8_t>(promotion));
 
     if (!moveOpt) return std::nullopt;
 
@@ -187,8 +191,9 @@ bool Game::isPromotionMove(uint8_t fromSquare, uint8_t toSquare) {
     auto [piece, colour] = board.getPieceAndColour(fromSquare);
     if (piece != Piece::PAWN || colour == Colour::NONE) return false;
 
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(board, piece, colour, fromSquare);
-    std::optional<Move> moveOpt = searchLegalMoves(legalMoves, fromSquare, toSquare);
+    moveBuffer.clear();
+    MoveGenerator::legalMoves(board, piece, colour, fromSquare, moveBuffer);
+    std::optional<Move> moveOpt = searchLegalMoves(moveBuffer, fromSquare, toSquare);
 
     if (!moveOpt) return false;
 
