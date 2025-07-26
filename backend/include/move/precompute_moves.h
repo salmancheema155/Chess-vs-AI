@@ -46,24 +46,24 @@ public:
     using Colour = Chess::PieceColour;
 
     inline static constexpr std::array<Bitboard, 64> knightMoveTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2},
-                                                    {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
+        constexpr std::array<std::array<int, 2>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2},
+                                                                {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
         return generateMoveTable(offsets);
     }();
 
     inline static constexpr std::array<Bitboard, 64> kingMoveTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{0, 1}, {1, 1}, {1, 0}, {1, -1},
-                                                    {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
+        constexpr std::array<std::array<int, 2>, 8> offsets = {{{0, 1}, {1, 1}, {1, 0}, {1, -1},
+                                                                {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
         return generateMoveTable(offsets);
     }();
 
     inline static constexpr std::array<Bitboard, 64> whitePawnCaptureTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{-1, -1}, {1, -1}}};
+        constexpr std::array<std::array<int, 2>, 8> offsets = {{{-1, -1}, {1, -1}}};
         return generateMoveTable(offsets);
     }();
 
     inline static constexpr std::array<Bitboard, 64> blackPawnCaptureTable = [] {
-        std::array<std::array<int, 2>, 8> offsets = {{{-1, 1}, {1, 1}}};
+        constexpr std::array<std::array<int, 2>, 8> offsets = {{{-1, 1}, {1, 1}}};
         return generateMoveTable(offsets);
     }();
 };
