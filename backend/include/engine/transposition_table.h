@@ -21,12 +21,17 @@ struct TTEntry {
     Move bestMove;
 };
 
+struct TTBucket {
+    static constexpr uint8_t BUCKET_SIZE = 4;
+    TTEntry entries[BUCKET_SIZE];
+};
+
 class TranspositionTable {
 public:
     /**
      * @brief Creates a transposition table
      * @param size Size of transposition table in MB
-     * @note The size of the transposition table may be slightly less than the specified number due to rounding for optimisation
+     * @note The size of the transposition table may be less than the specified number due to rounding for optimisation
      */
     TranspositionTable(std::size_t size);
 
@@ -46,24 +51,28 @@ public:
     TTEntry* getEntry(uint64_t key);
 
     /**
+     * @brief Clears all table entries
+     */
+    void clear();
+
+    /**
      * @brief Increments the current generation
      */
-    void incrementGeneration();
+    inline void incrementGeneration() {
+        currentGeneration++;
+    }
 
     /**
      * @brief Gets the current generation
      * @return Current generation
      */
-    int16_t getGeneration();
-
-    /**
-     * @brief Clears all table entries
-     */
-    void clear();
+    inline int16_t getGeneration() {
+        return currentGeneration;
+    }
 
 private:
     const std::size_t TT_SIZE;
-    std::vector<TTEntry> table;
+    std::vector<TTBucket> table;
     int16_t currentGeneration;
 };
 

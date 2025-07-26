@@ -88,8 +88,8 @@ namespace {
 Engine::Engine(uint8_t maxDepth, uint8_t quiescenceDepth) : 
     MAX_DEPTH(maxDepth),
     QUIESCENCE_DEPTH(quiescenceDepth),
-    transpositionTable(256),
-    quiescenceTranspositionTable(32),
+    transpositionTable(512),
+    quiescenceTranspositionTable(256),
     negamaxMoveBuffers(maxDepth),
     quiescenceMoveBuffers(quiescenceDepth + 1) {
 
