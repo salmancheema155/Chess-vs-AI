@@ -31,7 +31,7 @@ namespace Zobrist {
      * @return Updated zobrist hash of the current game state
      * @attention currentHash should be first computed once using computeInitialHash
      */
-    uint64_t updateHash(uint64_t currentHash, const Move& move, const std::optional<uint8_t> oldEnPassantSquare,
+    uint64_t updateHash(uint64_t currentHash, const Move move, const std::optional<uint8_t> oldEnPassantSquare,
                         const std::optional<uint8_t> newEnPassantSquare, 
                         const std::array<std::array<bool, 2>, 2> oldCastleRights, 
                         const std::array<std::array<bool, 2>, 2> newCastleRights, 

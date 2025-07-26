@@ -104,16 +104,18 @@ void MoveGenerator::legalCaptures(Board& board, Colour colour, std::vector<Move>
 void MoveGenerator::filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves) {
     auto castlingRightsBeforeMove = board.getCastlingRights();
     auto enPassantSquareBeforeMove = board.getEnPassantSquare();
-    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
-        const Move& move = moves[i];
+
+    std::vector<Move> filtered;
+    filtered.reserve(moves.capacity());
+    for (Move move : moves) {
         board.makeMove(move, colour);
         bool inCheck = Check::isInCheck(board, colour);
         board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
 
-        if (inCheck) {
-            moves.erase(moves.begin() + i);
-        }
+        if (!inCheck) filtered.push_back(move);
     }
+
+    moves = std::move(filtered);
 }
 
 void MoveGenerator::pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves) {

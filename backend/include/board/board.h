@@ -350,7 +350,7 @@ public:
      * @param move Move to execute
      * @param playerTurn Colour of player who executes this move
      */
-    void makeMove(const Move& move, Colour playerTurn);
+    void makeMove(const Move move, Colour playerTurn);
 
     /**
      * @brief Reverts the board back 1 move
@@ -359,7 +359,7 @@ public:
      * @param oldCastlingRights Castling rights array before the last move was executed
      * @param oldEnPassantSquare The square of the pawn that just moved 2 forward
      */
-    void undo(const Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+    void undo(const Move move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
                                                                 std::optional<uint8_t> oldEnPassantSquare);
 
     /**

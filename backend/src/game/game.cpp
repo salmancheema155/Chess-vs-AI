@@ -24,7 +24,7 @@ namespace {
                                             uint8_t toSquare, 
                                             std::optional<uint8_t> promotion = std::nullopt) {
 
-        for (const Move& move : legalMoves) {
+        for (const Move move : legalMoves) {
             if (move.getFromSquare() == fromSquare && 
                 move.getToSquare() == toSquare && 
                 (!promotion.has_value() || move.getPromotionPiece() == *promotion)) {
@@ -97,7 +97,7 @@ Colour Game::getColour(uint8_t square) {
     return board.getColour(square);
 }
 
-void Game::makeMove(const Move& move) {
+void Game::makeMove(const Move move) {
     auto [piece, colour] = board.getPieceAndColour(move.getFromSquare());
     board.makeMove(move, colour);
     GameState& currentState = gameStateHistory.top();
@@ -140,7 +140,7 @@ bool Game::undo() {
 
     undoHash(gameStateHistory.top().hash);
     gameStateHistory.pop();
-    const Move& previousMove = moveHistory.top();
+    const Move previousMove = moveHistory.top();
     const GameState& previousState = gameStateHistory.top();
     board.undo(previousMove, previousState.playerTurn, previousState.castleRights, previousState.enPassantSquare);
 

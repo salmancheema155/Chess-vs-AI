@@ -104,7 +104,7 @@ void Board::movePiece(uint8_t fromSquare, uint8_t toSquare) {
     movePiece(piece, colour, fromSquare, toSquare);
 }
 
-void Board::makeMove(const Move& move, Colour playerTurn) {
+void Board::makeMove(const Move move, Colour playerTurn) {
     uint8_t fromSquare = move.getFromSquare();
     uint8_t toSquare = move.getToSquare();
     Piece piece = getPiece(fromSquare);
@@ -178,7 +178,7 @@ void Board::makeMove(const Move& move, Colour playerTurn) {
     }
 }
 
-void Board::undo(const Move& move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
+void Board::undo(const Move move, Colour oldPlayerTurn, std::array<std::array<bool, 2>, 2> oldCastlingRights, 
                                                                 std::optional<uint8_t> oldEnPassantSquare) {
 
     uint8_t fromSquare = move.getFromSquare();

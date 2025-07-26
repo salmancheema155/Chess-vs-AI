@@ -72,7 +72,7 @@ public:
      * @note Promotion flags are defined and documented in the Move class
      * @attention This function does not check whether or not the move is legal
      */
-    void makeMove(const Move& move);
+    void makeMove(const Move move);
 
     /**
      * @brief Makes a move updating the game state

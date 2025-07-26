@@ -52,7 +52,7 @@ namespace {
         return eval;
     }
 
-    int16_t orderingScore(const Move& move, Board& board, const Move* bestMove = nullptr) {
+    int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr) {
         int16_t score = 0;
         uint8_t capturedPiece = move.getCapturedPiece();
         if (capturedPiece != Move::NO_CAPTURE) {
@@ -73,13 +73,13 @@ namespace {
     }
 
     void orderMoves(std::vector<Move>& moves, Board& board, const Move* bestMove = nullptr) {
-        std::sort(moves.begin(), moves.end(), [&board, bestMove](const Move& a, const Move& b) {
+        std::sort(moves.begin(), moves.end(), [&board, bestMove](const Move a, const Move b) {
             return orderingScore(a, board, bestMove) > orderingScore(b, board, bestMove); 
         });
     }
 
     void orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
-        std::sort(moves.begin(), moves.end(), [&board](const Move& a, const Move& b) {
+        std::sort(moves.begin(), moves.end(), [&board](const Move a, const Move b) {
             return orderingScore(a, board) > orderingScore(b, board); 
         });
     }
@@ -127,7 +127,7 @@ Move Engine::getMove(Game& game) {
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
-        for (const Move& move : moveBuffer) {
+        for (const Move move : moveBuffer) {
             if (timeUp()) break;
             game.makeMove(move);
             int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), timeUp);
@@ -196,7 +196,7 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
     MoveGenerator::legalMoves(board, colour, moves);
     orderMoves(moves, board, ttMove);
 
-    for (const Move& move : moves) {
+    for (const Move move : moves) {
         if (timeUp()) return alpha;
         game.makeMove(move);
         int16_t eval = -negamax(game, depth - 1, -beta, -alpha, timeUp);
@@ -272,7 +272,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
     Move bestMove;
 
-    for (const Move& move : captureMoves) {
+    for (const Move move : captureMoves) {
         game.makeMove(move);
         state = game.getCurrentGameStateEvaluation();
         int16_t eval = -quiescence(game, -beta, -alpha, qdepth - 1, state);
