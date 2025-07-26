@@ -2,7 +2,9 @@
 #define CHECK_H
 
 #include <cstdint>
+#include <vector>
 #include "board/board.h"
+#include "move/move.h"
 #include "chess_types.h"
 
 enum class CheckEvaluation {
@@ -50,6 +52,12 @@ private:
      * @return True if player has a legal move, false otherwise
      */
     static bool hasMove(Board& board, Colour colour);
+
+    inline static std::vector<Move> moveBuffer = [] {
+        std::vector<Move> v;
+        v.reserve(256);
+        return v;
+    }();
 };
 
 #endif // CHECK_H

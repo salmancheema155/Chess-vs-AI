@@ -1,6 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <vector>
 #include <cstdint>
 #include <unordered_map>
 #include "engine/transposition_table.h"
@@ -11,7 +12,12 @@
 
 class Engine {
 public:
-    Engine();
+    /**
+     * Constructor
+     * @param maxDepth Max depth for engine search
+     * @param quiescenceDepth Max depth for quiescence search
+     */
+    Engine(uint8_t maxDepth, uint8_t quiescenceDepth);
 
     /**
      * @brief Calculates the best move according to the engine
@@ -21,7 +27,7 @@ public:
      * This function assumes that at least one legal move exists
      * Win/draw checks must be done before calling this function
      */
-    static Move getMove(Game& game);
+    Move getMove(Game& game);
 
 private:
     /**
@@ -33,7 +39,7 @@ private:
      * @param timeUp Function to check if current search time has exceeded
      * @return Evaluation of current game state at a specified depth
      */
-    static int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
+    int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
 
     /**
      * @brief Evaluates the current game state
@@ -42,7 +48,7 @@ private:
      * @param depth Current depth remaining (typically 0)
      * @return Evaluation of current game state (at depth 0)
      */
-    static int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t depth);
+    int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t depth);
 
     /**
      * @brief Performs a quiescence search at leaf nodes of minimax
@@ -52,10 +58,17 @@ private:
      * @param state The current game state evaluation
      * @return Evaluation of current game state taking into account quiescence search
      */
-    static int16_t quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state);
+    int16_t quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state);
 
-    static TranspositionTable transpositionTable;
-    static TranspositionTable quiescenceTranspositionTable;
+    TranspositionTable transpositionTable;
+    TranspositionTable quiescenceTranspositionTable;
+
+    const uint8_t MAX_DEPTH;
+    const uint8_t QUIESCENCE_DEPTH;
+
+    std::vector<Move> moveBuffer;
+    std::vector<std::vector<Move>> negamaxMoveBuffers;
+    std::vector<std::vector<Move>> quiescenceMoveBuffers;
 };
 
 #endif // ENGINE_H

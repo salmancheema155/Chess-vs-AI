@@ -47,7 +47,7 @@ bool Check::isInDanger(const Board& board, Colour colour, uint8_t targetSquare) 
     constexpr uint8_t boundaryChecks[4] = {0, 7, 7, 0}; // file, rank, file, rank
     constexpr uint8_t rankChecks[4] = {7, 7, 0, 0}; // Boundaries depending on direction for diagonals
     constexpr uint8_t fileChecks[4] = {0, 7, 0, 7}; // Boundaries depending on direction for diagonals
-    Function functions[2] = {Board::getFile, Board::getRank}; // Alternate between file and rank checks
+    constexpr Function functions[2] = {Board::getFile, Board::getRank}; // Alternate between file and rank checks
 
     for (int i = 0; i < 4; i++) {
         // Orthogonal directions
@@ -90,17 +90,7 @@ bool Check::isInCheck(const Board& board, Colour colour) {
 }
 
 bool Check::hasMove(Board& board, Colour colour) {
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KING, Piece::KNIGHT,
-                                 Piece::ROOK, Piece::BISHOP, Piece::QUEEN};
-    
-    for (Piece piece : pieces) {
-        const auto& squares = board.getSquares(piece, colour);
-        for (uint8_t square : squares) {
-            if (!MoveGenerator::legalMoves(board, piece, colour, square).empty()) {
-                return true;
-            }
-        }
-    }
-
-    return false;
+    moveBuffer.clear();
+    MoveGenerator::legalMoves(board, colour, moveBuffer);
+    return !moveBuffer.empty();
 }

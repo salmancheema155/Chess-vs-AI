@@ -152,6 +152,12 @@ private:
      * @brief Removes a hash from the positionHistory
      */
     void undoHash(uint64_t hash);
+
+    inline static std::vector<Move> moveBuffer = [] {
+        std::vector<Move> v;
+        v.reserve(256);
+        return v;
+    }();
 };
 
 #endif // GAME_H

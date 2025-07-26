@@ -20,10 +20,8 @@ using Colour = Chess::PieceColour;
 using Chess::Bitboard;
 using Chess::toIndex;
 
-TranspositionTable Engine::transpositionTable(256);
-TranspositionTable Engine::quiescenceTranspositionTable(32);
-
 uint64_t probes = 0, hits = 0;
+uint64_t qprobes = 0, qhits = 0;
 
 namespace {
     constexpr int16_t CHECKMATE_VALUE = 32000;
@@ -32,7 +30,8 @@ namespace {
     constexpr int16_t BISHOP_VALUE = 330;
     constexpr int16_t ROOK_VALUE = 500;
     constexpr int16_t QUEEN_VALUE = 900;
-    constexpr int16_t pieceEvals[5] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE};
+    constexpr int16_t KING_VALUE = 10000;
+    constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
 
     constexpr int16_t BEST_MOVE_VALUE = 20000;
 }
@@ -55,8 +54,6 @@ namespace {
 
     int16_t orderingScore(const Move& move, Board& board, const Move* bestMove = nullptr) {
         int16_t score = 0;
-
-        // MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
         uint8_t capturedPiece = move.getCapturedPiece();
         if (capturedPiece != Move::NO_CAPTURE) {
             Piece attacker = board.getPiece(move.getFromSquare());
@@ -88,6 +85,19 @@ namespace {
     }
 }
 
+Engine::Engine(uint8_t maxDepth, uint8_t quiescenceDepth) : 
+    MAX_DEPTH(maxDepth),
+    QUIESCENCE_DEPTH(quiescenceDepth),
+    transpositionTable(256),
+    quiescenceTranspositionTable(32),
+    negamaxMoveBuffers(maxDepth),
+    quiescenceMoveBuffers(quiescenceDepth + 1) {
+
+        moveBuffer.reserve(256);
+        for (auto& buffer : negamaxMoveBuffers) buffer.reserve(256);
+        for (auto& buffer : quiescenceMoveBuffers) buffer.reserve(128);
+}
+
 Move Engine::getMove(Game& game) {
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
@@ -103,19 +113,21 @@ Move Engine::getMove(Game& game) {
 
     probes = 0;
     hits = 0;
+    qprobes = 0;
+    qhits = 0;
 
     uint8_t depth;
-    uint8_t maxDepth = 0xFF;
-    for (depth = 1; depth <= maxDepth; depth++) {
+    for (depth = 1; depth <= MAX_DEPTH; depth++) {
         if (timeUp()) break;
         
-        std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
-        orderMoves(moves, board);
+        moveBuffer.clear();
+        MoveGenerator::legalMoves(board, colour, moveBuffer);
+        orderMoves(moveBuffer, board);
 
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
-        for (const Move& move : moves) {
+        for (const Move& move : moveBuffer) {
             if (timeUp()) break;
             game.makeMove(move);
             int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), timeUp);
@@ -128,7 +140,7 @@ Move Engine::getMove(Game& game) {
         }
 
         if (!timeUp()) bestMove = currentBest;
-        if (bestMove == Move()) bestMove = moves[0];
+        if (bestMove == Move()) bestMove = moveBuffer[0];
     }
 
     transpositionTable.incrementGeneration();
@@ -139,6 +151,10 @@ Move Engine::getMove(Game& game) {
     std::cout << "Hit rate: " << 100 * (double)hits / (double)probes << "%" << std::endl;
 
     std::cout << "Depth Completed: " << static_cast<int>(depth - 1) << std::endl;
+
+    std::cout << "qProbes: " << qprobes << std::endl;
+    std::cout << "qHits: " << qhits << std::endl;
+    std::cout << "qHit rate: " << 100 * (double)qhits / (double)qprobes << "%" << std::endl;
 
     return bestMove;
 }
@@ -161,7 +177,7 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
         return evaluate(game, state, depth);
     }
 
-    if (depth == 0) return quiescence(game, alpha, beta, 4, state);
+    if (depth == 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state);
 
     int16_t originalAlpha = alpha;
     int16_t maxEval = std::numeric_limits<int16_t>::min() + 1;
@@ -169,12 +185,15 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
-    std::vector<Move> moves = MoveGenerator::legalMoves(board, colour);
 
     Move* ttMove = nullptr;
     if (entry && entry->generation == transpositionTable.getGeneration() && entry->depth >= depth) {
         ttMove = &entry->bestMove;
     }
+
+    std::vector<Move>& moves = negamaxMoveBuffers[depth];
+    moves.clear();
+    MoveGenerator::legalMoves(board, colour, moves);
     orderMoves(moves, board, ttMove);
 
     for (const Move& move : moves) {
@@ -226,7 +245,9 @@ int16_t Engine::evaluate(Game& game, GameStateEvaluation state, uint8_t depth) {
 int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state) {
     uint64_t hash = game.getHash();
     TTEntry* entry = quiescenceTranspositionTable.getEntry(hash);
+    qprobes++;
     if (entry && entry->depth >= qdepth) {
+        qhits++;
         if (entry->flag == TTFlag::EXACT) return entry->eval;
         if (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) return entry->eval;
         if (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha) return entry->eval;
@@ -242,7 +263,11 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
-    std::vector<Move> captureMoves = MoveGenerator::legalCaptures(board, colour);
+
+    std::vector<Move>& captureMoves = quiescenceMoveBuffers[qdepth];
+    captureMoves.clear();
+    MoveGenerator::legalCaptures(board, colour, captureMoves);
+
     orderQuiescenceMoves(captureMoves, board);
 
     Move bestMove;

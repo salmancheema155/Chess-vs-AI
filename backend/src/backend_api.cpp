@@ -15,6 +15,7 @@
 #include "chess_types.h"
 
 static Game game;
+static Engine engine(12, 4);
 static std::string legalMovesJson;
 static std::string moveInfoJson;
 
@@ -196,7 +197,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     const char* getEngineMove() {
-        Move move = Engine::getMove(game);
+        Move move = engine.getMove(game);
         
         uint8_t fromSquare = move.getFromSquare();
         uint8_t toSquare = move.getToSquare();

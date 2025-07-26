@@ -26,7 +26,7 @@ if(EMSCRIPTEN)
 		"-sEXPORT_NAME=createModule"
 		"-sSINGLE_FILE=1"
 		"-sEXPORTED_FUNCTIONS=['_initialiseGame', '_getLegalMoves', '_makeMove', '_undo', '_getCurrentTurn', '_getColour', '_getCurrentGameStateEvaluation', '_isCurrentPlayerOccupies', '_isPromotionMove', '_getMoveInfo', '_getEngineMove']"
-		"-sEXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'UTF8ToString']"
+		"-sEXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'UTF8ToString', 'HEAP8']"
 		"-sINITIAL_MEMORY=33554432"
 		"-sALLOW_MEMORY_GROWTH=1"
 	)
