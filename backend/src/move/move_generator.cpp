@@ -55,12 +55,69 @@ namespace {
     }
 }
 
-std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece, 
-                                            Colour colour, uint8_t currSquare) {
+void MoveGenerator::legalMoves(Board& board, Piece piece, Colour colour, 
+                                uint8_t currSquare, std::vector<Move>& moves) {
 
+    pseudoLegalMoves(board, piece, colour, currSquare, moves);
+    filterIllegalMoves(board, colour, moves);
+}
+
+void MoveGenerator::legalMoves(Board& board, Colour colour, std::vector<Move>& moves) {
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
+                                Piece::ROOK, Piece::QUEEN, Piece::KING};
+    
+    for (Piece piece : pieces) {
+        Bitboard bitboard = board.getBitboard(piece, colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            pseudoLegalMoves(board, piece, colour, square, moves);
+            bitboard &= (bitboard - 1);
+        }
+    }
+
+    filterIllegalMoves(board, colour, moves);
+}
+
+void MoveGenerator::legalCaptures(Board& board, Piece piece, Colour colour, 
+                                    uint8_t currSquare, std::vector<Move>& moves) {
+
+    pseudoLegalCaptures(board, piece, colour, currSquare, moves);
+    filterIllegalMoves(board, colour, moves);
+}
+
+void MoveGenerator::legalCaptures(Board& board, Colour colour, std::vector<Move>& moves) {
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
+                                Piece::ROOK, Piece::QUEEN, Piece::KING};
+    
+    for (Piece piece : pieces) {
+        Bitboard bitboard = board.getBitboard(piece, colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            pseudoLegalCaptures(board, piece, colour, square, moves);
+            bitboard &= (bitboard - 1);
+        }
+    }
+
+    filterIllegalMoves(board, colour, moves);
+}
+
+void MoveGenerator::filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves) {
+    auto castlingRightsBeforeMove = board.getCastlingRights();
+    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
+    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
+        const Move& move = moves[i];
+        board.makeMove(move, colour);
+        bool inCheck = Check::isInCheck(board, colour);
+        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
+
+        if (inCheck) {
+            moves.erase(moves.begin() + i);
+        }
+    }
+}
+
+void MoveGenerator::pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves) {
     assert(currSquare < 64 && "currSquare must be between 0-63");
-    std::vector<Move> moves;
-    moves.reserve(16);
     switch (piece) {
         case Piece::PAWN:
             pseudoLegalPawnMoves(board, colour, currSquare, moves);
@@ -82,50 +139,11 @@ std::vector<Move> MoveGenerator::legalMoves(Board& board, Piece piece,
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
-            return {};
     }
-
-    auto castlingRightsBeforeMove = board.getCastlingRights();
-    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
-    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
-        const Move& move = moves[i];
-        board.makeMove(move, colour);
-        bool inCheck = Check::isInCheck(board, colour);
-        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
-
-        if (inCheck) {
-            moves.erase(moves.begin() + i);
-        }
-    }
-
-    return moves;
 }
 
-std::vector<Move> MoveGenerator::legalMoves(Board& board, Colour colour) {
-    std::vector<Move> moves;
-    moves.reserve(256);
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
-                                Piece::ROOK, Piece::QUEEN, Piece::KING};
-    
-    for (Piece piece : pieces) {
-        Bitboard bitboard = board.getBitboard(piece, colour);
-        while (bitboard) {
-            uint8_t square = std::countr_zero(bitboard);
-            std::vector<Move> pieceMoves = MoveGenerator::legalMoves(board, piece, colour, square);
-            moves.insert(moves.end(), pieceMoves.begin(), pieceMoves.end());
-            bitboard &= (bitboard - 1);
-        }
-    }
-
-    return moves;
-}
-
-std::vector<Move> MoveGenerator::legalCaptures(Board& board, Piece piece, 
-                                                Colour colour, uint8_t currSquare) {
-
+void MoveGenerator::pseudoLegalCaptures(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves) {
     assert(currSquare < 64 && "currSquare must be between 0-63");
-    std::vector<Move> moves;
-    moves.reserve(8);
     switch (piece) {
         case Piece::PAWN:
             pseudoLegalPawnCaptures(board, colour, currSquare, moves);
@@ -147,42 +165,7 @@ std::vector<Move> MoveGenerator::legalCaptures(Board& board, Piece piece,
             break;
         default:
             assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK, QUEEN or KING");
-            return {};
     }
-
-    auto castlingRightsBeforeMove = board.getCastlingRights();
-    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
-    for (int i = static_cast<int>(moves.size()) - 1; i >= 0; i--) {
-        const Move& move = moves[i];
-        board.makeMove(move, colour);
-        bool inCheck = Check::isInCheck(board, colour);
-        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
-
-        if (inCheck) {
-            moves.erase(moves.begin() + i);
-        }
-    }
-
-    return moves;
-}
-
-std::vector<Move> MoveGenerator::legalCaptures(Board& board, Colour colour) {
-    std::vector<Move> moves;
-    moves.reserve(48);
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
-                                Piece::ROOK, Piece::QUEEN, Piece::KING};
-    
-    for (Piece piece : pieces) {
-        Bitboard bitboard = board.getBitboard(piece, colour);
-        while (bitboard) {
-            uint8_t square = std::countr_zero(bitboard);
-            std::vector<Move> pieceMoves = MoveGenerator::legalCaptures(board, piece, colour, square);
-            moves.insert(moves.end(), pieceMoves.begin(), pieceMoves.end());
-            bitboard &= (bitboard - 1);
-        }
-    }
-
-    return moves;
 }
 
 void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Colour colour, 

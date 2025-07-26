@@ -22,17 +22,17 @@ public:
      * @param piece Piece to find legal moves for
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
-     * @return Vector containing all legal moves for the given piece and colour
+     * @param moves Legal moves out paramater
      */
-    static std::vector<Move> legalMoves(Board& board, Piece piece, Colour colour, uint8_t currSquare);
+    static void legalMoves(Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 
     /**
      * @brief Gets the legal moves for a given colour
      * @param board Board object representing the current board state
      * @param colour Colour of player
-     * @return Vector containing all legal moves for the given colour
+     * @param moves Legal moves out paramater
      */
-    static std::vector<Move> legalMoves(Board& board, Colour colour);
+    static void legalMoves(Board& board, Colour colour, std::vector<Move>& moves);
 
     /**
      * @brief Gets the legal captures for a given piece and colour
@@ -40,19 +40,53 @@ public:
      * @param piece Piece to find legal moves for
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
-     * @return Vector containing all legal captures for the given piece and colour
+     * @param moves Capture moves out paramater
      */
-    static std::vector<Move> legalCaptures(Board& board, Piece piece, Colour colour, uint8_t currSquare);
+    static void legalCaptures(Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 
     /**
      * @brief Gets the legal captures for a given colour
      * @param board Board object representing the current board state
      * @param colour Colour of player
-     * @return Vector containing all legal captures for the given colour
+     * @param moves Capture moves out paramater
      */
-    static std::vector<Move> legalCaptures(Board& board, Colour colour);
+    static void legalCaptures(Board& board, Colour colour, std::vector<Move>& moves);
 
 private:
+    /**
+     * @brief Filters out illegal moves
+     * @param board Board object representing current board state
+     * @param colour Colour of player's moves
+     * @param moves Moves out paramater
+     */
+    static void filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds pseudo legal moves to the given vector moves
+     * @param board Board object representing the current board state
+     * @param piece Type of piece
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalMoves function instead for exact list of legal moves
+     */
+    static void pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds pseudo legal capture moves to the given vector moves
+     * @param board Board object representing the current board state
+     * @param piece Type of piece
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalCaptures function instead for exact list of legal moves
+     */
+    static void pseudoLegalCaptures(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
     /**
      * @brief Adds pseudo legal moves to the given vector moves
      * @param board Board object representing the current board state
