@@ -48,41 +48,46 @@ TEST(legalRookGeneratorTest, board1) {
     // White rook on a1
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("a1");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("b1")),
                                             Move(square, algebraicToSquare("c1"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White rook on f1
     colour = Colour::WHITE;
     square = algebraicToSquare("f1");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("e1"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black rook on a8
     colour = Colour::BLACK;
     square = algebraicToSquare("a8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b8")),
                             Move(square, algebraicToSquare("a7")),
                             Move(square, algebraicToSquare("a6"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black rook on f8
     colour = Colour::BLACK;
     square = algebraicToSquare("f8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("e8"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
 
 TEST(legalRookGeneratorTest, board2) {
@@ -94,7 +99,8 @@ TEST(legalRookGeneratorTest, board2) {
     // White rook on f1
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("f1");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("e1")),
                                             Move(square, algebraicToSquare("d1")),
                                             Move(square, algebraicToSquare("c1")),
@@ -110,11 +116,12 @@ TEST(legalRookGeneratorTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White rook on h6
     colour = Colour::WHITE;
     square = algebraicToSquare("h6");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("g6")),
                             Move(square, algebraicToSquare("f6")),
                             Move(square, algebraicToSquare("h7"), toIndex(Piece::PAWN)),
@@ -122,23 +129,26 @@ TEST(legalRookGeneratorTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black rook on a8
     colour = Colour::BLACK;
     square = algebraicToSquare("a8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b8")),
                             Move(square, algebraicToSquare("a7"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black rook on c8
     colour = Colour::BLACK;
     square = algebraicToSquare("c8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::ROOK, colour, square);
+    MoveGenerator::legalMoves(b, Piece::ROOK, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b8"))};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }

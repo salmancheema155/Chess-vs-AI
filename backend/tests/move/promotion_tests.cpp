@@ -35,7 +35,8 @@ TEST(promotionMoveTest, board1) {
     // White pawn on a7
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("a7");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::KNIGHT)),
                                             Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::BISHOP)),
                                             Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::ROOK)),
@@ -43,6 +44,7 @@ TEST(promotionMoveTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
 
 TEST(promotionMoveTest, board2) {
@@ -54,7 +56,8 @@ TEST(promotionMoveTest, board2) {
     // White pawn on a7
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("a7");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::KNIGHT)),
                                             Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::BISHOP)),
                                             Move(square, algebraicToSquare("a8"), Move::NO_CAPTURE, toIndex(Piece::ROOK)),
@@ -66,20 +69,22 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on b7
     colour = Colour::WHITE;
     square = algebraicToSquare("b7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on c7
     colour = Colour::WHITE;
     square = algebraicToSquare("c7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("c8"), Move::NO_CAPTURE, toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("c8"), Move::NO_CAPTURE, toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("c8"), Move::NO_CAPTURE, toIndex(Piece::ROOK)),
@@ -95,11 +100,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on e7
     colour = Colour::WHITE;
     square = algebraicToSquare("e7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("d8"), toIndex(Piece::QUEEN), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("d8"), toIndex(Piece::QUEEN), toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("d8"), toIndex(Piece::QUEEN), toIndex(Piece::ROOK)),
@@ -107,20 +113,22 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on g7
     colour = Colour::WHITE;
     square = algebraicToSquare("g7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on h7
     colour = Colour::WHITE;
     square = algebraicToSquare("h7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("h8"), Move::NO_CAPTURE, toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("h8"), Move::NO_CAPTURE, toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("h8"), Move::NO_CAPTURE, toIndex(Piece::ROOK)),
@@ -132,11 +140,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on a2
     colour = Colour::BLACK;
     square = algebraicToSquare("a2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::ROOK)),
@@ -144,11 +153,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on b2
     colour = Colour::BLACK;
     square = algebraicToSquare("b2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {
                             Move(square, algebraicToSquare("a1"), toIndex(Piece::ROOK), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("a1"), toIndex(Piece::ROOK), toIndex(Piece::BISHOP)),
@@ -161,11 +171,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on c2
     colour = Colour::BLACK;
     square = algebraicToSquare("c2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("b1"), toIndex(Piece::KNIGHT), toIndex(Piece::ROOK)),
@@ -177,11 +188,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on e2
     colour = Colour::BLACK;
     square = algebraicToSquare("e2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("d1"), toIndex(Piece::QUEEN), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("d1"), toIndex(Piece::QUEEN), toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("d1"), toIndex(Piece::QUEEN), toIndex(Piece::ROOK)),
@@ -193,11 +205,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on g2
     colour = Colour::BLACK;
     square = algebraicToSquare("g2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("f1"), toIndex(Piece::BISHOP), toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("f1"), toIndex(Piece::BISHOP), toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("f1"), toIndex(Piece::BISHOP), toIndex(Piece::ROOK)),
@@ -205,11 +218,12 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on h2
     colour = Colour::BLACK;
     square = algebraicToSquare("h2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("h1"), Move::NO_CAPTURE, toIndex(Piece::KNIGHT)),
                             Move(square, algebraicToSquare("h1"), Move::NO_CAPTURE, toIndex(Piece::BISHOP)),
                             Move(square, algebraicToSquare("h1"), Move::NO_CAPTURE, toIndex(Piece::ROOK)),
@@ -221,4 +235,5 @@ TEST(promotionMoveTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }

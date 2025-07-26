@@ -48,7 +48,8 @@ TEST(legalQueenGeneratorTest, board1) {
     // White queen on d1
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("d1");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("c1")),
                                             Move(square, algebraicToSquare("b1")),
                                             Move(square, algebraicToSquare("e1")),
@@ -61,11 +62,12 @@ TEST(legalQueenGeneratorTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black queen on d8
     colour = Colour::BLACK;
     square = algebraicToSquare("d8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("e8")),
                             Move(square, algebraicToSquare("d7")),
                             Move(square, algebraicToSquare("e7")),
@@ -75,6 +77,7 @@ TEST(legalQueenGeneratorTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
 
 TEST(legalQueenGeneratorTest, board2) {
@@ -86,7 +89,8 @@ TEST(legalQueenGeneratorTest, board2) {
     // White queen on g4
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("g4");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("h4")),
                                             Move(square, algebraicToSquare("f4")),
                                             Move(square, algebraicToSquare("e4")),
@@ -106,11 +110,12 @@ TEST(legalQueenGeneratorTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black queen on d8
     colour = Colour::BLACK;
     square = algebraicToSquare("d8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::QUEEN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("e8")),
                             Move(square, algebraicToSquare("f8")),
                             Move(square, algebraicToSquare("d7")),
@@ -127,4 +132,5 @@ TEST(legalQueenGeneratorTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }

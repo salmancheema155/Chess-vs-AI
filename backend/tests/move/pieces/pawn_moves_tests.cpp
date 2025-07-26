@@ -48,70 +48,79 @@ TEST(legalPawnGeneratorTest, board1) {
     // White pawn on d4
     Colour colour = Colour::WHITE;
     uint8_t square = 27;
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, square + 7, toIndex(Piece::BISHOP)), 
                                             Move(square, square + 9, toIndex(Piece::PAWN))};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on c3
     colour = Colour::WHITE;
     square = 18;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on a2
     colour = Colour::WHITE;
     square = 8;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square + 8), 
                             Move(square, square + 16)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on h2
     colour = Colour::WHITE;
     square = 15;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square + 8), 
                             Move(square, square + 16)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on d6
     colour = Colour::BLACK;
     square = 43;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on e5
     colour = Colour::BLACK;
     square = 36;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square - 9, toIndex(Piece::PAWN))};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on a5
     colour = Colour::BLACK;
     square = 32;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square - 8)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // black pawn on b7
     colour = Colour::BLACK;
     square = 49;
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square - 16), 
                             Move(square, square - 8)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
 
 TEST(legalPawnGeneratorTest, board2) {
@@ -123,27 +132,31 @@ TEST(legalPawnGeneratorTest, board2) {
     // Black pawn on g7
     Colour colour = Colour::BLACK;
     uint8_t square = algebraicToSquare("g7");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, square - 16), 
                                             Move(square, square - 8)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // White pawn on g2
     colour = Colour::WHITE;
     square = algebraicToSquare("g2");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, square + 8)};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black pawn on h7
     colour = Colour::BLACK;
     square = algebraicToSquare("h7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
 
     b.movePiece(algebraicToSquare("f1"), algebraicToSquare("f8"));
@@ -152,8 +165,9 @@ TEST(legalPawnGeneratorTest, board2) {
     // Black pawn on c7
     colour = Colour::BLACK;
     square = algebraicToSquare("c7");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::PAWN, colour, square);
+    MoveGenerator::legalMoves(b, Piece::PAWN, colour, square, legalMoves);
     expectedLegalMoves = {};
     sortMoves(legalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }

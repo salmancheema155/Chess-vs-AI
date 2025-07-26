@@ -48,7 +48,8 @@ TEST(legalBishopGeneratorTest, board1) {
     // White bishop on c4
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("c4");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("b3")),
                                             Move(square, algebraicToSquare("b5")),
                                             Move(square, algebraicToSquare("a6")),
@@ -57,11 +58,12 @@ TEST(legalBishopGeneratorTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black bishop on c5
     colour = Colour::BLACK;
     square = algebraicToSquare("c5");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square);
+    MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("b4")),
                             Move(square, algebraicToSquare("a3")),
                             Move(square, algebraicToSquare("b6")),
@@ -70,11 +72,12 @@ TEST(legalBishopGeneratorTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 
     // Black bishop on c8
     colour = Colour::BLACK;
     square = algebraicToSquare("c8");
-    legalMoves = MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square);
+    MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square, legalMoves);
     expectedLegalMoves = {Move(square, algebraicToSquare("d7")),
                             Move(square, algebraicToSquare("e6")),
                             Move(square, algebraicToSquare("f5")),
@@ -83,6 +86,7 @@ TEST(legalBishopGeneratorTest, board1) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
 
 TEST(legalBishopGeneratorTest, board2) {
@@ -94,7 +98,8 @@ TEST(legalBishopGeneratorTest, board2) {
     // White bishop on c5
     Colour colour = Colour::WHITE;
     uint8_t square = algebraicToSquare("c5");
-    std::vector<Move> legalMoves = MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square);
+    std::vector<Move> legalMoves;
+    MoveGenerator::legalMoves(b, Piece::BISHOP, colour, square, legalMoves);
     std::vector<Move> expectedLegalMoves = {Move(square, algebraicToSquare("b4")),
                                             Move(square, algebraicToSquare("a3")),
                                             Move(square, algebraicToSquare("b6")),
@@ -106,4 +111,5 @@ TEST(legalBishopGeneratorTest, board2) {
     sortMoves(legalMoves);
     sortMoves(expectedLegalMoves);
     EXPECT_EQ(legalMoves, expectedLegalMoves) << "legalMoves differ from expectedLegalMoves";
+    legalMoves.clear();
 }
