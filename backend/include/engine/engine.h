@@ -42,15 +42,6 @@ private:
     int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
 
     /**
-     * @brief Evaluates the current game state
-     * @param game Game object
-     * @param state The current game state evaluation
-     * @param depth Current depth remaining (typically 0)
-     * @return Evaluation of current game state (at depth 0)
-     */
-    int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t depth);
-
-    /**
      * @brief Performs a quiescence search at leaf nodes of minimax
      * @param alpha Minimax alpha variable for alpha-beta pruning
      * @param beta Minimax beta variable for alpha-beta pruning

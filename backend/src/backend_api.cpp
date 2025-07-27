@@ -15,7 +15,7 @@
 #include "chess_types.h"
 
 static Game game;
-static Engine engine(12, 4);
+static Engine engine(12, 8);
 static std::string legalMovesJson;
 static std::string moveInfoJson;
 

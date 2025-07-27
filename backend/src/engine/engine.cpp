@@ -7,6 +7,7 @@
 #include <chrono>
 #include "engine/engine.h"
 #include "engine/transposition_table.h"
+#include "engine/evaluation.h"
 #include "board/board.h"
 #include "move/move.h"
 #include "game/game.h"
@@ -22,68 +23,6 @@ using Chess::toIndex;
 
 uint64_t probes = 0, hits = 0;
 uint64_t qprobes = 0, qhits = 0;
-
-namespace {
-    constexpr int16_t CHECKMATE_VALUE = 32000;
-    constexpr int16_t PAWN_VALUE = 100;
-    constexpr int16_t KNIGHT_VALUE = 320;
-    constexpr int16_t BISHOP_VALUE = 330;
-    constexpr int16_t ROOK_VALUE = 500;
-    constexpr int16_t QUEEN_VALUE = 900;
-    constexpr int16_t KING_VALUE = 10000;
-    constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
-
-    constexpr int16_t BEST_MOVE_VALUE = 20000;
-}
-
-namespace {
-    int16_t pieceValueEvaluation(Board& board, Colour colour) {
-        constexpr Piece pieces[5] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
-        int16_t eval = 0;
-
-        for (Piece piece : pieces) {
-            Bitboard bitboard = board.getBitboard(piece, colour);
-            while (bitboard != 0) {
-                eval += pieceEvals[toIndex(piece)];
-                bitboard &= (bitboard - 1);
-            }
-        }
-
-        return eval;
-    }
-
-    int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr) {
-        int16_t score = 0;
-        uint8_t capturedPiece = move.getCapturedPiece();
-        if (capturedPiece != Move::NO_CAPTURE) {
-            Piece attacker = board.getPiece(move.getFromSquare());
-            score += 10 * pieceEvals[capturedPiece] - pieceEvals[toIndex(attacker)];
-        }
-
-        uint8_t promotionPiece = move.getPromotionPiece();
-        if (promotionPiece != Move::NO_PROMOTION) {
-            score += pieceEvals[promotionPiece] + 800;
-        }
-
-        if (bestMove && move == *bestMove) {
-            score += BEST_MOVE_VALUE;
-        }
-
-        return score;
-    }
-
-    void orderMoves(std::vector<Move>& moves, Board& board, const Move* bestMove = nullptr) {
-        std::sort(moves.begin(), moves.end(), [&board, bestMove](const Move a, const Move b) {
-            return orderingScore(a, board, bestMove) > orderingScore(b, board, bestMove); 
-        });
-    }
-
-    void orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
-        std::sort(moves.begin(), moves.end(), [&board](const Move a, const Move b) {
-            return orderingScore(a, board) > orderingScore(b, board); 
-        });
-    }
-}
 
 Engine::Engine(uint8_t maxDepth, uint8_t quiescenceDepth) : 
     MAX_DEPTH(maxDepth),
@@ -122,7 +61,7 @@ Move Engine::getMove(Game& game) {
         
         moveBuffer.clear();
         MoveGenerator::legalMoves(board, colour, moveBuffer);
-        orderMoves(moveBuffer, board);
+        Evaluation::orderMoves(moveBuffer, board);
 
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
@@ -174,7 +113,7 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
 
     GameStateEvaluation state = game.getCurrentGameStateEvaluation();
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
-        return evaluate(game, state, depth);
+        return Evaluation::evaluate(game, state, depth);
     }
 
     if (depth == 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state);
@@ -194,7 +133,7 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
     std::vector<Move>& moves = negamaxMoveBuffers[depth];
     moves.clear();
     MoveGenerator::legalMoves(board, colour, moves);
-    orderMoves(moves, board, ttMove);
+    Evaluation::orderMoves(moves, board, ttMove);
 
     for (const Move move : moves) {
         if (timeUp()) return alpha;
@@ -226,22 +165,6 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
     return maxEval;
 }
 
-int16_t Engine::evaluate(Game& game, GameStateEvaluation state, uint8_t depth) {
-    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE - depth;
-    
-    // Stalemate / Draw by either fifty move rule, repetition or insufficient material
-    if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
-        return 0;
-    }
-
-    Board& board = game.getBoard();
-    Colour currentColour = game.getCurrentTurn();
-    Colour opposingColour = (currentColour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-    int16_t eval = pieceValueEvaluation(board, currentColour) - pieceValueEvaluation(board, opposingColour);
-
-    return eval;
-}
-
 int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state) {
     uint64_t hash = game.getHash();
     TTEntry* entry = quiescenceTranspositionTable.getEntry(hash);
@@ -254,10 +177,10 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     }
 
     if (qdepth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
-        return evaluate(game, state, qdepth);
+        return Evaluation::evaluate(game, state, qdepth);
     }
 
-    int16_t currentEval = evaluate(game, state, 0);
+    int16_t currentEval = Evaluation::evaluate(game, state, 0);
     if (currentEval >= beta) return beta;
     if (currentEval > alpha) alpha = currentEval;
 
@@ -268,7 +191,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     captureMoves.clear();
     MoveGenerator::legalCaptures(board, colour, captureMoves);
 
-    orderQuiescenceMoves(captureMoves, board);
+    Evaluation::orderQuiescenceMoves(captureMoves, board);
 
     Move bestMove;
 
