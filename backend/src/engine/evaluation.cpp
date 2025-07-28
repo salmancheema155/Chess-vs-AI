@@ -23,12 +23,7 @@ namespace {
         for (Colour colour : colours) {
             for (Piece piece : pieces) {
                 Bitboard bitboard = board.getBitboard(piece, colour);
-                int count = 0;
-                while (bitboard != 0) {
-                    count++;
-                    bitboard &= (bitboard - 1);
-                }
-                totalPhase += count * phaseValues[toIndex(piece)];
+                totalPhase += std::popcount(bitboard) * phaseValues[toIndex(piece)];
             }
         }
         
