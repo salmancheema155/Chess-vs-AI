@@ -11,6 +11,8 @@ using Colour = Chess::PieceColour;
 
 class Evaluation {
 public:
+    static constexpr int16_t CHECKMATE_VALUE = 32000;
+
     /**
      * @brief Calculates the evaluation of the players pieces
      * @param board Board object representing current board state
@@ -39,15 +41,13 @@ public:
      * @brief Evaluates the current game state
      * @param game Game object
      * @param state The current game state evaluation
-     * @param depth Current depth remaining (typically 0)
      * @return Evaluation of current game state (at depth 0)
      */
-    static int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t depth);
+    static int16_t evaluate(Game& game, GameStateEvaluation state);
 
 private:
     static int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr);
 
-    static constexpr int16_t CHECKMATE_VALUE = 32000;
     static constexpr int16_t PAWN_VALUE = 100;
     static constexpr int16_t KNIGHT_VALUE = 320;
     static constexpr int16_t BISHOP_VALUE = 330;

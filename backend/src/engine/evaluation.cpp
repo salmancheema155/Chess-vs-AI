@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <bit>
+#include <algorithm>
 #include "board/board.h"
 #include "move/move.h"
 #include "game/game.h"
@@ -69,8 +70,8 @@ void Evaluation::orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
     });
 }
 
-int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state, uint8_t depth) {
-    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE - depth;
+int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state) {
+    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE;
     
     // Stalemate / Draw by either fifty move rule, repetition or insufficient material
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
