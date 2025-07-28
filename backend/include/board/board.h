@@ -389,8 +389,7 @@ public:
 
     /**
      * @brief Sets the board state to a given position
-     * @param boardState String representation of board state
-     * @note See full documentation in tests/board/board_debug.cpp
+     * @param boardState FEN string representation of board state
      * @attention This function should only be used for testing and debugging
      */
     void setCustomBoardState(const char* boardState);
