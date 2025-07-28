@@ -21,8 +21,8 @@ struct TTEntry {
     Move bestMove;
 };
 
-struct TTBucket {
-    static constexpr uint8_t BUCKET_SIZE = 4;
+struct alignas(64) TTBucket {
+    static constexpr uint8_t BUCKET_SIZE = 2;
     TTEntry entries[BUCKET_SIZE];
 };
 
