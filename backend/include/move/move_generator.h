@@ -52,6 +52,24 @@ public:
      */
     static void legalCaptures(Board& board, Colour colour, std::vector<Move>& moves);
 
+    /**
+     * @brief Gets the legal moves which land a player in check or are capture moves or is a queen promotion for a given piece and colour
+     * @param board Board object representing the current board state
+     * @param piece Piece to find legal moves for
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Moves out paramater
+     */
+    static void quiescenceMoves(Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /**
+     * @brief Gets the legal moves which land a player in check or are capture moves or is a queen promotion for a given colour
+     * @param board Board object representing the current board state
+     * @param colour Colour of player
+     * @param moves Moves out paramater
+     */
+    static void quiescenceMoves(Board& board, Colour colour, std::vector<Move>& moves);
+
 private:
     /**
      * @brief Filters out illegal moves
@@ -60,6 +78,14 @@ private:
      * @param moves Moves out paramater
      */
     static void filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves);
+
+    /**
+     * @brief Filters out illegal moves and moves which are neither checks nor captures nor a queen promotion
+     * @param board Board object representing current board state
+     * @param colour Colour of player's moves
+     * @param moves Moves out paramater
+     */
+    static void quiescenceFilter(Board& board, Colour colour, std::vector<Move>& moves);
 
     /**
      * @brief Adds pseudo legal moves to the given vector moves
