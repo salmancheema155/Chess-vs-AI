@@ -23,7 +23,7 @@ namespace EnginePrecompute {
                 mask |= (fileMask >> 1);
             }
 
-            table[file] = fileMask;
+            table[file] = mask;
         }
 
         return table;
