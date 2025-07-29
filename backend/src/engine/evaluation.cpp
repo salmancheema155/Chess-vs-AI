@@ -7,6 +7,7 @@
 #include "chess_types.h"
 #include "engine/evaluation.h"
 #include "engine/piece_tables.h"
+#include "engine/precompute.h"
 
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
@@ -35,19 +36,44 @@ namespace {
 int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
     int16_t eval = 0;
+    double phase = gamePhase(board);
 
     for (uint8_t i = 0; i < 6; i++) {
         Bitboard bitboard = board.getBitboard(pieces[i], colour);
         while (bitboard != 0) {
+            // Piece evaluation
             eval += pieceEvals[i];
 
+            // Piece Square Table evaluation
             uint8_t square = std::countr_zero(bitboard);
             if (colour == Colour::WHITE) square ^= 0x38; // Flip square from black to white's perspective
-            double phase = gamePhase(board);
             eval += static_cast<int>(PieceTables::tables[i][square] * phase + PieceTables::endgameTables[i][square] * (1 - phase));
 
             bitboard &= (bitboard - 1);
         }
+    }
+
+    // Penalty for doubling pawns
+    Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
+    for (uint8_t file = 0; file < 8; file++) {
+        uint64_t mask = 0x0101010101010101ULL << file;
+        uint8_t pawnCount = std::popcount(pawnsBitboard & mask);
+        // Weighted penalty and is calculated via n(n-1)/2 counting pawn pairs formula
+        uint8_t pairs = (pawnCount * (pawnCount - 1)) >> 1;
+        double penalty = pairs * (phase * DOUBLED_PAWN_PENALTY + (1 - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
+        eval += static_cast<int>(penalty);
+    }
+
+    // Penalty for isolated pawns
+    for (uint8_t file = 0; file < 8; file++) {
+        uint64_t mask = EnginePrecompute::isolatedPawnMaskTable[file];
+        if (pawnsBitboard & mask) continue;
+
+        uint64_t fileBitboard = pawnsBitboard & (0x0101010101010101ULL << file);
+        uint8_t pawnCount = std::popcount(fileBitboard);
+        // Larger penalty for doubled isolated pawns
+        double penalty = pawnCount * pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
+        eval += static_cast<int>(penalty);
     }
 
     return eval;

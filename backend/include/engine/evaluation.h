@@ -57,6 +57,11 @@ private:
     static constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
 
     static constexpr int16_t BEST_MOVE_VALUE = 20000;
+
+    static constexpr int16_t DOUBLED_PAWN_PENALTY = -17;
+    static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -12;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY = -10;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY_END_GAME = -15;
 };
 
 #endif // EVALUATION_H
