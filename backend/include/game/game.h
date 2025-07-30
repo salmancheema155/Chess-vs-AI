@@ -123,6 +123,25 @@ public:
      */
     bool isPromotionMove(uint8_t fromSquare, uint8_t toSquare);
 
+    /**
+     * @brief Makes a null move
+     * @warning This function should only be used for null move pruning
+     */
+    void makeNullMove();
+
+    /**
+     * @brief Undos a null move
+     * @warning This function should only be used for null move pruning and paired with a corresponding makeNullMove() call
+     */
+    void undoNullMove();
+
+    /**
+     * @brief Sets the game state to a given state
+     * @param fen FEN string representation of board state
+     * @attention This function should only be used for testing and debugging
+     */
+    void setCustomGameState(const char* fen);
+
 private:
     Board board;
     std::stack<GameState> gameStateHistory;

@@ -2,6 +2,7 @@
 #include <vector>
 #include <optional>
 #include <cstdint>
+#include <cstdlib>
 #include <bit>
 #include "game/game.h"
 #include "game/game_state.h"
@@ -242,3 +243,68 @@ bool Game::isDrawByInsufficientMaterial() {
     return insufficientMaterialHelper(board, Colour::WHITE, Colour::BLACK) || 
            insufficientMaterialHelper(board, Colour::BLACK, Colour::WHITE);
 }
+
+void Game::makeNullMove() {
+    GameState& currentState = gameStateHistory.top();
+    Colour colour = currentTurn;
+    Colour newPlayerTurn = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+    uint16_t newFullMoves = (colour == Colour::BLACK) ? currentState.fullMoves + 1 : currentState.fullMoves;
+    uint8_t newHalfMoves = currentState.halfMoveClock + 1;
+
+    auto newEnPassantSquare = std::nullopt;
+    board.setEnPassantSquare(newEnPassantSquare);
+    uint64_t newHash = Zobrist::updateNullMoveHash(currentState.hash, currentState.enPassantSquare);
+
+    GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, currentState.castleRights, newHalfMoves, newFullMoves, newHash);
+    positionHistory[newHash]++;
+    moveHistory.push(Move());
+    gameStateHistory.push(newState);
+    currentTurn = newPlayerTurn;
+}
+
+void Game::undoNullMove() {
+    undoHash(gameStateHistory.top().hash);
+    gameStateHistory.pop();
+    const GameState& previousState = gameStateHistory.top();
+    board.setEnPassantSquare(previousState.enPassantSquare);
+
+    currentTurn = previousState.playerTurn;
+    moveHistory.pop();
+}
+
+// // TESTING PURPOSES ONLY
+// void Game::setCustomGameState(const char* fen) {
+//     board.setCustomBoardState(fen);
+//     int index = 0;
+//     while (fen[index++] != ' ');
+//     index++;
+
+//     currentTurn = (fen[index] == 'w') ? Colour::WHITE : Colour::BLACK;
+
+//     // Jump to half move clock
+//     index += 2;
+//     while (fen[index++] != ' ');
+//     index++;
+//     while(fen[index++] != ' ');
+//     index++;
+
+//     uint8_t halfMoveClock = 0;
+//     while (fen[index] != ' ') {
+//         halfMoveClock = 10 * halfMoveClock + (fen[index] - '0');
+//     }
+//     index++;
+
+//     uint16_t fullMoves = 0;
+//     while (fen[index]) {
+//         fullMoves = 10 * fullMoves + (fen[index] - '0');
+//     }
+
+//     positionHistory.erase(gameStateHistory.top().hash);
+//     gameStateHistory.pop();
+
+//     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
+//     positionHistory[hash] = 1;
+//     GameState currentState = createGameState(currentTurn, board.getEnPassantSquare(), 
+//                                             board.getCastlingRights(), halfMoveClock, fullMoves, hash);
+//     gameStateHistory.push(currentState);
+// }
