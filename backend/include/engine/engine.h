@@ -58,6 +58,7 @@ private:
     const uint8_t QUIESCENCE_DEPTH;
 
     static constexpr uint8_t NULL_MOVE_REDUCTION = 2;
+    static constexpr int16_t DELTA_MARGIN = 100;
 
     std::vector<Move> moveBuffer;
     std::vector<std::vector<Move>> negamaxMoveBuffers;
