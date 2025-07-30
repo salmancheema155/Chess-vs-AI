@@ -20,7 +20,7 @@ namespace Zobrist {
 
     /**
      * @brief Updates the zobrist hash of the game state
-     * @param currentHash Zobrist hash computed from the previous board state
+     * @param currentHash Zobrist hash computed from the previous game state
      * @param move Move object representing the current move
      * @param oldEnPassantSquare The updated square of the pawn that just moved 2 forward before the move if it exists
      * @param newEnPassantSquare The updated square of the pawn that just moved 2 forward after the move if it exists
@@ -36,6 +36,15 @@ namespace Zobrist {
                         const std::array<std::array<bool, 2>, 2> oldCastleRights, 
                         const std::array<std::array<bool, 2>, 2> newCastleRights, 
                         Chess::PieceColour playerTurn, Chess::PieceType movedPiece);
+
+    /**
+     * @brief Updates the hash after a null move
+     * @param currentHash Zobrist hash computed from the previous game state
+     * @param oldEnPassantSquare The updated square of the pawn that just moved 2 forward before the move if it exists
+     * @return Updated zobrist hash of the current game state after the null move
+     * @warning This function must only be used for null moves during null move pruning
+     */
+    uint64_t updateNullMoveHash(uint64_t currentHash, const std::optional<uint8_t> oldEnPassantSquare);
 }
 
 #endif // ZOBRIST_HASH_H

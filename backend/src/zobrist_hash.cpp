@@ -113,4 +113,16 @@ namespace Zobrist {
         currentHash ^= zobristPlayerTurn;
         return currentHash;
     }
+
+    uint64_t updateNullMoveHash(uint64_t currentHash, const std::optional<uint8_t> oldEnPassantSquare) {
+        // Remove en passant hash
+        if (oldEnPassantSquare.has_value()) {
+            currentHash ^= zobristEnPassant[Board::getFile(*oldEnPassantSquare)];
+        }
+
+        // Toggle player turn hash
+        currentHash ^= zobristPlayerTurn;
+        
+        return currentHash;
+    }
 }
