@@ -33,10 +33,9 @@ namespace {
     }
 }
 
-int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour) {
+int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double phase) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
     int16_t eval = 0;
-    double phase = gamePhase(board);
 
     for (uint8_t i = 0; i < 6; i++) {
         Bitboard bitboard = board.getBitboard(pieces[i], colour);
@@ -53,27 +52,45 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour) {
         }
     }
 
-    // Penalty for doubling pawns
+    // Pawn structure penalties
     Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     for (uint8_t file = 0; file < 8; file++) {
         uint64_t mask = 0x0101010101010101ULL << file;
         uint8_t pawnCount = std::popcount(pawnsBitboard & mask);
-        // Weighted penalty and is calculated via n(n-1)/2 counting pawn pairs formula
-        uint8_t pairs = (pawnCount * (pawnCount - 1)) >> 1;
-        double penalty = pairs * (phase * DOUBLED_PAWN_PENALTY + (1 - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int>(penalty);
+
+        // Penalty for doubling pawns
+        double doublingPenalty = (pawnCount - 1) * (phase * DOUBLED_PAWN_PENALTY + (1 - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
+        eval += static_cast<int>(doublingPenalty);
+
+        // Penalty for isolated pawns
+        uint64_t isolatedMask = EnginePrecompute::isolatedPawnMaskTable[file];
+        if (pawnsBitboard & isolatedMask) continue; // Contains pawn on either immediate left or right file
+        double isolatedPenalty =  pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
+        eval += static_cast<int>(isolatedPenalty);
     }
 
-    // Penalty for isolated pawns
-    for (uint8_t file = 0; file < 8; file++) {
-        uint64_t mask = EnginePrecompute::isolatedPawnMaskTable[file];
-        if (pawnsBitboard & mask) continue;
+    Bitboard pawnsBitboardTemp = pawnsBitboard;
+    while (pawnsBitboardTemp) {
+        uint8_t square = std::countr_zero(pawnsBitboardTemp);
+        uint64_t backwardMask = EnginePrecompute::backwardPawnMaskTable[toIndex(colour)][square];
 
-        uint64_t fileBitboard = pawnsBitboard & (0x0101010101010101ULL << file);
-        uint8_t pawnCount = std::popcount(fileBitboard);
-        // Larger penalty for doubled isolated pawns
-        double penalty = pawnCount * pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int>(penalty);
+        // Does not contain pawns on adjacent files either next to or behind ranks
+        if (!(pawnsBitboard & backwardMask)) {
+            double backwardPenalty = (phase * BACKWARD_PAWN_PENALTY + (1 - phase) * BACKWARD_PAWN_PENALTY_END_GAME);
+            eval += static_cast<int>(backwardPenalty);
+        }
+
+        uint64_t connectedMask = EnginePrecompute::connectedPawnMaskTable[toIndex(colour)][square];
+
+        // Has a connected pawn
+        uint64_t connectedBitboard = pawnsBitboard & connectedMask;
+        if (connectedBitboard) {
+            int connectedCount = std::popcount(connectedBitboard);
+            double connectedBonus = connectedCount * (phase * CONNECTED_PAWN_BONUS + (1 - phase) * CONNECTED_PAWN_BONUS_END_GAME);
+            eval += static_cast<int>(connectedBonus);
+        }
+
+        pawnsBitboardTemp &= (pawnsBitboardTemp - 1);
     }
 
     return eval;
@@ -102,7 +119,8 @@ int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state) {
     Board& board = game.getBoard();
     Colour currentColour = game.getCurrentTurn();
     Colour opposingColour = (currentColour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-    int16_t eval = pieceValueEvaluation(board, currentColour) - pieceValueEvaluation(board, opposingColour);
+    double phase = gamePhase(board);
+    int16_t eval = pieceValueEvaluation(board, currentColour, phase) - pieceValueEvaluation(board, opposingColour, phase);
 
     return eval;
 }

@@ -28,6 +28,57 @@ namespace EnginePrecompute {
 
         return table;
     }();
+
+    inline const std::array<std::array<uint64_t, 64>, 2> backwardPawnMaskTable = [] {
+        std::array<std::array<uint64_t, 64>, 2> table;
+        
+        for (uint8_t colour = 0; colour < 2; colour++) {
+            for (uint8_t square = 8; square < 56; square++) {
+                uint8_t rank = square / 8;
+                uint64_t mask = (colour == 0) ? 
+                    (1ULL << (8 * (rank + 1))) - 1 : // 0s followed by 8 * (rank + 1) 1s
+                    ~((1ULL << (8 * rank)) - 1); // 8 * (rank + 1) 1s followed by 0s
+
+                mask &= isolatedPawnMaskTable[square % 8];
+                table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
+
+    inline const std::array<std::array<uint64_t, 64>, 2> connectedPawnMaskTable = [] {
+        std::array<std::array<uint64_t, 64>, 2> table;
+
+        for (uint8_t colour = 0; colour < 2; colour++) {
+            for (uint8_t square = 8; square < 56; square++) {
+                uint8_t rank = square / 8, file = square % 8;
+                uint64_t mask = 0ULL;
+
+                // Defending pawn on the left
+                if (file > 0) {
+                    uint8_t pawnDefenderSquare = (colour == 0) ?
+                        square - 9 :
+                        square + 7;
+                    
+                    mask |= (1ULL << pawnDefenderSquare);
+                }
+
+                // Defending pawn on the right
+                if (file < 7) {
+                    uint8_t pawnDefenderSquare = (colour == 0) ?
+                        square - 7 :
+                        square + 9;
+                    
+                    mask |= (1ULL << pawnDefenderSquare);
+                }
+
+                table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
 };
 
 #endif // ENGINE_PRECOMPUTE_H

@@ -17,9 +17,10 @@ public:
      * @brief Calculates the evaluation of the players pieces
      * @param board Board object representing current board state
      * @param colour Colour of player
+     * @param phase Current game phase (0-1) with 1 = early game, 0 = end game
      * @return Evaluation of players pieces
      */
-    static int16_t pieceValueEvaluation(Board& board, Colour colour);
+    static int16_t pieceValueEvaluation(Board& board, Colour colour, double phase);
 
     /**
      * @brief Orders moves by predicted best to worse for normal negamax search
@@ -45,6 +46,15 @@ public:
      */
     static int16_t evaluate(Game& game, GameStateEvaluation state);
 
+    /**
+     * @brief Gets the value of a piece
+     * @param piece Piece (0 = pawn, 1 = knight, 2 = bishop, 3 = rook, 4 = queen)
+     * @return Value of piece
+     */
+    static inline int16_t getPieceValue(uint8_t piece) {
+        return pieceEvals[piece];
+    }
+
 private:
     static int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr);
 
@@ -58,10 +68,15 @@ private:
 
     static constexpr int16_t BEST_MOVE_VALUE = 20000;
 
-    static constexpr int16_t DOUBLED_PAWN_PENALTY = -17;
-    static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -12;
-    static constexpr int16_t ISOLATED_PAWN_PENALTY = -10;
-    static constexpr int16_t ISOLATED_PAWN_PENALTY_END_GAME = -15;
+    static constexpr int16_t DOUBLED_PAWN_PENALTY = -12;
+    static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -17;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY = -8;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY_END_GAME = -13;
+    static constexpr int16_t BACKWARD_PAWN_PENALTY = -10;
+    static constexpr int16_t BACKWARD_PAWN_PENALTY_END_GAME = -15;
+
+    static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
+    static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
 };
 
 #endif // EVALUATION_H
