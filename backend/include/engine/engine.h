@@ -39,7 +39,7 @@ private:
      * @param timeUp Function to check if current search time has exceeded
      * @return Evaluation of current game state at a specified depth
      */
-    int16_t negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
+    int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
 
     /**
      * @brief Performs a quiescence search at leaf nodes of minimax
@@ -56,6 +56,8 @@ private:
 
     const uint8_t MAX_DEPTH;
     const uint8_t QUIESCENCE_DEPTH;
+
+    static constexpr uint8_t NULL_MOVE_REDUCTION = 2;
 
     std::vector<Move> moveBuffer;
     std::vector<std::vector<Move>> negamaxMoveBuffers;

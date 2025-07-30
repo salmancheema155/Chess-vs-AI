@@ -43,7 +43,7 @@ Move Engine::getMove(Game& game) {
     Move bestMove;
 
     auto start = std::chrono::steady_clock::now();
-    int timeLimit = 3000; // In ms
+    int timeLimit = 2000; // In ms
 
     auto timeUp = [&]() {
         auto now = std::chrono::steady_clock::now();
@@ -57,29 +57,33 @@ Move Engine::getMove(Game& game) {
 
     uint8_t depth;
     for (depth = 1; depth <= MAX_DEPTH; depth++) {
-        if (timeUp()) break;
-        
         moveBuffer.clear();
         MoveGenerator::legalMoves(board, colour, moveBuffer);
-        Evaluation::orderMoves(moveBuffer, board);
+        bestMove != Move() ? Evaluation::orderMoves(moveBuffer, board, &bestMove) : Evaluation::orderMoves(moveBuffer, board);
 
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
         for (const Move move : moveBuffer) {
-            if (timeUp()) break;
             game.makeMove(move);
             int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), timeUp);
             game.undo();
+
+            if (timeUp()) break;
 
             if (eval > bestEval) {
                 bestEval = eval;
                 currentBest = move;
             }
+
+            if (bestEval == Evaluation::CHECKMATE_VALUE) break;
         }
 
-        if (!timeUp()) bestMove = currentBest;
-        if (bestMove == Move()) bestMove = moveBuffer[0];
+        if (timeUp()) break;
+
+        bestMove = currentBest;
+
+        if (bestEval == Evaluation::CHECKMATE_VALUE) break;
     }
 
     transpositionTable.incrementGeneration();
@@ -98,9 +102,7 @@ Move Engine::getMove(Game& game) {
     return bestMove;
 }
 
-int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp) {
-    if (timeUp()) return alpha;
-
+int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp) {
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
     probes++;
@@ -113,10 +115,22 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
 
     GameStateEvaluation state = game.getCurrentGameStateEvaluation();
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
-        return Evaluation::evaluate(game, state, depth);
+        return Evaluation::evaluate(game, state);
     }
 
-    if (depth == 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state);
+    if (depth <= 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state);
+
+    // Null move pruning
+    bool inCheck = (state == GameStateEvaluation::CHECK);
+    if (!inCheck && depth >= NULL_MOVE_REDUCTION + 1) {
+        game.makeNullMove();
+        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -beta + 1, timeUp);
+        game.undoNullMove();
+
+        if (nullEval >= beta) {
+            return beta;
+        }
+    }
 
     int16_t originalAlpha = alpha;
     int16_t maxEval = std::numeric_limits<int16_t>::min() + 1;
@@ -136,10 +150,11 @@ int16_t Engine::negamax(Game& game, uint8_t depth, int16_t alpha, int16_t beta, 
     Evaluation::orderMoves(moves, board, ttMove);
 
     for (const Move move : moves) {
-        if (timeUp()) return alpha;
         game.makeMove(move);
         int16_t eval = -negamax(game, depth - 1, -beta, -alpha, timeUp);
         game.undo();
+
+        if (timeUp()) return 0;
 
         if (eval > maxEval) {
             maxEval = eval;
@@ -177,25 +192,26 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     }
 
     if (qdepth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
-        return Evaluation::evaluate(game, state, qdepth);
+        return Evaluation::evaluate(game, state);
     }
 
-    int16_t currentEval = Evaluation::evaluate(game, state, 0);
+    int16_t currentEval = Evaluation::evaluate(game, state);
     if (currentEval >= beta) return beta;
     if (currentEval > alpha) alpha = currentEval;
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
 
-    std::vector<Move>& captureMoves = quiescenceMoveBuffers[qdepth];
-    captureMoves.clear();
-    MoveGenerator::legalCaptures(board, colour, captureMoves);
+    std::vector<Move>& moves = quiescenceMoveBuffers[qdepth];
+    moves.clear();
+    (state != GameStateEvaluation::CHECK) ? MoveGenerator::quiescenceMoves(board, colour, moves) : 
+                                            MoveGenerator::legalMoves(board, colour, moves);
 
-    Evaluation::orderQuiescenceMoves(captureMoves, board);
+    Evaluation::orderQuiescenceMoves(moves, board);
 
     Move bestMove;
 
-    for (const Move move : captureMoves) {
+    for (const Move move : moves) {
         game.makeMove(move);
         state = game.getCurrentGameStateEvaluation();
         int16_t eval = -quiescence(game, -beta, -alpha, qdepth - 1, state);
