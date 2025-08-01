@@ -60,7 +60,7 @@ public:
 
     /**
      * @brief Gets the current game state evaluation for the opposite player of the player who just made their move
-     * @return Current game state evaluation of the board
+     * @return Current game state evaluation of the game
      * @note This function should be called after a move has been made to determine whether the opposing player
      * has been checkmated, stalemated, etc
      */
@@ -134,6 +134,13 @@ public:
      * @warning This function should only be used for null move pruning and paired with a corresponding makeNullMove() call
      */
     void undoNullMove();
+
+    /**
+     * @brief Gets the current game state evaluation for the opposite player of the player who just made a null move
+     * @return Current game state evaluation of the game
+     * @attention This function must only be used for null move pruning and will not check for checkmates, stalemates or draw by insufficient material
+     */
+    GameStateEvaluation getNullMoveStateEvaluation();
 
     /**
      * @brief Sets the game state to a given state

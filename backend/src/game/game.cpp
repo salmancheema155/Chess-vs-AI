@@ -167,15 +167,14 @@ std::vector<Move> Game::getLegalMoves(uint8_t square) {
     auto [piece, colour] = board.getPieceAndColour(square);
     if (piece == Piece::NONE || colour == Colour::NONE) return {};
 
-    moveBuffer.clear();
-    MoveGenerator::legalMoves(board, piece, colour, square, moveBuffer);
-    return moveBuffer;
+    std::vector<Move> moves;
+    moves.reserve(256);
+    MoveGenerator::legalMoves(board, piece, colour, square, moves);
+    return moves;
 }
 
 std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
-    auto [piece, colour] = board.getPieceAndColour(fromSquare);
-    if (piece == Piece::NONE || colour == Colour::NONE) return std::nullopt;
-
+    auto [piece, colour] = board.getPieceAndColour(fromSquare);    
     moveBuffer.clear();
     MoveGenerator::legalMoves(board, piece, colour, fromSquare, moveBuffer);
     std::optional<Move> moveOpt = searchLegalMoves(moveBuffer, fromSquare, toSquare, std::optional<uint8_t>(promotion));
@@ -270,6 +269,12 @@ void Game::undoNullMove() {
 
     currentTurn = previousState.playerTurn;
     moveHistory.pop();
+}
+
+GameStateEvaluation Game::getNullMoveStateEvaluation() {
+    if (isDrawByRepetition()) return GameStateEvaluation::DRAW_BY_REPETITION;
+    if (isDrawByFiftyMoveRule()) return GameStateEvaluation::DRAW_BY_FIFTY_MOVE_RULE;
+    return GameStateEvaluation::IN_PROGRESS;
 }
 
 // // TESTING PURPOSES ONLY
