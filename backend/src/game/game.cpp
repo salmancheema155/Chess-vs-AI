@@ -174,7 +174,9 @@ std::vector<Move> Game::getLegalMoves(uint8_t square) {
 }
 
 std::optional<MoveInfo> Game::getMoveInfo(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
-    auto [piece, colour] = board.getPieceAndColour(fromSquare);    
+    auto [piece, colour] = board.getPieceAndColour(fromSquare); 
+    if (piece == Piece::NONE || colour == Colour::NONE) return std::nullopt;
+    
     moveBuffer.clear();
     MoveGenerator::legalMoves(board, piece, colour, fromSquare, moveBuffer);
     std::optional<Move> moveOpt = searchLegalMoves(moveBuffer, fromSquare, toSquare, std::optional<uint8_t>(promotion));
@@ -256,7 +258,6 @@ void Game::makeNullMove() {
 
     GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, currentState.castleRights, newHalfMoves, newFullMoves, newHash);
     positionHistory[newHash]++;
-    moveHistory.push(Move());
     gameStateHistory.push(newState);
     currentTurn = newPlayerTurn;
 }
@@ -268,7 +269,6 @@ void Game::undoNullMove() {
     board.setEnPassantSquare(previousState.enPassantSquare);
 
     currentTurn = previousState.playerTurn;
-    moveHistory.pop();
 }
 
 GameStateEvaluation Game::getNullMoveStateEvaluation() {
