@@ -296,12 +296,14 @@ GameStateEvaluation Game::getNullMoveStateEvaluation() {
 //     uint8_t halfMoveClock = 0;
 //     while (fen[index] != ' ') {
 //         halfMoveClock = 10 * halfMoveClock + (fen[index] - '0');
+//         index++;
 //     }
 //     index++;
 
 //     uint16_t fullMoves = 0;
 //     while (fen[index]) {
 //         fullMoves = 10 * fullMoves + (fen[index] - '0');
+//         index++;
 //     }
 
 //     positionHistory.erase(gameStateHistory.top().hash);
