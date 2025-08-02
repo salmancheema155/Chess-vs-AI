@@ -87,8 +87,8 @@ Move Engine::getMove(Game& game) {
     return bestMove;
 }
 
-int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, 
-                        GameStateEvaluation state, const std::function<bool()>& timeUp, uint8_t ply, int extensionCount) {
+int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, 
+                        const std::function<bool()>& timeUp, uint8_t ply, int extensionCount, bool allowNullMove) {
 
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
@@ -106,10 +106,10 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta,
 
     // Null move pruning
     bool inCheck = (state == GameStateEvaluation::CHECK);
-    if (!inCheck && depth >= NULL_MOVE_REDUCTION + 1) {
+    if (allowNullMove && !inCheck && depth >= NULL_MOVE_REDUCTION + 1) {
         game.makeNullMove();
         GameStateEvaluation newState = game.getNullMoveStateEvaluation();
-        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -beta + 1, newState, timeUp, ply + 1);
+        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -beta + 1, newState, timeUp, ply + 1, extensionCount, false);
         game.undoNullMove();
 
         if (nullEval >= beta) {
@@ -138,7 +138,7 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta,
         game.makeMove(move);
         GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
         uint8_t extension = (newState == GameStateEvaluation::CHECK && extensionCount < MAX_EXTENSION_COUNT) ? 1 : 0;
-        int16_t eval = -negamax(game, depth - 1 + extension, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension);
+        int16_t eval = -negamax(game, depth - 1 + extension, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
         game.undo();
 
         if (timeUp()) return 0;
