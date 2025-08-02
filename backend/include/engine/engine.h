@@ -36,10 +36,14 @@ private:
      * @param depth Depth to search in game tree
      * @param alpha Minimax alpha variable for alpha-beta pruning
      * @param beta Minimax beta variable for alpha-beta pruning
+     * @param state The current game state evaluation
      * @param timeUp Function to check if current search time has exceeded
+     * @param ply Number of half moves elapsed since the start of the search
+     * @param extensionCount Number of extensions made
      * @return Evaluation of current game state at a specified depth
      */
-    int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, const std::function<bool()>& timeUp);
+    int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, 
+                    GameStateEvaluation state, const std::function<bool()>& timeUp, uint8_t ply = 0, int extensionCount = 0);
 
     /**
      * @brief Performs a quiescence search at leaf nodes of minimax
@@ -47,9 +51,10 @@ private:
      * @param beta Minimax beta variable for alpha-beta pruning
      * @param qdepth Maximum depth of quiescence search
      * @param state The current game state evaluation
+     * @param ply Number of half moves elapsed since the start of the search
      * @return Evaluation of current game state taking into account quiescence search
      */
-    int16_t quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state);
+    int16_t quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdepth, GameStateEvaluation state, uint8_t ply);
 
     TranspositionTable transpositionTable;
     TranspositionTable quiescenceTranspositionTable;
@@ -59,6 +64,7 @@ private:
 
     static constexpr uint8_t NULL_MOVE_REDUCTION = 2;
     static constexpr int16_t DELTA_MARGIN = 100;
+    static constexpr int MAX_EXTENSION_COUNT = 16;
 
     std::vector<Move> moveBuffer;
     std::vector<std::vector<Move>> negamaxMoveBuffers;
