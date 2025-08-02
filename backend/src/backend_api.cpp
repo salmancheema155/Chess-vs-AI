@@ -15,7 +15,7 @@
 #include "chess_types.h"
 
 static Game game;
-static Engine engine(12, 8);
+static Engine engine(30, 8);
 static std::string legalMovesJson;
 static std::string moveInfoJson;
 
@@ -118,6 +118,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void initialiseGame() {
         game = Game();
+        //game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -158,7 +159,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     bool isPromotionMove(int fromRow, int fromCol, int toRow, int toCol) {
-        if (!isValidSquare(fromRow, fromCol) | !isValidSquare(toRow, toCol)) return false;
+        if (!isValidSquare(fromRow, fromCol) || !isValidSquare(toRow, toCol)) return false;
 
         uint8_t fromSquare = getSquare(fromRow, fromCol);
         uint8_t toSquare = getSquare(toRow, toCol);
@@ -168,7 +169,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     const char* getMoveInfo(int fromRow, int fromCol, int toRow, int toCol, int promotion) {
-        if (!isValidSquare(fromRow, fromCol) | !isValidSquare(toRow, toCol)) return "{\"error\": \"Invalid square input\"}";
+        if (!isValidSquare(fromRow, fromCol) || !isValidSquare(toRow, toCol)) return "{\"error\": \"Invalid square input\"}";
 
         uint8_t fromSquare = getSquare(fromRow, fromCol);
         uint8_t toSquare = getSquare(toRow, toCol);
