@@ -11,8 +11,6 @@ using Colour = Chess::PieceColour;
 
 class Evaluation {
 public:
-    static constexpr int16_t CHECKMATE_VALUE = 32000;
-
     /**
      * @brief Calculates the evaluation of the players pieces
      * @param board Board object representing current board state
@@ -42,9 +40,10 @@ public:
      * @brief Evaluates the current game state
      * @param game Game object
      * @param state The current game state evaluation
+     * @param ply Number of half moves elapsed since the start of the search
      * @return Evaluation of current game state (at depth 0)
      */
-    static int16_t evaluate(Game& game, GameStateEvaluation state);
+    static int16_t evaluate(Game& game, GameStateEvaluation state, uint8_t ply);
 
     /**
      * @brief Gets the value of a piece
@@ -58,6 +57,8 @@ public:
 private:
     static int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr);
 
+    static constexpr int16_t CHECKMATE_VALUE = 30000;
+
     static constexpr int16_t PAWN_VALUE = 100;
     static constexpr int16_t KNIGHT_VALUE = 320;
     static constexpr int16_t BISHOP_VALUE = 330;
@@ -66,7 +67,7 @@ private:
     static constexpr int16_t KING_VALUE = 10000;
     static constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
 
-    static constexpr int16_t BEST_MOVE_VALUE = 20000;
+    static constexpr int16_t BEST_MOVE_VALUE = 10000;
 
     static constexpr int16_t DOUBLED_PAWN_PENALTY = -12;
     static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -17;

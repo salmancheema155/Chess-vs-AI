@@ -142,12 +142,13 @@ public:
      */
     GameStateEvaluation getNullMoveStateEvaluation();
 
-    /**
-     * @brief Sets the game state to a given state
-     * @param fen FEN string representation of board state
-     * @attention This function should only be used for testing and debugging
-     */
-    void setCustomGameState(const char* fen);
+    // // TESTING PURPOSES ONLY
+    // /**
+    //  * @brief Sets the game state to a given state
+    //  * @param fen FEN string representation of board state
+    //  * @attention This function should only be used for testing and debugging
+    //  */
+    // void setCustomGameState(const char* fen);
 
 private:
     Board board;

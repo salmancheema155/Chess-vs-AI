@@ -271,12 +271,6 @@ void Game::undoNullMove() {
     currentTurn = previousState.playerTurn;
 }
 
-GameStateEvaluation Game::getNullMoveStateEvaluation() {
-    if (isDrawByRepetition()) return GameStateEvaluation::DRAW_BY_REPETITION;
-    if (isDrawByFiftyMoveRule()) return GameStateEvaluation::DRAW_BY_FIFTY_MOVE_RULE;
-    return GameStateEvaluation::IN_PROGRESS;
-}
-
 // // TESTING PURPOSES ONLY
 // void Game::setCustomGameState(const char* fen) {
 //     board.setCustomBoardState(fen);

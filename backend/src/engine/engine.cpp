@@ -21,6 +21,26 @@ using Colour = Chess::PieceColour;
 using Chess::Bitboard;
 using Chess::toIndex;
 
+namespace {
+    bool disableNullPruning(Board& board, Colour colour) {
+        constexpr uint16_t DISABLE_NULL_PRUNING_VALUE = 1300;
+        constexpr uint16_t KNIGHT_VALUE = 300;
+        constexpr uint16_t BISHOP_VALUE = 300;
+        constexpr uint16_t ROOK_VALUE = 500;
+        constexpr uint16_t QUEEN_VALUE = 900;
+        constexpr Piece pieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+        constexpr uint16_t values[4] = {KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE};
+
+        uint16_t total = 0;
+        for (uint8_t i = 0; i < 4; i++) {
+            uint8_t count = std::popcount(board.getBitboard(pieces[i], colour));
+            total += count * values[i];
+        }
+
+        return (total <= DISABLE_NULL_PRUNING_VALUE);
+    }
+}
+
 Engine::Engine(uint8_t maxDepth, uint8_t quiescenceDepth) : 
     MAX_DEPTH(maxDepth),
     QUIESCENCE_DEPTH(quiescenceDepth),
@@ -68,15 +88,11 @@ Move Engine::getMove(Game& game) {
                 bestEval = eval;
                 currentBest = move;
             }
-
-            if (bestEval == Evaluation::CHECKMATE_VALUE) break;
         }
 
         if (timeUp()) break;
 
         bestMove = currentBest;
-
-        if (bestEval == Evaluation::CHECKMATE_VALUE) break;
     }
 
     transpositionTable.incrementGeneration();
@@ -99,17 +115,20 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     }
 
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
-        return Evaluation::evaluate(game, state);
+        return Evaluation::evaluate(game, state, ply);
     }
 
-    if (depth <= 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state, ply + 1);
+    if (depth <= 0) return quiescence(game, alpha, beta, QUIESCENCE_DEPTH, state, ply);
+
+    Board& board = game.getBoard();
+    Colour colour = game.getCurrentTurn();
 
     // Null move pruning
     bool inCheck = (state == GameStateEvaluation::CHECK);
-    if (allowNullMove && !inCheck && depth >= NULL_MOVE_REDUCTION + 1) {
+    if (allowNullMove && !inCheck && depth >= NULL_MOVE_REDUCTION + 1 && !disableNullPruning(board, colour)) {
         game.makeNullMove();
-        GameStateEvaluation newState = game.getNullMoveStateEvaluation();
-        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -beta + 1, newState, timeUp, ply + 1, extensionCount, false);
+        GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
+        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, timeUp, ply + 1, extensionCount, false);
         game.undoNullMove();
 
         if (nullEval >= beta) {
@@ -120,9 +139,6 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     int16_t originalAlpha = alpha;
     int16_t maxEval = std::numeric_limits<int16_t>::min() + 1;
     Move bestMove;
-
-    Board& board = game.getBoard();
-    Colour colour = game.getCurrentTurn();
 
     Move* ttMove = nullptr;
     if (entry && entry->generation == transpositionTable.getGeneration() && entry->depth >= depth) {
@@ -177,12 +193,15 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     }
 
     if (qdepth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
-        return Evaluation::evaluate(game, state);
+        return Evaluation::evaluate(game, state, ply);
     }
 
-    int16_t currentEval = Evaluation::evaluate(game, state);
-    if (currentEval >= beta) return beta;
-    if (currentEval > alpha) alpha = currentEval;
+    int16_t currentEval = Evaluation::evaluate(game, state, ply);
+
+    // Standard pat
+    int16_t bestEval = currentEval;
+    if (bestEval >= beta) return bestEval;
+    if (bestEval > alpha) alpha = bestEval;
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
@@ -194,6 +213,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
     Evaluation::orderQuiescenceMoves(moves, board);
 
+    int16_t originalAlpha = alpha;
     Move bestMove;
 
     for (const Move move : moves) {
@@ -222,23 +242,29 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
             quiescenceTranspositionTable.add(hash, newEntry);
 
-            return beta;
+            return eval;
+        }
+        if (eval > bestEval) {
+            bestEval = eval;
+            bestMove = move;
         }
         if (eval > alpha) {
             alpha = eval;
-            bestMove = move;
         }
     }
 
     TTEntry newEntry;
     newEntry.zobristKey = hash;
     newEntry.depth = qdepth;
-    newEntry.eval = alpha;
+    newEntry.eval = bestEval;
     newEntry.generation = quiescenceTranspositionTable.getGeneration();
-    newEntry.flag = TTFlag::EXACT;
     newEntry.bestMove = bestMove;
+
+    if (bestEval <= originalAlpha) newEntry.flag = TTFlag::UPPER_BOUND;
+    else if (bestEval >= beta) newEntry.flag = TTFlag::LOWER_BOUND;
+    else newEntry.flag = TTFlag::EXACT;
 
     quiescenceTranspositionTable.add(hash, newEntry);
 
-    return alpha;
+    return bestEval;
 }

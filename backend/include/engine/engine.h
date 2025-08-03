@@ -44,7 +44,7 @@ private:
      * @return Evaluation of current game state at a specified depth
      */
     int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, 
-                    const std::function<bool()>& timeUp, uint8_t ply = 0, int extensionCount = 0, bool allowNullMove = true);
+                    const std::function<bool()>& timeUp, uint8_t ply = 1, int extensionCount = 0, bool allowNullMove = true);
 
     /**
      * @brief Performs a quiescence search at leaf nodes of minimax
