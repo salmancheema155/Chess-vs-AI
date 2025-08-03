@@ -108,8 +108,8 @@ void Evaluation::orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
     });
 }
 
-int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state) {
-    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE;
+int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state, uint8_t ply) {
+    if (state == GameStateEvaluation::CHECKMATE) return -CHECKMATE_VALUE + ply;
     
     // Stalemate / Draw by either fifty move rule, repetition or insufficient material
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
