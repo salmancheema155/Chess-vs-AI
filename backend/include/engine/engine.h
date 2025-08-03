@@ -29,6 +29,31 @@ public:
      */
     Move getMove(Game& game);
 
+    /**
+     * @brief Get the maximum depth searched in the last getMove call
+     * @return Maximum depth searched in the last getMove call
+     */
+    inline uint8_t getMaxDepthSearched() {
+        return maxDepthSearched;
+    }
+
+    /**
+     * @brief Gets the current evaluation of the game from white's perspective
+     * @return Current evaluation of the game
+     */
+    inline int16_t getCurrentEvaluation() {
+        return currentEvaluation;
+    }
+
+    /**
+     * @brief Gets the previous move that the engine played
+     * @return The previous move that the engine played
+     * @attention This function must be called after at least one engine move
+     */
+    inline Move getPreviousMove() {
+        return previousMove;
+    }
+
 private:
     /**
      * @brief Searches through game tree to find the best evaluation for a player assuming optimal moves from both sides
@@ -70,6 +95,10 @@ private:
     std::vector<Move> moveBuffer;
     std::vector<std::vector<Move>> negamaxMoveBuffers;
     std::vector<std::vector<Move>> quiescenceMoveBuffers;
+
+    uint8_t maxDepthSearched = 0;
+    int16_t currentEvaluation = 0.0;
+    Move previousMove;
 };
 
 #endif // ENGINE_H

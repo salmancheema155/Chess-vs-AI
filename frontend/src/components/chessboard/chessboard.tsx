@@ -48,31 +48,71 @@ const pieceImages = {
 /**
  * Initial board state
  */
-const initialBoard: BoardState = [
-    [
-        {type: "rook", colour: "black"},
-        {type: "knight", colour: "black"},
-        {type: "bishop", colour: "black"},
-        {type: "queen", colour: "black"},
-        {type: "king", colour: "black"},
-        {type: "bishop", colour: "black"},
-        {type: "knight", colour: "black"},
-        {type: "rook", colour: "black"}
-    ],
-    Array(8).fill(null).map(() => ({type: "pawn", colour: "black"})),
-    ...Array(4).fill(null).map(() => (Array(8).fill(null))),
-    Array(8).fill(null).map(() => ({type: "pawn", colour: "white"})),
-    [
-        {type: "rook", colour: "white"},
-        {type: "knight", colour: "white"},
-        {type: "bishop", colour: "white"},
-        {type: "queen", colour: "white"},
-        {type: "king", colour: "white"},
-        {type: "bishop", colour: "white"},
-        {type: "knight", colour: "white"},
-        {type: "rook", colour: "white"},
-    ]
-];
+const initialBoard: BoardState = []
+
+const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const boardPart = fen.split(" ")[0];
+const ranks = boardPart.split("/");
+
+const pieceMap: { [key: string]: Piece } = {
+        p: { type: "pawn",   colour: "black" },
+        r: { type: "rook",   colour: "black" },
+        n: { type: "knight", colour: "black" },
+        b: { type: "bishop", colour: "black" },
+        q: { type: "queen",  colour: "black" },
+        k: { type: "king",   colour: "black" },
+        P: { type: "pawn",   colour: "white" },
+        R: { type: "rook",   colour: "white" },
+        N: { type: "knight", colour: "white" },
+        B: { type: "bishop", colour: "white" },
+        Q: { type: "queen",  colour: "white" },
+        K: { type: "king",   colour: "white" },
+    };
+
+    for (const rank of ranks) {
+        const row: (Piece | null)[] = [];
+        for (const char of rank) {
+            if (/\d/.test(char)) {
+                // Digit means empty squares
+                const count = parseInt(char, 10);
+                for (let i = 0; i < count; i++) {
+                    row.push(null);
+                }
+            } else {
+                row.push(pieceMap[char]);
+            }
+        }
+        initialBoard.push(row);
+    }
+
+// /**
+//  * Initial board state
+//  */
+// const initialBoard: BoardState = [
+//     [
+//         {type: "rook", colour: "black"},
+//         {type: "knight", colour: "black"},
+//         {type: "bishop", colour: "black"},
+//         {type: "queen", colour: "black"},
+//         {type: "king", colour: "black"},
+//         {type: "bishop", colour: "black"},
+//         {type: "knight", colour: "black"},
+//         {type: "rook", colour: "black"}
+//     ],
+//     Array(8).fill(null).map(() => ({type: "pawn", colour: "black"})),
+//     ...Array(4).fill(null).map(() => (Array(8).fill(null))),
+//     Array(8).fill(null).map(() => ({type: "pawn", colour: "white"})),
+//     [
+//         {type: "rook", colour: "white"},
+//         {type: "knight", colour: "white"},
+//         {type: "bishop", colour: "white"},
+//         {type: "queen", colour: "white"},
+//         {type: "king", colour: "white"},
+//         {type: "bishop", colour: "white"},
+//         {type: "knight", colour: "white"},
+//         {type: "rook", colour: "white"},
+//     ]
+// ];
 
 /**
  * Chess board UI with interactive pieces
@@ -95,6 +135,10 @@ const ChessBoard = () => {
         position: {top: number, left: number};
     } | null>(null);
 
+    const [depthSearched, setDepthSearched] = useState<number>(0);
+    const [currentEvaluation, setCurrentEvaluation] = useState<string>("+0.00");
+    const [engineMove, setEngineMove] = useState<string>("None");
+
     useEffect(() => {
         async function loadWasm() {
             const module = await createModule();
@@ -113,7 +157,17 @@ const ChessBoard = () => {
 
         if ((newGameState === "IN_PROGRESS" || newGameState === "CHECK") && currentTurn === engineColour) {
             setTimeout(() => {
+                //console.log(`Heap used before move: ${(wasm.HEAP8.length / 1024 / 1024).toFixed(2)} MB`);
                 handleEngineMove();
+                //console.log(`Heap used after move: ${(wasm.HEAP8.length / 1024 / 1024).toFixed(2)} MB`);
+
+                const ptr = wasm._getEngineStats();
+                const jsonStr = wasm.UTF8ToString(ptr);
+                const engineStats : {depth: number, evaluation: string, move: string} = JSON.parse(jsonStr);
+                
+                setDepthSearched(engineStats.depth);
+                setCurrentEvaluation(engineStats.evaluation);
+                setEngineMove(engineStats.move);
             }, 0)
         }
 
@@ -381,106 +435,127 @@ const ChessBoard = () => {
 
     return (
         <>
-            <div className="chess-board" ref={boardRef}>
-                {board.map((row, rowIndex) => (
-                    <div className="board-row" key={rowIndex}>
-                        {row.map((piece, colIndex) => {
-                            const isLight = ((rowIndex + colIndex) % 2 === 0);
-                            
-                            const isLegalMoveSquare = legalMoveSquares.some(
-                                square => square.row === rowIndex && square.col === colIndex
-                            );
+            <div 
+                style={{
+                    display: "flex", 
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: "30px"
+                }}
+            >
+                <div className="chess-board" ref={boardRef}>
+                    {board.map((row, rowIndex) => (
+                        <div className="board-row" key={rowIndex}>
+                            {row.map((piece, colIndex) => {
+                                const isLight = ((rowIndex + colIndex) % 2 === 0);
+                                
+                                const isLegalMoveSquare = legalMoveSquares.some(
+                                    square => square.row === rowIndex && square.col === colIndex
+                                );
 
-                            return (
-                                <div 
-                                    key={`${rowIndex}-${colIndex}`}
-                                    className={`
-                                        ${isLight ? "light" : "dark"}-square
-                                        ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
-                                        ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
-                                        ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
-                                        ${isLegalMoveSquare ? " legal-move-square" : ""}
-                                        ${piece && piece.colour !== engineColour && piece.colour === currentTurn ? " clickable-square" : ""}
-                                    `}
-                                    onDragOver={(e) => {
-                                        if (selectedSquare && 
-                                            board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
-                                            board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
-                                                e.preventDefault();
+                                return (
+                                    <div 
+                                        key={`${rowIndex}-${colIndex}`}
+                                        className={`
+                                            ${isLight ? "light" : "dark"}-square
+                                            ${selectedSquare?.row === rowIndex && selectedSquare?.col === colIndex ? " selected-square" : ""}
+                                            ${movedFromSquare?.row === rowIndex && movedFromSquare?.col === colIndex ? " moved-from-square" : ""}
+                                            ${movedToSquare?.row === rowIndex && movedToSquare?.col === colIndex ? " moved-to-square" : ""}
+                                            ${isLegalMoveSquare ? " legal-move-square" : ""}
+                                            ${piece && piece.colour !== engineColour && piece.colour === currentTurn ? " clickable-square" : ""}
+                                        `}
+                                        onDragOver={(e) => {
+                                            if (selectedSquare && 
+                                                board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
+                                                board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
+                                                    e.preventDefault();
+                                                }
+                                        }}
+                                        onDrop={(e) => {
+                                            if (selectedSquare && 
+                                                board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
+                                                board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
+                                                    const from = JSON.parse(e.dataTransfer.getData("text/plain"));
+                                                    moveSquare({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex, colIndex});
                                             }
-                                    }}
-                                    onDrop={(e) => {
-                                        if (selectedSquare && 
-                                            board[selectedSquare.row][selectedSquare.col]?.colour === currentTurn && 
-                                            board[selectedSquare.row][selectedSquare.col]?.colour !== engineColour) {
-                                                const from = JSON.parse(e.dataTransfer.getData("text/plain"));
-                                                moveSquare({rowIndex: from.rowIndex, colIndex: from.colIndex}, {rowIndex, colIndex});
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        if (gameState !== "IN_PROGRESS" && gameState !== "CHECK") return;
-                                        if (piece && piece.colour === currentTurn && piece.colour !== engineColour) {
-                                            if (selectedSquare) {
-                                                if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
-                                                    if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
-                                                        // User clicks the currently selected piece
-                                                        nullifySelectedSquare();
-                                                        resetLegalMoveSquares();
+                                        }}
+                                        onClick={() => {
+                                            if (gameState !== "IN_PROGRESS" && gameState !== "CHECK") return;
+                                            if (piece && piece.colour === currentTurn && piece.colour !== engineColour) {
+                                                if (selectedSquare) {
+                                                    if (piece.colour === board[selectedSquare.row][selectedSquare.col]!.colour) {
+                                                        if (rowIndex === selectedSquare.row && colIndex === selectedSquare.col) {
+                                                            // User clicks the currently selected piece
+                                                            nullifySelectedSquare();
+                                                            resetLegalMoveSquares();
+                                                        } else {
+                                                            // User clicks on a piece of the same colour as the currently selected piece
+                                                            handleSelectedSquare(rowIndex, colIndex);
+                                                            handleLegalMoveSquares(rowIndex, colIndex);
+                                                        }
                                                     } else {
-                                                        // User clicks on a piece of the same colour as the currently selected piece
-                                                        handleSelectedSquare(rowIndex, colIndex);
-                                                        handleLegalMoveSquares(rowIndex, colIndex);
+                                                        // User makes a capture move
+                                                        moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
+                                                                    {rowIndex: rowIndex, colIndex: colIndex});
                                                     }
                                                 } else {
-                                                    // User makes a capture move
-                                                    moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
-                                                                {rowIndex: rowIndex, colIndex: colIndex});
-                                                }
-                                            } else {
-                                                // User clicks on a piece without a currently selected piece
-                                                handleSelectedSquare(rowIndex, colIndex);
-                                                handleLegalMoveSquares(rowIndex, colIndex);
-                                            }
-                                        } else {
-                                            if (selectedSquare) {
-                                                // User makes a non capture move
-                                                moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
-                                                            {rowIndex: rowIndex, colIndex: colIndex});
-                                            }
-                                        }
-                                    }}
-                                >
-                                    {(rowIndex == 7 || colIndex == 0) && (
-                                        <>
-                                            <span className="file-corner-label">
-                                                {rowIndex === 7 ? fileLabels[colIndex] : ""}
-                                            </span>
-                                            <span className="rank-corner-label">
-                                                {colIndex === 0 ? rankLabels[rowIndex] : ""}
-                                            </span>
-                                        </>
-                                    )}
-
-                                    {piece && (
-                                        <img
-                                            className="square-piece"
-                                            src={pieceImages[piece.colour][piece.type]}
-                                            alt={`${piece.colour} ${piece.type}`}
-                                            draggable={(gameState === "IN_PROGRESS" || gameState === "CHECK") && piece.colour !== engineColour && currentTurn === piece.colour}
-                                            onDragStart={(e) => {
-                                                if (piece && piece.colour !== engineColour && piece.colour === currentTurn) {
-                                                    e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
+                                                    // User clicks on a piece without a currently selected piece
                                                     handleSelectedSquare(rowIndex, colIndex);
                                                     handleLegalMoveSquares(rowIndex, colIndex);
                                                 }
-                                            }}
-                                        />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ))}
+                                            } else {
+                                                if (selectedSquare) {
+                                                    // User makes a non capture move
+                                                    moveSquare({rowIndex: selectedSquare.row, colIndex:selectedSquare.col}, 
+                                                                {rowIndex: rowIndex, colIndex: colIndex});
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        {(rowIndex == 7 || colIndex == 0) && (
+                                            <>
+                                                <span className="file-corner-label">
+                                                    {rowIndex === 7 ? fileLabels[colIndex] : ""}
+                                                </span>
+                                                <span className="rank-corner-label">
+                                                    {colIndex === 0 ? rankLabels[rowIndex] : ""}
+                                                </span>
+                                            </>
+                                        )}
+
+                                        {piece && (
+                                            <img
+                                                className="square-piece"
+                                                src={pieceImages[piece.colour][piece.type]}
+                                                alt={`${piece.colour} ${piece.type}`}
+                                                draggable={(gameState === "IN_PROGRESS" || gameState === "CHECK") && piece.colour !== engineColour && currentTurn === piece.colour}
+                                                onDragStart={(e) => {
+                                                    if (piece && piece.colour !== engineColour && piece.colour === currentTurn) {
+                                                        e.dataTransfer.setData("text/plain", JSON.stringify({rowIndex, colIndex}));
+                                                        handleSelectedSquare(rowIndex, colIndex);
+                                                        handleLegalMoveSquares(rowIndex, colIndex);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+
+                <div 
+                    style={{
+                        marginTop: "50px",
+                        fontSize: "30px",
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif"
+                    }}
+                >
+                    <div style={{color: "rgba(156, 3, 3, 1)"}}>Depth Searched: {depthSearched}</div>
+                    <div style={{color: "green"}}>Evaluation: {currentEvaluation}</div>
+                    <div style={{color: "rgba(3, 133, 219, 1)"}}>Move: {engineMove}</div>
+                </div>
             </div>
 
             {promotionInfo && (

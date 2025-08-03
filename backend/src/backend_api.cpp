@@ -3,8 +3,10 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include <vector>
 #include <cstring>
+#include <cassert>
 #include "emscripten.h"
 #include "move/move.h"
 #include "move/move_info.h"
@@ -18,6 +20,7 @@ static Game game;
 static Engine engine(30, 8);
 static std::string legalMovesJson;
 static std::string moveInfoJson;
+static std::string engineStatsJson;
 
 namespace {
     const char* pieceToString(uint8_t piece) {
@@ -50,6 +53,17 @@ namespace {
     const char* enPassantToString(uint8_t enPassant) {
         return (enPassant == Move::NO_EN_PASSANT) ? "NO_EN_PASSANT" : "EN_PASSANT";
     }
+
+    std::string squareToAlgebraic(uint8_t square) {
+    assert(square < 64 && "Square must be between 0-63");
+    uint8_t file = Board::getFile(square);
+    uint8_t rank = Board::getRank(square);
+
+    char fileChar = 'a' + file;
+    char rankChar = '1' + rank;
+
+    return std::string() + fileChar + rankChar;
+}
 
     std::string legalMovesToJson(const std::vector<Move>& moves) {
         std::ostringstream json;
@@ -105,6 +119,33 @@ namespace {
         return json.str();
     }
 
+    std::string engineStatsToJson(const int maxDepthSearched, const int currentEvaluation, const Move previousMove) {
+        std::ostringstream currentEvaluationStr;
+        if (currentEvaluation >= 29000) {
+            int ply = 30000 - currentEvaluation;
+            currentEvaluationStr << "+M" << ply / 2;
+        } else if (currentEvaluation <= -29000) {
+            int ply = 30000 + currentEvaluation;
+            currentEvaluationStr << "-M" << ply / 2;
+        } else {
+            if (currentEvaluation >= 0) currentEvaluationStr << "+";
+            currentEvaluationStr << std::fixed << std::setprecision(2) << currentEvaluation / 100.0;
+        }
+
+        std::string fromSquare = squareToAlgebraic(previousMove.getFromSquare());
+        std::string toSquare = squareToAlgebraic(previousMove.getToSquare());
+
+        std::ostringstream json;
+
+        json << "{" <<
+        "\"depth\":" << maxDepthSearched << "," <<
+        "\"evaluation\":\"" << currentEvaluationStr.str() << "\"," <<
+        "\"move\":\"" << fromSquare << "-" << toSquare << "\"" <<
+        "}";
+
+        return json.str();
+    }
+
     bool isValidSquare(int row, int col) {
         return (row >= 0 && row <= 7 && col >= 0 && col <= 7);
     }
@@ -118,7 +159,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void initialiseGame() {
         game = Game();
-        //game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -179,6 +220,16 @@ extern "C" {
 
         moveInfoJson = moveInfoToJson(*moveInfoOpt);
         return moveInfoJson.c_str();
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    const char* getEngineStats() {
+        uint8_t maxDepthSearched = engine.getMaxDepthSearched();
+        int currentEvaluation = engine.getCurrentEvaluation();
+        Move previousMove = engine.getPreviousMove();
+
+        engineStatsJson = engineStatsToJson(maxDepthSearched, currentEvaluation, previousMove);
+        return engineStatsJson.c_str();
     }
 
     EMSCRIPTEN_KEEPALIVE

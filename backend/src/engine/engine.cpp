@@ -58,6 +58,7 @@ Move Engine::getMove(Game& game) {
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
     Move bestMove;
+    maxDepthSearched = 0;
 
     auto start = std::chrono::steady_clock::now();
     int timeLimit = 2000; // In ms
@@ -67,8 +68,7 @@ Move Engine::getMove(Game& game) {
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= timeLimit;
     };
 
-    uint8_t depth;
-    for (depth = 1; depth <= MAX_DEPTH; depth++) {
+    for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
         moveBuffer.clear();
         MoveGenerator::legalMoves(board, colour, moveBuffer);
         bestMove != Move() ? Evaluation::orderMoves(moveBuffer, board, &bestMove) : Evaluation::orderMoves(moveBuffer, board);
@@ -93,12 +93,12 @@ Move Engine::getMove(Game& game) {
         if (timeUp()) break;
 
         bestMove = currentBest;
+        currentEvaluation = (game.getCurrentTurn() == Colour::WHITE) ? bestEval : -bestEval;
     }
 
     transpositionTable.incrementGeneration();
     quiescenceTranspositionTable.incrementGeneration();
-
-    std::cout << "Depth completed: " << static_cast<int>(depth - 1) << std::endl;
+    previousMove = bestMove;
 
     return bestMove;
 }
@@ -109,12 +109,17 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
     if (entry && entry->depth >= depth) {
-        if (entry->flag == TTFlag::EXACT) return entry->eval;
-        if (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) return entry->eval;
-        if (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha) return entry->eval;
+        if (entry->flag == TTFlag::EXACT ||
+           (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) ||
+           (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha)) {
+
+            maxDepthSearched = std::max(maxDepthSearched, ply);
+            return entry->eval;
+        }
     }
 
     if (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK) {
+        maxDepthSearched = std::max(maxDepthSearched, ply);
         return Evaluation::evaluate(game, state, ply);
     }
 
@@ -187,12 +192,17 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     uint64_t hash = game.getHash();
     TTEntry* entry = quiescenceTranspositionTable.getEntry(hash);
     if (entry && entry->depth >= qdepth) {
-        if (entry->flag == TTFlag::EXACT) return entry->eval;
-        if (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) return entry->eval;
-        if (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha) return entry->eval;
+        if (entry->flag == TTFlag::EXACT ||
+           (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) ||
+           (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha)) {
+
+            maxDepthSearched = std::max(maxDepthSearched, ply);
+            return entry->eval;
+        }
     }
 
     if (qdepth == 0 || (state != GameStateEvaluation::IN_PROGRESS && state != GameStateEvaluation::CHECK)) {
+        maxDepthSearched = std::max(maxDepthSearched, ply);
         return Evaluation::evaluate(game, state, ply);
     }
 
@@ -200,7 +210,10 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
     // Standard pat
     int16_t bestEval = currentEval;
-    if (bestEval >= beta) return bestEval;
+    if (bestEval >= beta) {
+        maxDepthSearched = std::max(maxDepthSearched, ply);
+        return bestEval;
+    }
     if (bestEval > alpha) alpha = bestEval;
 
     Board& board = game.getBoard();

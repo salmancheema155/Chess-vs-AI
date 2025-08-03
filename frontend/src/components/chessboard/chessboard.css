@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
     width: fit-content;
-    margin: 20px auto;
+    margin: 20px 200px 20px 0;
 }
 
 .board-row {
@@ -95,7 +95,7 @@
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.95);
     padding: 12px 24px;
-    border: 2px solid #333;
+    border: 2px solid rgb(51, 51, 51);
     border-radius: 8px;
     font-size: 20px;
     z-index: 12;
