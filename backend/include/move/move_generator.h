@@ -35,6 +35,42 @@ public:
     static void legalMoves(Board& board, Colour colour, std::vector<Move>& moves);
 
     /**
+     * @brief Adds all pseudo legal moves to the given vector moves
+     * @param board Board object representing the current board state
+     * @param colour Colour of piece
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalMoves function instead for exact list of legal moves
+     */
+    static void pseudoLegalMoves(const Board& board, Colour colour, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds pseudo legal moves for the given piece type to the given vector moves
+     * @param board Board object representing the current board state
+     * @param piece Type of piece
+     * @param colour Colour of piece
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalMoves function instead for exact list of legal moves
+     */
+    static void pseudoLegalMoves(const Board& board, Piece piece, Colour colour, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds pseudo legal moves to the given vector moves
+     * @param board Board object representing the current board state
+     * @param piece Type of piece
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalMoves function instead for exact list of legal moves
+     */
+    static void pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /**
      * @brief Gets the legal captures for a given piece and colour
      * @param board Board object representing the current board state
      * @param piece Piece to find legal moves for
@@ -86,19 +122,6 @@ private:
      * @param moves Moves out paramater
      */
     static void quiescenceFilter(Board& board, Colour colour, std::vector<Move>& moves);
-
-    /**
-     * @brief Adds pseudo legal moves to the given vector moves
-     * @param board Board object representing the current board state
-     * @param piece Type of piece
-     * @param colour Colour of piece
-     * @param currSquare Square that the piece is located on (0-63)
-     * @param moves Vector to append legal moves to
-     * @warning This function does not take into account moves where the king will be placed in a check
-     * The vector moves may still append with moves where the king will be in direct danger
-     * Use legalMoves function instead for exact list of legal moves
-     */
-    static void pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
 
     /**
      * @brief Adds pseudo legal capture moves to the given vector moves

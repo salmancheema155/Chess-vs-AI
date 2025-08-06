@@ -63,18 +63,7 @@ void MoveGenerator::legalMoves(Board& board, Piece piece, Colour colour,
 }
 
 void MoveGenerator::legalMoves(Board& board, Colour colour, std::vector<Move>& moves) {
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
-                                Piece::ROOK, Piece::QUEEN, Piece::KING};
-    
-    for (Piece piece : pieces) {
-        Bitboard bitboard = board.getBitboard(piece, colour);
-        while (bitboard) {
-            uint8_t square = std::countr_zero(bitboard);
-            pseudoLegalMoves(board, piece, colour, square, moves);
-            bitboard &= (bitboard - 1);
-        }
-    }
-
+    pseudoLegalMoves(board, colour, moves);
     filterIllegalMoves(board, colour, moves);
 }
 
@@ -109,18 +98,7 @@ void MoveGenerator::quiescenceMoves(Board& board, Piece piece, Colour colour,
 }
 
 void MoveGenerator::quiescenceMoves(Board& board, Colour colour, std::vector<Move>& moves) {
-    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
-                                Piece::ROOK, Piece::QUEEN, Piece::KING};
-    
-    for (Piece piece : pieces) {
-        Bitboard bitboard = board.getBitboard(piece, colour);
-        while (bitboard) {
-            uint8_t square = std::countr_zero(bitboard);
-            pseudoLegalMoves(board, piece, colour, square, moves);
-            bitboard &= (bitboard - 1);
-        }
-    }
-
+    pseudoLegalMoves(board, colour, moves);
     quiescenceFilter(board, colour, moves);
 }
 
@@ -164,6 +142,22 @@ void MoveGenerator::quiescenceFilter(Board& board, Colour colour, std::vector<Mo
     }
 
     moves = std::move(filtered);
+}
+
+void MoveGenerator::pseudoLegalMoves(const Board& board, Colour colour, std::vector<Move>& moves) {
+    constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, 
+                                Piece::ROOK, Piece::QUEEN, Piece::KING};
+    
+    for (Piece piece : pieces) pseudoLegalMoves(board, piece, colour, moves);
+}
+
+void MoveGenerator::pseudoLegalMoves(const Board& board, Piece piece, Colour colour, std::vector<Move>& moves) {
+    Bitboard bitboard = board.getBitboard(piece, colour);
+    while (bitboard) {
+        uint8_t square = std::countr_zero(bitboard);
+        pseudoLegalMoves(board, piece, colour, square, moves);
+        bitboard &= (bitboard - 1);
+    }
 }
 
 void MoveGenerator::pseudoLegalMoves(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves) {
