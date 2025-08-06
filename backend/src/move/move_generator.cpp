@@ -90,18 +90,6 @@ void MoveGenerator::legalCaptures(Board& board, Colour colour, std::vector<Move>
     filterIllegalMoves(board, colour, moves);
 }
 
-void MoveGenerator::quiescenceMoves(Board& board, Piece piece, Colour colour, 
-                                    uint8_t currSquare, std::vector<Move>& moves) {
-
-    pseudoLegalMoves(board, piece, colour, currSquare, moves);
-    quiescenceFilter(board, colour, moves);
-}
-
-void MoveGenerator::quiescenceMoves(Board& board, Colour colour, std::vector<Move>& moves) {
-    pseudoLegalMoves(board, colour, moves);
-    quiescenceFilter(board, colour, moves);
-}
-
 void MoveGenerator::filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves) {
     auto castlingRightsBeforeMove = board.getCastlingRights();
     auto enPassantSquareBeforeMove = board.getEnPassantSquare();
@@ -114,31 +102,6 @@ void MoveGenerator::filterIllegalMoves(Board& board, Colour colour, std::vector<
         board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
 
         if (!inCheck) filtered.push_back(move);
-    }
-
-    moves = std::move(filtered);
-}
-
-void MoveGenerator::quiescenceFilter(Board& board, Colour colour, std::vector<Move>& moves) {
-    auto castlingRightsBeforeMove = board.getCastlingRights();
-    auto enPassantSquareBeforeMove = board.getEnPassantSquare();
-
-    Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-
-    std::vector<Move> filtered;
-    filtered.reserve(moves.capacity());
-    for (Move move : moves) {
-        board.makeMove(move, colour);
-        bool inCheck = Check::isInCheck(board, colour);
-
-        if (!inCheck && 
-            (move.getCapturedPiece() != Move::NO_CAPTURE || 
-            move.getPromotionPiece() == toIndex(Piece::QUEEN) || 
-            Check::isInCheck(board, opposingColour))) {
-                filtered.push_back(move);
-        }   
-
-        board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
     }
 
     moves = std::move(filtered);
