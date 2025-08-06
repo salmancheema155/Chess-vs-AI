@@ -90,7 +90,24 @@ bool Check::isInCheck(const Board& board, Colour colour) {
 }
 
 bool Check::hasMove(Board& board, Colour colour) {
-    moveBuffer.clear();
-    MoveGenerator::legalMoves(board, colour, moveBuffer);
-    return !moveBuffer.empty();
+    constexpr Piece pieces[6] = {Piece::KING, Piece::KNIGHT, Piece::PAWN, 
+                                Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+
+    for (Piece piece : pieces) {
+        moveBuffer.clear();
+        MoveGenerator::pseudoLegalMoves(board, piece, colour, moveBuffer);
+
+        auto castlingRightsBeforeMove = board.getCastlingRights();
+        auto enPassantSquareBeforeMove = board.getEnPassantSquare();
+
+        for (Move move : moveBuffer) {
+            board.makeMove(move, colour);
+            bool inCheck = Check::isInCheck(board, colour);
+            board.undo(move, colour, castlingRightsBeforeMove, enPassantSquareBeforeMove);
+
+            if (!inCheck) return true;
+        }
+    }
+
+    return false;
 }
