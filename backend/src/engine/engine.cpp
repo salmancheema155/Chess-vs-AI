@@ -11,6 +11,7 @@
 #include "board/board.h"
 #include "move/move.h"
 #include "game/game.h"
+#include "check/check.h"
 #include "move/move_generator.h"
 #include "chess_types.h"
 
@@ -68,16 +69,31 @@ Move Engine::getMove(Game& game) {
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= timeLimit;
     };
 
-    for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
+    uint8_t depth;
+    for (depth = 1; depth <= MAX_DEPTH; depth++) {
+        auto profile_start = std::chrono::high_resolution_clock::now();
+
         moveBuffer.clear();
-        MoveGenerator::legalMoves(board, colour, moveBuffer);
-        bestMove != Move() ? Evaluation::orderMoves(moveBuffer, board, &bestMove) : Evaluation::orderMoves(moveBuffer, board);
+        MoveGenerator::pseudoLegalMoves(board, colour, moveBuffer);
+        if (bestMove != Move()) {
+            Evaluation::orderMoves(moveBuffer, board, &bestMove);
+        } else {
+            Evaluation::orderMoves(moveBuffer, board);
+        }
 
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
         for (const Move move : moveBuffer) {
             game.makeMove(move);
+            bool inCheck = Check::isInCheck(board, colour);
+
+            // Illegal move
+            if (inCheck) {
+                game.undo();
+                continue;
+            }
+
             GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
             int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), newState, timeUp);
             game.undo();
@@ -94,7 +110,12 @@ Move Engine::getMove(Game& game) {
 
         bestMove = currentBest;
         currentEvaluation = (game.getCurrentTurn() == Colour::WHITE) ? bestEval : -bestEval;
+
+        auto profile_end = std::chrono::high_resolution_clock::now();
+        std::cout << "Time taken at depth " << static_cast<int>(depth) << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(profile_end - profile_start) << std::endl;
     }
+
+    //std::cout << "Depth achieved: " << static_cast<int>(depth - 1) << std::endl;
 
     transpositionTable.incrementGeneration();
     quiescenceTranspositionTable.incrementGeneration();
@@ -152,11 +173,19 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
 
     std::vector<Move>& moves = negamaxMoveBuffers[ply];
     moves.clear();
-    MoveGenerator::legalMoves(board, colour, moves);
+    MoveGenerator::pseudoLegalMoves(board, colour, moves);
     Evaluation::orderMoves(moves, board, ttMove);
 
     for (const Move move : moves) {
         game.makeMove(move);
+        bool inCheck = Check::isInCheck(board, colour);
+
+        // Illegal move
+        if (inCheck) {
+            game.undo();
+            continue;
+        }
+
         GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
         uint8_t extension = (newState == GameStateEvaluation::CHECK && extensionCount < MAX_EXTENSION_COUNT) ? 1 : 0;
         int16_t eval = -negamax(game, depth - 1 + extension, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
@@ -218,12 +247,12 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
 
     Board& board = game.getBoard();
     Colour colour = game.getCurrentTurn();
+    Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
 
     std::vector<Move>& moves = quiescenceMoveBuffers[qdepth];
     moves.clear();
-    (state != GameStateEvaluation::CHECK) ? MoveGenerator::quiescenceMoves(board, colour, moves) : 
-                                            MoveGenerator::legalMoves(board, colour, moves);
 
+    MoveGenerator::pseudoLegalMoves(board, colour, moves);
     Evaluation::orderQuiescenceMoves(moves, board);
 
     int16_t originalAlpha = alpha;
@@ -240,6 +269,25 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
         }
 
         game.makeMove(move);
+
+        // Illegal move / not interested in quiescence search
+        // If currently in check consider all legal moves, otherwise only consider captures, queen promotions and checking moves
+        if (state == GameStateEvaluation::CHECK) {
+            if (Check::isInCheck(board, colour)) {
+                game.undo();
+                continue;
+            }
+        } else {
+            if ((move.getCapturedPiece() == Move::NO_CAPTURE &&
+                move.getPromotionPiece() != toIndex(Piece::QUEEN) &&
+                !Check::isInCheck(board, opposingColour)) ||
+                Check::isInCheck(board, colour)) {
+
+                game.undo();
+                continue;
+            }
+        }
+
         GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
         int16_t eval = -quiescence(game, -beta, -alpha, qdepth - 1, newState, ply + 1);
         game.undo();
