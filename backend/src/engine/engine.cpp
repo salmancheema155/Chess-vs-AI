@@ -81,6 +81,9 @@ Move Engine::getMove(Game& game) {
             Evaluation::orderMoves(moveBuffer, board);
         }
 
+        int16_t alpha = std::numeric_limits<int16_t>::min() + 1;
+        int16_t beta = std::numeric_limits<int16_t>::max();
+
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
@@ -95,7 +98,7 @@ Move Engine::getMove(Game& game) {
             }
 
             GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
-            int16_t eval = -negamax(game, depth - 1, std::numeric_limits<int16_t>::min() + 1, std::numeric_limits<int16_t>::max(), newState, timeUp);
+            int16_t eval = -negamax(game, depth - 1, -beta, -alpha, newState, timeUp);
             game.undo();
 
             if (timeUp()) break;
@@ -104,6 +107,7 @@ Move Engine::getMove(Game& game) {
                 bestEval = eval;
                 currentBest = move;
             }
+            if (eval > alpha) alpha = eval;
         }
 
         if (timeUp()) break;
