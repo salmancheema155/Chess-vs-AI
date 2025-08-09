@@ -215,68 +215,13 @@ void MoveGenerator::pseudoLegalKnightMoves(const Board& board, Colour colour,
 void MoveGenerator::pseudoLegalBishopMoves(const Board& board, Colour colour, 
                                             uint8_t currSquare, std::vector<Move>& moves) {
 
-    Colour opposingColour = (colour == Colour::WHITE) ?
-                            Colour::BLACK :
-                            Colour::WHITE;
-    
-    constexpr int directions[4] = {7, 9, -9, -7}; // ↖, ↗, ↙, ↘
-    constexpr uint8_t rankChecks[4] = {7, 7, 0, 0}; // Boundaries depending on direction
-    constexpr uint8_t fileChecks[4] = {0, 7, 0, 7}; // Boundaries depending on direction
-
-    for (int i = 0; i < 4; i++) {
-        if (Board::getFile(currSquare) != fileChecks[i] && Board::getRank(currSquare) != rankChecks[i]) {
-            uint8_t square = currSquare + directions[i];
-            // Not at edge of the board and square is empty
-            while (Board::getFile(square) != fileChecks[i] && Board::getRank(square) != rankChecks[i] && board.isEmpty(square)) {
-                moves.push_back(Move(currSquare, square));
-                square += directions[i];
-            }
-            // Final square is either an empty square on the edge of the board or an occupied square
-            Colour finalSquareColour = board.getColour(square);
-            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
-                // Capture if final square is of the opposing colour
-                uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(board.getPiece(square)) :
-                                    Move::NO_CAPTURE;
-
-                moves.push_back(Move(currSquare, square, capture));
-            }
-        }
-    }
+    pseudoLegalMovesFromTable(board, colour, currSquare, moves, PrecomputeMoves::getBishopMovesFromTable(currSquare, board.getPiecesBitboard()));
 }
 
 void MoveGenerator::pseudoLegalRookMoves(const Board& board, Colour colour, 
                                         uint8_t currSquare, std::vector<Move>& moves) {
 
-    using Function = uint8_t(*)(uint8_t);
-    Colour opposingColour = (colour == Colour::WHITE) ?
-                        Colour::BLACK :
-                        Colour::WHITE;
-    
-    constexpr int directions[4] = {-1, 8, 1, -8}; // ←, ↑, →, ↓
-    constexpr uint8_t boundaryChecks[4] = {0, 7, 7, 0}; // file, rank, file, rank
-    Function functions[2] = {Board::getFile, Board::getRank}; // Alternate between file and rank checks
-
-    for (int i = 0; i < 4; i++) {
-        if (functions[i & 0x1](currSquare) != boundaryChecks[i]) { // toggle between checking file and rank
-            uint8_t square = currSquare + directions[i];
-            // Not at edge of the board and square is empty
-            while (functions[i & 0x1](square) != boundaryChecks[i] && board.isEmpty(square)) {
-                moves.push_back(Move(currSquare, square));
-                square += directions[i];
-            }
-            // Final square is either an empty square on the edge of the board or an occupied square
-            Colour finalSquareColour = board.getColour(square);
-            if (finalSquareColour == Colour::NONE || finalSquareColour == opposingColour) {
-                // Capture if final square is of the opposing colour
-                uint8_t capture = (finalSquareColour == opposingColour) ?
-                                    toIndex(board.getPiece(square)) :
-                                    Move::NO_CAPTURE;
-
-                moves.push_back(Move(currSquare, square, capture));
-            }
-        }
-    }
+    pseudoLegalMovesFromTable(board, colour, currSquare, moves, PrecomputeMoves::getRookMovesFromTable(currSquare, board.getPiecesBitboard()));
 }
 
 void MoveGenerator::pseudoLegalQueenMoves(const Board& board, Colour colour, 
