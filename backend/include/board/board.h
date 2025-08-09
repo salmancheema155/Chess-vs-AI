@@ -372,7 +372,7 @@ public:
      * @param square Square to find the rank of (0-63)
      * @return Rank of the square
      */
-    static inline uint8_t getRank(uint8_t square) {
+    static inline constexpr uint8_t getRank(uint8_t square) {
         assert(square < 64 && "square must be between 0-63");
         return square >> 3;
     }
@@ -382,7 +382,7 @@ public:
      * @param square Square to find the file of (0-63)
      * @return File of the square
      */
-    static inline uint8_t getFile(uint8_t square) {
+    static inline constexpr uint8_t getFile(uint8_t square) {
         assert(square < 64 && "square must be between 0-63");
         return square & 0x7;
     }
