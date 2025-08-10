@@ -178,32 +178,80 @@ void MoveGenerator::pseudoLegalCaptures(const Board& board, Piece piece, Colour 
 void MoveGenerator::pseudoLegalPawnMoves(const Board& board, Colour colour, 
                                         uint8_t currSquare, std::vector<Move>& moves) {
 
-    int8_t direction = (colour == Colour::WHITE) ? 1 : -1;
-    uint8_t nextSquare = currSquare + 8 * direction;
-    uint8_t promotionPawnRank = (colour == Colour::WHITE) ? 6 : 1;
+    uint8_t promotionPawnRanks[2] = {6, 1};
+    uint8_t c = toIndex(colour);
+    if (Board::getRank(currSquare) != promotionPawnRanks[c]) {
+        Bitboard singlePawnPush = PrecomputeMoves::singlePawnPushTable[c][currSquare];
+        uint8_t singlePawnPushSquare = std::countr_zero(singlePawnPush);
+        bool singlePawnPushSquareEmpty = board.isEmpty(singlePawnPushSquare);
 
-    // One square forward
-    if (board.isEmpty(nextSquare)) {
-        // Possible promotion
-        if (Board::getRank(currSquare) == promotionPawnRank) {
-            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::KNIGHT)));
-            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::BISHOP)));
-            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::ROOK)));
-            moves.push_back(Move(currSquare, nextSquare, Move::NO_CAPTURE, toIndex(Piece::QUEEN)));
-        } else {
-            moves.push_back(Move(currSquare, nextSquare));
+        if (singlePawnPushSquareEmpty) {
+            moves.push_back(Move(currSquare, singlePawnPushSquare));
+        }
 
-            // Two squares forward
-            nextSquare += 8 * direction;
-            uint8_t initialPawnRank = (colour == Colour::WHITE) ? 1 : 6;
-            bool isUnmoved = (Board::getRank(currSquare) == initialPawnRank);
-            if (isUnmoved && board.isEmpty(nextSquare)) { // Unmoved and square is free
-                moves.push_back(Move(currSquare, nextSquare));
+        Bitboard doublePawnPush = PrecomputeMoves::doublePawnPushTable[c][currSquare];
+        if (doublePawnPush) {
+            uint8_t doublePawnPushSquare = std::countr_zero(doublePawnPush);
+            bool doublePawnPushSquareEmpty = board.isEmpty(doublePawnPushSquare);
+            
+            if (singlePawnPushSquareEmpty && doublePawnPushSquareEmpty) {
+                moves.push_back(Move(currSquare, doublePawnPushSquare));
             }
         }
-    }
 
-    pseudoLegalPawnCaptures(board, colour, currSquare, moves);
+        Bitboard precomputedCaptures = PrecomputeMoves::pawnCaptureTable[c][currSquare];
+        Bitboard captureBitboard = precomputedCaptures & board.getOpposingBitboard(colour);
+        while (captureBitboard) {
+            uint8_t captureSquare = std::countr_zero(captureBitboard);
+            uint8_t capture = toIndex(board.getPiece(captureSquare));
+            moves.push_back(Move(currSquare, captureSquare, capture));
+
+            captureBitboard &= captureBitboard - 1;
+        }
+
+        // En passant
+        const std::optional<uint8_t> enPassantSquare = board.getEnPassantSquare();
+        if (enPassantSquare.has_value()) {
+            Bitboard enPassantAttacks = PrecomputeMoves::enPassantSquareTable[c][currSquare];
+            int directions[2] = {1, -1};
+            while (enPassantAttacks) {
+                uint8_t enPassantAttackSquare = std::countr_zero(enPassantAttacks);
+                if (enPassantAttackSquare == *enPassantSquare) {
+                    uint8_t captureSquare = enPassantAttackSquare + 8 * directions[c];
+                    moves.push_back(Move(currSquare, captureSquare, toIndex(Piece::PAWN), Move::NO_PROMOTION, Move::NO_CASTLE, 1));
+                }
+
+                enPassantAttacks &= enPassantAttacks - 1;
+            }
+        }
+
+    } else {
+        // Possible promotion
+        Bitboard singlePawnPush = PrecomputeMoves::singlePawnPushTable[c][currSquare];
+        uint8_t singlePawnPushSquare = std::countr_zero(singlePawnPush);
+        bool singlePawnPushSquareEmpty = board.isEmpty(singlePawnPushSquare);
+
+        if (singlePawnPushSquareEmpty) {
+            moves.push_back(Move(currSquare, singlePawnPushSquare, Move::NO_CAPTURE, toIndex(Piece::KNIGHT)));
+            moves.push_back(Move(currSquare, singlePawnPushSquare, Move::NO_CAPTURE, toIndex(Piece::BISHOP)));
+            moves.push_back(Move(currSquare, singlePawnPushSquare, Move::NO_CAPTURE, toIndex(Piece::ROOK)));
+            moves.push_back(Move(currSquare, singlePawnPushSquare, Move::NO_CAPTURE, toIndex(Piece::QUEEN)));
+        }
+
+        Bitboard precomputedCaptures = PrecomputeMoves::pawnCaptureTable[c][currSquare];
+        Bitboard captureBitboard = precomputedCaptures & board.getOpposingBitboard(colour);
+        while (captureBitboard) {
+            uint8_t captureSquare = std::countr_zero(captureBitboard);
+            uint8_t capture = toIndex(board.getPiece(captureSquare));
+            
+            moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::KNIGHT)));
+            moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::BISHOP)));
+            moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::ROOK)));
+            moves.push_back(Move(currSquare, captureSquare, capture, toIndex(Piece::QUEEN)));
+
+            captureBitboard &= captureBitboard - 1;
+        }
+    }
 }
 
 void MoveGenerator::pseudoLegalKnightMoves(const Board& board, Colour colour, 

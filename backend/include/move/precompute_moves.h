@@ -263,14 +263,111 @@ public:
         return generateMoveTable(offsets);
     }();
 
-    inline static constexpr std::array<Bitboard, 64> whitePawnCaptureTable = [] {
-        constexpr std::array<std::array<int, 2>, 8> offsets = {{{-1, -1}, {1, -1}}};
-        return generateMoveTable(offsets);
+    inline static constexpr std::array<std::array<Bitboard, 64>, 2> pawnThreatTable = [] {
+        std::array<std::array<Bitboard, 64>, 2> table {};
+        constexpr std::array<std::array<int, 2>, 8> whiteOffsets = {{{-1, -1}, {1, -1}}};
+        constexpr std::array<std::array<int, 2>, 8> blackOffsets = {{{-1, 1}, {1, 1}}};
+
+        table[0] = generateMoveTable(whiteOffsets);
+        table[1] = generateMoveTable(blackOffsets);
+
+        return table;
     }();
 
-    inline static constexpr std::array<Bitboard, 64> blackPawnCaptureTable = [] {
-        constexpr std::array<std::array<int, 2>, 8> offsets = {{{-1, 1}, {1, 1}}};
-        return generateMoveTable(offsets);
+    inline static constexpr std::array<std::array<Bitboard, 64>, 2> pawnCaptureTable = [] {
+        std::array<std::array<Bitboard, 64>, 2> table {};
+        constexpr std::array<std::array<int, 2>, 8> whiteOffsets = {{{-1, 1}, {1, 1}}};
+        constexpr std::array<std::array<int, 2>, 8> blackOffsets = {{{-1, -1}, {1, -1}}};
+
+        table[0] = generateMoveTable(whiteOffsets);
+        table[1] = generateMoveTable(blackOffsets);
+
+        return table;
+    }();
+
+    /// Indexed as [white|black][square]
+    inline static constexpr std::array<std::array<Bitboard, 64>, 2> singlePawnPushTable = [] {
+        std::array<std::array<Bitboard, 64>, 2> table {};
+        Colour colours[] = {Colour::WHITE, Colour::BLACK};
+
+        for (Colour colour : colours) {
+            for (int square = 0; square < 64; square++) {
+                uint8_t rank = Board::getRank(square);
+                int c = Chess::toIndex(colour);
+
+                if (rank == 0 || rank == 7) {
+                    table[c][square] = 0ULL;
+                    continue;
+                }
+
+                int nextSquare = (c == 0) ? square + 8 : square - 8;
+                table[c][square] = 1ULL << nextSquare;
+            }
+        }
+
+        return table;
+    }();
+
+    /// Indexed as [white|black][square]
+    inline static constexpr std::array<std::array<Bitboard, 64>, 2> doublePawnPushTable = [] {
+        std::array<std::array<Bitboard, 64>, 2> table {};
+        Colour colours[] = {Colour::WHITE, Colour::BLACK};
+
+        for (Colour colour : colours) {
+            for (int square = 0; square < 64; square++) {
+                uint8_t rank = Board::getRank(square);
+                int c = Chess::toIndex(colour);
+                if (colour == Colour::WHITE && rank != 1) {
+                    table[c][square] = 0ULL;
+                    continue;
+                }
+                if (colour == Colour::BLACK && rank != 6) {
+                    table[c][square] = 0ULL;
+                    continue;
+                }
+
+                int doublePushSquare = (c == 0) ? square + 16 : square - 16;
+                table[c][square] = 1ULL << doublePushSquare;
+            }
+        }
+
+        return table;
+    }();
+
+    inline static constexpr std::array<std::array<Bitboard, 64>, 2> enPassantSquareTable = [] {
+        std::array<std::array<Bitboard, 64>, 2> table {};
+        Colour colours[] = {Colour::WHITE, Colour::BLACK};
+
+        for (Colour colour : colours) {
+            for (int square = 0; square < 64; square++) {
+                uint8_t rank = Board::getRank(square);
+                int c = Chess::toIndex(colour);
+                
+                if (colour == Colour::WHITE && rank != 4) {
+                    table[c][square] = 0ULL;
+                    continue;
+                }
+                if (colour == Colour::BLACK && rank != 3) {
+                    table[c][square] = 0ULL;
+                    continue;
+                }
+
+                uint8_t file = Board::getFile(square);
+                Bitboard bitboard = 0ULL;
+
+                if (file > 0) {
+                    bitboard |= (1ULL << (square - 1));
+                }
+
+                if (file < 7) {
+                    bitboard |= (1ULL << (square + 1));
+                }
+                
+                table[c][square] = bitboard;
+            }
+        }
+
+        return table;
     }();
 
     /**
