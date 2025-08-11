@@ -60,7 +60,7 @@ namespace {
      * @param colour Colour of piece
      * @param currSquare Square that the piece is located on (0-63)
      * @param moves Vector to append legal capture moves to
-     * @param precomputedMoveBitboard Bitboard representation of possible capture moves for that piece (from table lookup)
+     * @param precomputedMoveBitboard Bitboard representation of possible capture for that piece (from table lookup)
      * @warning This function does not take into account king safety
      * It is possible that the capture moves generated from this function can put the king in direct danger
      * Use MoveGenerator::legalCaptures instead to take into account king safety
@@ -76,6 +76,35 @@ namespace {
             uint8_t capture = toIndex(board.getPiece(bitIndex));
             moves.push_back(Move(currSquare, bitIndex, capture));
             captureBitboard &= captureBitboard - 1; // Remove trailing set bit
+        }
+    }
+
+    /**
+     * @brief Generates pseudo legal check moves which are not captures using a precomputed table of moves
+     * @param board Board object representing current board state
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param moves Vector to append legal capture moves to
+     * @param precomputedMoveBitboard Bitboard representation of possible moves for that piece (from table lookup)
+     * @param precomputedKingThreatBitboard Bitboard representation of squares that attack the opposing colour king
+     * @warning This function does not take into account king safety
+     * It is possible that the capture moves generated from this function can put the king in direct danger
+     * @attention This function does not take into account discovered attack checks
+     * @note This function does not take into account pseudo legal moves where a king attacks another king
+     */
+    static void pseudoLegalNonCaptureChecksFromTable(const Board& board, Colour colour, uint8_t currSquare, std::vector<Move>& moves, 
+                                                    Bitboard precomputedMoveBitboard, Bitboard precomputedKingThreatBitboard) {
+
+        assert(currSquare < 64 && "currSquare must be between 0-63");
+        Bitboard captureBitboard = precomputedMoveBitboard & board.getOpposingBitboard(colour); // Bitboard of moves which are captures
+        precomputedMoveBitboard &= ~board.getBitboard(colour); // Remove moves which land onto same colour pieces
+        precomputedMoveBitboard &= ~captureBitboard; // Remove moves which are captures
+        precomputedMoveBitboard &= precomputedKingThreatBitboard; // Only include checking moves
+
+        while (precomputedMoveBitboard) {
+            uint8_t bitIndex = std::countr_zero(precomputedMoveBitboard); // Square on board
+            moves.push_back(Move(currSquare, bitIndex));
+            precomputedMoveBitboard &= precomputedMoveBitboard - 1; // Remove trailing set bit
         }
     }
 }
@@ -245,6 +274,38 @@ void MoveGenerator::pseudoLegalQueenPromotions(const Board& board, Colour colour
         }
 
         pawnsBitboard &= (pawnsBitboard - 1);
+    }
+}
+
+void MoveGenerator::pseudoLegalNonCaptureChecks(const Board& board, Colour colour, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    constexpr Piece pieces[5] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+    
+    for (Piece piece : pieces) {
+        Bitboard bitboard = board.getBitboard(piece, colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            switch (piece) {
+                case Piece::PAWN:
+                    pseudoLegalNonCapturePawnChecks(board, colour, square, opponentKingSquare, moves);
+                    break;
+                case Piece::KNIGHT:
+                    pseudoLegalNonCaptureKnightChecks(board, colour, square, opponentKingSquare, moves);
+                    break;
+                case Piece::BISHOP:
+                    pseudoLegalNonCaptureBishopChecks(board, colour, square, opponentKingSquare, moves);
+                    break;
+                case Piece::ROOK:
+                    pseudoLegalNonCaptureRookChecks(board, colour, square, opponentKingSquare, moves);
+                    break;
+                case Piece::QUEEN:
+                    pseudoLegalNonCaptureQueenChecks(board, colour, square, opponentKingSquare, moves);
+                    break;
+                default:
+                    assert(false && "Piece must be either PAWN, KNIGHT, BISHOP, ROOK or QUEEN");
+            }
+
+            bitboard &= (bitboard - 1);
+        }
     }
 }
 
@@ -426,4 +487,52 @@ void MoveGenerator::pseudoLegalKingCaptures(const Board& board, Colour colour,
                                             uint8_t currSquare, std::vector<Move>& moves) {
 
     pseudoLegalCapturesFromTable(board, colour, currSquare, moves, PrecomputeMoves::kingMoveTable[currSquare]);
+}
+
+void MoveGenerator::pseudoLegalNonCapturePawnChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    uint8_t c = toIndex(colour);
+    Bitboard movesBitboard = 0ULL;
+
+    Bitboard singlePawnPush = PrecomputeMoves::singlePawnPushTable[c][currSquare];
+    uint8_t singlePawnPushSquare = std::countr_zero(singlePawnPush);
+    bool singlePawnPushSquareEmpty = board.isEmpty(singlePawnPushSquare);
+
+    if (singlePawnPushSquareEmpty) {
+        movesBitboard = singlePawnPush;
+    }
+
+    Bitboard doublePawnPush = PrecomputeMoves::doublePawnPushTable[c][currSquare];
+    if (doublePawnPush) {
+        uint8_t doublePawnPushSquare = std::countr_zero(doublePawnPush);
+        bool doublePawnPushSquareEmpty = board.isEmpty(doublePawnPushSquare);
+        
+        if (singlePawnPushSquareEmpty && doublePawnPushSquareEmpty) {
+            movesBitboard |= doublePawnPush;
+        }
+    }
+
+    pseudoLegalNonCaptureChecksFromTable(board, colour, currSquare, moves, movesBitboard, PrecomputeMoves::pawnThreatTable[c][opponentKingSquare]);
+}
+
+void MoveGenerator::pseudoLegalNonCaptureKnightChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    pseudoLegalNonCaptureChecksFromTable(board, colour, currSquare, moves, 
+                                        PrecomputeMoves::knightMoveTable[currSquare], 
+                                        PrecomputeMoves::knightMoveTable[opponentKingSquare]);
+}
+
+void MoveGenerator::pseudoLegalNonCaptureBishopChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    pseudoLegalNonCaptureChecksFromTable(board, colour, currSquare, moves, 
+                                        PrecomputeMoves::getBishopMovesFromTable(currSquare, board.getPiecesBitboard()), 
+                                        PrecomputeMoves::getBishopMovesFromTable(opponentKingSquare, board.getPiecesBitboard()));
+}
+
+void MoveGenerator::pseudoLegalNonCaptureRookChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    pseudoLegalNonCaptureChecksFromTable(board, colour, currSquare, moves, 
+                                        PrecomputeMoves::getRookMovesFromTable(currSquare, board.getPiecesBitboard()), 
+                                        PrecomputeMoves::getRookMovesFromTable(opponentKingSquare, board.getPiecesBitboard()));
+}
+
+void MoveGenerator::pseudoLegalNonCaptureQueenChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves) {
+    pseudoLegalNonCaptureBishopChecks(board, colour, currSquare, opponentKingSquare, moves);
+    pseudoLegalNonCaptureRookChecks(board, colour, currSquare, opponentKingSquare, moves);
 }
