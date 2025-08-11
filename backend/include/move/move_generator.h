@@ -88,14 +88,16 @@ public:
      */
     static void legalCaptures(Board& board, Colour colour, std::vector<Move>& moves);
 
-private:
     /**
-     * @brief Filters out illegal moves
-     * @param board Board object representing current board state
-     * @param colour Colour of player's moves
-     * @param moves Moves out paramater
+     * @brief Adds all pseudo legal captures to the given vector moves
+     * @param board Board object representing the current board state
+     * @param colour Colour of piece
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * Use legalCaptures function instead for exact list of legal captures
      */
-    static void filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves);
+    static void pseudoLegalCaptures(const Board& board, Colour colour, std::vector<Move>& moves);
 
     /**
      * @brief Adds pseudo legal capture moves to the given vector moves
@@ -109,6 +111,25 @@ private:
      * Use legalCaptures function instead for exact list of legal moves
      */
     static void pseudoLegalCaptures(const Board& board, Piece piece, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds all pseudo legal queen promotions to the given vector moves
+     * @param board Board object representing the current board state
+     * @param colour Colour of piece
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     */
+    static void pseudoLegalQueenPromotions(const Board& board, Colour colour, std::vector<Move>& moves);
+
+private:
+    /**
+     * @brief Filters out illegal moves
+     * @param board Board object representing current board state
+     * @param colour Colour of player's moves
+     * @param moves Moves out paramater
+     */
+    static void filterIllegalMoves(Board& board, Colour colour, std::vector<Move>& moves);
 
     /**
      * @brief Adds pseudo legal moves to the given vector moves
