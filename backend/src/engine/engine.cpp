@@ -287,6 +287,7 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
     if (state != GameStateEvaluation::CHECK) {
         MoveGenerator::pseudoLegalCaptures(board, colour, moves);
         MoveGenerator::pseudoLegalQueenPromotions(board, colour, moves);
+        MoveGenerator::pseudoLegalNonCaptureChecks(board, colour, board.getKingSquare(opposingColour), moves);
     } else {
         MoveGenerator::pseudoLegalMoves(board, colour, moves);
     }
