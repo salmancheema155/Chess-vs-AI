@@ -89,7 +89,7 @@ private:
     const uint8_t QUIESCENCE_DEPTH;
 
     static constexpr uint8_t NULL_MOVE_REDUCTION = 2;
-    static constexpr int16_t DELTA_MARGIN = 100;
+    static constexpr int16_t DELTA_MARGIN = 150;
     static constexpr int MAX_EXTENSION_COUNT = 5;
 
     std::vector<Move> moveBuffer;

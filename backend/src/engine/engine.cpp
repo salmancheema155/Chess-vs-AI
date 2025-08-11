@@ -300,7 +300,8 @@ int16_t Engine::quiescence(Game& game, int16_t alpha, int16_t beta, uint8_t qdep
         uint8_t capturedPiece = move.getCapturedPiece();
         if (capturedPiece != Move::NO_CAPTURE) {
             int16_t capturedValue = Evaluation::getPieceValue(capturedPiece);
-            if (capturedValue + DELTA_MARGIN + alpha < currentEval && state != GameStateEvaluation::CHECK) {
+            // Capturing cannot raise alpha
+            if (currentEval + capturedValue + DELTA_MARGIN <= alpha && state != GameStateEvaluation::CHECK) {
                 continue;
             }
         }
