@@ -162,9 +162,10 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
 
     // Null move pruning
     bool inCheck = (state == GameStateEvaluation::CHECK);
-    if (allowNullMove && !inCheck && depth >= NULL_MOVE_REDUCTION + 1 && !disableNullPruning(board, colour)) {
+    if (allowNullMove && !inCheck && depth >= 3 && !disableNullPruning(board, colour)) {
         game.makeNullMove();
         GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
+        const int NULL_MOVE_REDUCTION = (depth >= 6) ? 3 : 2;
         int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, timeUp, ply + 1, extensionCount, false);
         game.undoNullMove();
 
@@ -190,10 +191,9 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     int moveCount = 0;
     for (const Move move : moves) {
         game.makeMove(move);
-        bool inCheck = Check::isInCheck(board, colour);
 
         // Illegal move
-        if (inCheck) {
+        if (Check::isInCheck(board, colour)) {
             game.undo();
             continue;
         }
