@@ -122,6 +122,19 @@ public:
      */
     static void pseudoLegalQueenPromotions(const Board& board, Colour colour, std::vector<Move>& moves);
 
+    /**
+     * @brief Adds all pseudo legal check moves which are not captures to the given vector moves
+     * @param board Board object representing the current board state
+     * @param colour Colour of piece
+     * @param opponentKingSquare Square that the king of the opposite colour occupies
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * @attention This function does not include discovered attack checks
+     * @note This function does not include pseudo legal moves where a king attacks another king
+     */
+    static void pseudoLegalNonCaptureChecks(const Board& board, Colour colour, uint8_t opponentKingSquare, std::vector<Move>& moves);
+
 private:
     /**
      * @brief Filters out illegal moves
@@ -183,6 +196,31 @@ private:
 
     /// \copydoc MoveGenerator::pseudoLegalPawnCaptures
     static void pseudoLegalKingCaptures(const Board& board, Colour colour, uint8_t currSquare, std::vector<Move>& moves);
+
+    /**
+     * @brief Adds pseudo legal check moves which are not captures to the given vector moves
+     * @param board Board object representing the current board state
+     * @param colour Colour of piece
+     * @param currSquare Square that the piece is located on (0-63)
+     * @param opponentKingSquare Square that the king of the opposite colour occupies
+     * @param moves Vector to append legal moves to
+     * @warning This function does not take into account moves where the king will be placed in a check
+     * The vector moves may still append with moves where the king will be in direct danger
+     * @attention This function does not include discovered attack checks
+     */
+    static void pseudoLegalNonCapturePawnChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::pseudoLegalNonCapturePawnChecks
+    static void pseudoLegalNonCaptureKnightChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::pseudoLegalNonCapturePawnChecks
+    static void pseudoLegalNonCaptureBishopChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::pseudoLegalNonCapturePawnChecks
+    static void pseudoLegalNonCaptureRookChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves);
+
+    /// \copydoc MoveGenerator::pseudoLegalNonCapturePawnChecks
+    static void pseudoLegalNonCaptureQueenChecks(const Board& board, Colour colour, uint8_t currSquare, uint8_t opponentKingSquare, std::vector<Move>& moves);
 };
 
 #endif // MOVE_GENERATOR_H
