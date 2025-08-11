@@ -12,6 +12,9 @@
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::Bitboard;
+using Chess::toIndex;
+
+Move Evaluation::killerMoves[256][2];
 
 namespace {
     double gamePhase(Board& board) {
@@ -96,15 +99,15 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     return eval;
 }
 
-void Evaluation::orderMoves(std::vector<Move>& moves, Board& board, const Move* bestMove) {
-    std::sort(moves.begin(), moves.end(), [&board, bestMove](const Move a, const Move b) {
-        return orderingScore(a, board, bestMove) > orderingScore(b, board, bestMove); 
+void Evaluation::orderMoves(std::vector<Move>& moves, Board& board, uint8_t ply, const Move* bestMove) {
+    std::sort(moves.begin(), moves.end(), [&board, ply, bestMove](const Move a, const Move b) {
+        return orderingScore(a, board, ply, bestMove) > orderingScore(b, board, ply, bestMove);
     });
 }
 
 void Evaluation::orderQuiescenceMoves(std::vector<Move>& moves, Board& board) {
     std::sort(moves.begin(), moves.end(), [&board](const Move a, const Move b) {
-        return orderingScore(a, board) > orderingScore(b, board); 
+        return orderingQuiescenceScore(a, board) > orderingQuiescenceScore(b, board);
     });
 }
 
@@ -125,7 +128,22 @@ int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state, uint8_t ply)
     return eval;
 }
 
-int16_t Evaluation::orderingScore(const Move move, Board& board, const Move* bestMove) {
+void Evaluation::addKillerMove(Move move, uint8_t ply) {
+    if (killerMoves[ply][0] != move && killerMoves[ply][1] != move) {
+        killerMoves[ply][1] = killerMoves[ply][0];
+        killerMoves[ply][0] = move;
+    }
+}
+
+void Evaluation::clearKillerMoveTable() {
+    std::memset(killerMoves, 0, sizeof(killerMoves));
+}
+
+int16_t Evaluation::orderingScore(const Move move, Board& board, uint8_t ply, const Move* bestMove) {
+    if (bestMove && move == *bestMove) return BEST_MOVE_VALUE;
+    if (move == killerMoves[ply][0]) return KILLER_MOVE_VALUE + 5;
+    if (move == killerMoves[ply][1]) return KILLER_MOVE_VALUE;
+
     int16_t score = 0;
     uint8_t capturedPiece = move.getCapturedPiece();
     if (capturedPiece != Move::NO_CAPTURE) {
@@ -134,12 +152,24 @@ int16_t Evaluation::orderingScore(const Move move, Board& board, const Move* bes
     }
 
     uint8_t promotionPiece = move.getPromotionPiece();
-    if (promotionPiece != Move::NO_PROMOTION) {
-        score += pieceEvals[promotionPiece] + 800;
+    if (promotionPiece == toIndex(Piece::QUEEN)) {
+        score += 9000;
     }
 
-    if (bestMove && move == *bestMove) {
-        score += BEST_MOVE_VALUE;
+    return score;
+}
+
+int16_t Evaluation::orderingQuiescenceScore(const Move move, Board& board) {
+    int16_t score = 0;
+    uint8_t capturedPiece = move.getCapturedPiece();
+    if (capturedPiece != Move::NO_CAPTURE) {
+        Piece attacker = board.getPiece(move.getFromSquare());
+        score += 10 * pieceEvals[capturedPiece] - pieceEvals[toIndex(attacker)];
+    }
+
+    uint8_t promotionPiece = move.getPromotionPiece();
+    if (promotionPiece == toIndex(Piece::QUEEN)) {
+        score += 9000;
     }
 
     return score;

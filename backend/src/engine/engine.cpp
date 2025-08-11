@@ -80,9 +80,9 @@ Move Engine::getMove(Game& game) {
         moveBuffer.clear();
         MoveGenerator::pseudoLegalMoves(board, colour, moveBuffer);
         if (bestMove != Move()) {
-            Evaluation::orderMoves(moveBuffer, board, &bestMove);
+            Evaluation::orderMoves(moveBuffer, board, 0, &bestMove);
         } else {
-            Evaluation::orderMoves(moveBuffer, board);
+            Evaluation::orderMoves(moveBuffer, board, 0);
         }
 
         int16_t alpha = std::numeric_limits<int16_t>::min() + 1;
@@ -126,6 +126,7 @@ Move Engine::getMove(Game& game) {
     //std::cout << "Depth achieved: " << static_cast<int>(depth - 1) << std::endl;
     std::cout << "Hit rate: " << 100 * (double)hits/(double)probes << "%" << std::endl;
 
+    Evaluation::clearKillerMoveTable();
     transpositionTable.incrementGeneration();
     quiescenceTranspositionTable.incrementGeneration();
     previousMove = bestMove;
@@ -186,7 +187,7 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     std::vector<Move>& moves = negamaxMoveBuffers[ply];
     moves.clear();
     MoveGenerator::pseudoLegalMoves(board, colour, moves);
-    Evaluation::orderMoves(moves, board, ttMove);
+    Evaluation::orderMoves(moves, board, ply, ttMove);
 
     int moveCount = 0;
     for (const Move move : moves) {
@@ -230,7 +231,13 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
             bestMove = move;
         }
         if (eval > alpha) alpha = eval;
-        if (beta <= alpha) break;
+        if (beta <= alpha) {
+            // Quiet move
+            if (move.getCapturedPiece() == Move::NO_CAPTURE && move.getPromotionPiece() == Move::NO_PROMOTION) {
+                Evaluation::addKillerMove(move, ply);
+            }
+            break;
+        }
     }
     
     TTEntry newEntry;

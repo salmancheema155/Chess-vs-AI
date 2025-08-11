@@ -2,6 +2,7 @@
 #define EVALUATION_H
 
 #include <cstdint>
+#include <cstring>
 #include "board/board.h"
 #include "move/move.h"
 #include "game/game.h"
@@ -24,9 +25,10 @@ public:
      * @brief Orders moves by predicted best to worse for normal negamax search
      * @param moves Moves vector to sort
      * @param board Board object representing current board state
+     * @param ply Number of half moves elapsed since the start of the search
      * @param bestMove Best move from previous depth if any
      */
-    static void orderMoves(std::vector<Move>& moves, Board& board, const Move* bestMove = nullptr);
+    static void orderMoves(std::vector<Move>& moves, Board& board, uint8_t ply, const Move* bestMove = nullptr);
 
     /**
      * @brief Orders moves by predicted best to worse for quiescence search
@@ -54,8 +56,22 @@ public:
         return pieceEvals[piece];
     }
 
+    /**
+     * @brief Clears the killer move table
+     * @note This should be called after every search to prevent stale data
+     */
+    static void clearKillerMoveTable();
+
+    /**
+     * @brief Adds the given move to the killer move table
+     * @param move Move to add to the table
+     * @param ply Number of half moves elapsed since the start of the search
+     */
+    static void addKillerMove(Move move, uint8_t ply);
+
 private:
-    static int16_t orderingScore(const Move move, Board& board, const Move* bestMove = nullptr);
+    static int16_t orderingScore(const Move move, Board& board, uint8_t ply, const Move* bestMove = nullptr);
+    static int16_t orderingQuiescenceScore(const Move move, Board& board);
 
     static constexpr int16_t CHECKMATE_VALUE = 30000;
 
@@ -67,7 +83,8 @@ private:
     static constexpr int16_t KING_VALUE = 10000;
     static constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
 
-    static constexpr int16_t BEST_MOVE_VALUE = 10000;
+    static constexpr int16_t BEST_MOVE_VALUE = 30000;
+    static constexpr int16_t KILLER_MOVE_VALUE = 80;
 
     static constexpr int16_t DOUBLED_PAWN_PENALTY = -12;
     static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -17;
@@ -78,6 +95,8 @@ private:
 
     static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
     static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
+
+    static Move killerMoves[256][2];
 };
 
 #endif // EVALUATION_H
