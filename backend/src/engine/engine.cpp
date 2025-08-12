@@ -208,10 +208,13 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
                                     depth >= 3 &&
                                     moveCount >= 4 &&
                                     move.getCapturedPiece() == Move::NO_CAPTURE &&
-                                    move.getPromotionPiece() == Move::NO_PROMOTION);
+                                    move.getPromotionPiece() == Move::NO_PROMOTION &&
+                                    !Evaluation::isKillerMove(move, ply));
 
         if (doLateMoveReduction) {
             newDepth--;
+            if (moveCount >= 6) newDepth--;
+            if (moveCount >= 12) newDepth--;
         }
 
         int16_t eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
