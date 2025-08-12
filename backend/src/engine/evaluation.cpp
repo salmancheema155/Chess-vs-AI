@@ -139,6 +139,10 @@ void Evaluation::clearKillerMoveTable() {
     std::memset(killerMoves, 0, sizeof(killerMoves));
 }
 
+bool Evaluation::isKillerMove(Move move, uint8_t ply) {
+    return (killerMoves[ply][0] == move || killerMoves[ply][1] == move);
+}
+
 int16_t Evaluation::orderingScore(const Move move, Board& board, uint8_t ply, const Move* bestMove) {
     if (bestMove && move == *bestMove) return BEST_MOVE_VALUE;
     if (move == killerMoves[ply][0]) return KILLER_MOVE_VALUE + 5;

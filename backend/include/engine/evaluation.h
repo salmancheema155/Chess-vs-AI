@@ -69,6 +69,14 @@ public:
      */
     static void addKillerMove(Move move, uint8_t ply);
 
+    /**
+     * @brief Checks if a given move is a killer move
+     * @param move Move to check if it is a killer move
+     * @param ply Number of half move elapsed since the start of the search
+     * @return True if the move is a killer move at ply, otherwise false
+     */
+    static bool isKillerMove(Move move, uint8_t ply);
+
 private:
     static int16_t orderingScore(const Move move, Board& board, uint8_t ply, const Move* bestMove = nullptr);
     static int16_t orderingQuiescenceScore(const Move move, Board& board);
