@@ -3,15 +3,25 @@
 
 #include <cstdint>
 #include <cstring>
+#include <utility>
 #include "board/board.h"
 #include "move/move.h"
 #include "game/game.h"
 #include "chess_types.h"
 
-using Colour = Chess::PieceColour;
+enum class MoveType : uint8_t {
+    BEST = 0,
+    PROMOTION = 1,
+    CAPTURE = 2,
+    KILLER = 3,
+    HISTORY = 4
+};
 
 class Evaluation {
 public:
+    using Piece = Chess::PieceType;
+    using Colour = Chess::PieceColour;
+
     /**
      * @brief Calculates the evaluation of the players pieces
      * @param board Board object representing current board state
@@ -26,9 +36,10 @@ public:
      * @param moves Moves vector to sort
      * @param board Board object representing current board state
      * @param ply Number of half moves elapsed since the start of the search
+     * @param colour Colour of player making the moves
      * @param bestMove Best move from previous depth if any
      */
-    static void orderMoves(std::vector<Move>& moves, Board& board, uint8_t ply, const Move* bestMove = nullptr);
+    static void orderMoves(std::vector<Move>& moves, Board& board, uint8_t ply, Colour colour, const Move* bestMove = nullptr);
 
     /**
      * @brief Orders moves by predicted best to worse for quiescence search
@@ -77,8 +88,29 @@ public:
      */
     static bool isKillerMove(Move move, uint8_t ply);
 
+    /**
+     * @brief Adds the given move to the history heuristic table
+     * @param move Move to add to the table
+     * @param piece Piece that is moving
+     * @param colour Colour of the player that made the move
+     * @param depth Depth remaining of the search at the point of adding the history heuristic
+     */
+    static void addHistoryHeuristic(Move move, Piece piece, Colour colour, uint8_t depth);
+
+    /**
+     * @brief Ages each entry inside of the table to prevent stale entries
+     * @note This function should be called after every search
+     */
+    static void ageHistoryHeuristicsTable();
+
+    /**
+     * @brief Clears the history heuristics table
+     * @note This funcion should not often be called and instead values should be aged
+     */
+    static void clearHistoryHeuristicsTable();
+
 private:
-    static int16_t orderingScore(const Move move, Board& board, uint8_t ply, const Move* bestMove = nullptr);
+    static std::pair<MoveType, int16_t> orderingScore(const Move move, Board& board, uint8_t ply, Colour colour, const Move* bestMove = nullptr);
     static int16_t orderingQuiescenceScore(const Move move, Board& board);
 
     static constexpr int16_t CHECKMATE_VALUE = 30000;
@@ -91,8 +123,7 @@ private:
     static constexpr int16_t KING_VALUE = 10000;
     static constexpr int16_t pieceEvals[6] = {PAWN_VALUE, KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE, KING_VALUE};
 
-    static constexpr int16_t BEST_MOVE_VALUE = 30000;
-    static constexpr int16_t KILLER_MOVE_VALUE = 80;
+    static constexpr int16_t PROMOTION_ORDERING_VALUE = 9000;
 
     static constexpr int16_t DOUBLED_PAWN_PENALTY = -12;
     static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -17;
@@ -104,7 +135,10 @@ private:
     static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
     static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
 
+    static constexpr int16_t MAX_HISTORY_VALUE = 128;
+
     static Move killerMoves[256][2];
+    static int16_t historyHeuristics[2][6][64][64];
 };
 
 #endif // EVALUATION_H
