@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <array>
+#include <algorithm>
+#include <cmath>
 
 namespace EnginePrecompute {
     inline constexpr std::array<uint64_t, 8> isolatedPawnMaskTable = [] {
@@ -142,6 +144,24 @@ namespace EnginePrecompute {
                 }
 
                 table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
+
+    inline const std::array<std::array<uint8_t, 64>, 64> chebyshevDistanceTable = [] {
+        std::array<std::array<uint8_t, 64>, 64> table;
+
+        for (uint8_t i = 0; i < 64; i++) {
+            for (uint8_t j = 0; j < 64; j++) {
+                int iRank = i / 8, iFile = i % 8;
+                int jRank = j / 8, jFile = j % 8;
+
+                // Chebyshev distance (maximum of horizontal and vertical distances)
+                uint8_t rankDifference = static_cast<uint8_t>(std::abs(iRank - jRank));
+                uint8_t fileDifference = static_cast<uint8_t>(std::abs(iFile - jFile));
+                table[i][j] = std::max(rankDifference, fileDifference);
             }
         }
 

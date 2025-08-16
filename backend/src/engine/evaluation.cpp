@@ -41,13 +41,15 @@ namespace {
 
 int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double phase) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
+    Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     uint8_t kingSquare = board.getKingSquare(colour);
+    uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
     uint8_t c = toIndex(colour);
     int16_t eval = 0;
 
     for (uint8_t i = 0; i < 6; i++) {
         Bitboard bitboard = board.getBitboard(pieces[i], colour);
-        while (bitboard != 0) {
+        while (bitboard) {
             // Piece evaluation
             eval += pieceEvals[i];
 
@@ -63,7 +65,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     // Pawn structure penalties
     Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     for (uint8_t file = 0; file < 8; file++) {
-        uint64_t mask = 0x0101010101010101ULL << file;
+        uint64_t mask = 0x0101010101010101ULL << file; // Mask of the current file
         uint8_t pawnCount = std::popcount(pawnsBitboard & mask);
 
         // Penalty for doubling pawns
@@ -110,6 +112,23 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     Bitboard minorPawnsShieldBitboard = EnginePrecompute::minorPawnShieldTable[c][kingSquare] & pawnsBitboard;
     double minorPawnShieldBonus = phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
     eval += static_cast<int16_t>(minorPawnShieldBonus);
+
+    // King tropism penalties
+    constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+    for (uint8_t i = 0; i < 4; i++) {
+        Bitboard bitboard = board.getBitboard(tropismPieces[i], colour);
+        while (bitboard) {
+            uint8_t square = std::countr_zero(bitboard);
+            uint8_t distance = EnginePrecompute::chebyshevDistanceTable[opposingKingSquare][square];
+            
+            if (distance < MAX_TROPISM_DISTANCE) {
+                double tropismPenalty = phase * KING_TROPISM_PENALTIES[i] * (MAX_TROPISM_DISTANCE - distance);
+                eval += static_cast<int16_t>(tropismPenalty);
+            }
+
+            bitboard &= bitboard - 1;
+        }
+    }
 
     return eval;
 }

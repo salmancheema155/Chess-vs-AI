@@ -138,6 +138,14 @@ private:
     static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 6;
     static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 3;
 
+    static constexpr int16_t MAX_TROPISM_DISTANCE = 4;
+    static constexpr int16_t KING_TROPISM_QUEEN_PENALTY = -8;
+    static constexpr int16_t KING_TROPISM_ROOK_PENALTY = -3;
+    static constexpr int16_t KING_TROPISM_KNIGHT_PENALTY = -5;
+    static constexpr int16_t KING_TROPISM_BISHOP_PENALTY = -2;
+    static constexpr int16_t KING_TROPISM_PENALTIES[4] = {KING_TROPISM_KNIGHT_PENALTY, KING_TROPISM_BISHOP_PENALTY, 
+                                                          KING_TROPISM_ROOK_PENALTY, KING_TROPISM_QUEEN_PENALTY};
+
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 
     static Move killerMoves[256][2];
