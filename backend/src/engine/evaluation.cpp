@@ -41,6 +41,8 @@ namespace {
 
 int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double phase) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
+    uint8_t kingSquare = board.getKingSquare(colour);
+    uint8_t c = toIndex(colour);
     int16_t eval = 0;
 
     for (uint8_t i = 0; i < 6; i++) {
@@ -52,7 +54,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             // Piece Square Table evaluation
             uint8_t square = std::countr_zero(bitboard);
             if (colour == Colour::WHITE) square ^= 0x38; // Flip square from black to white's perspective
-            eval += static_cast<int>(PieceTables::tables[i][square] * phase + PieceTables::endgameTables[i][square] * (1 - phase));
+            eval += static_cast<int16_t>(PieceTables::tables[i][square] * phase + PieceTables::endgameTables[i][square] * (1 - phase));
 
             bitboard &= (bitboard - 1);
         }
@@ -66,38 +68,48 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
         // Penalty for doubling pawns
         double doublingPenalty = (pawnCount - 1) * (phase * DOUBLED_PAWN_PENALTY + (1 - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int>(doublingPenalty);
+        eval += static_cast<int16_t>(doublingPenalty);
 
         // Penalty for isolated pawns
         uint64_t isolatedMask = EnginePrecompute::isolatedPawnMaskTable[file];
         if (pawnsBitboard & isolatedMask) continue; // Contains pawn on either immediate left or right file
         double isolatedPenalty =  pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int>(isolatedPenalty);
+        eval += static_cast<int16_t>(isolatedPenalty);
     }
 
     Bitboard pawnsBitboardTemp = pawnsBitboard;
     while (pawnsBitboardTemp) {
         uint8_t square = std::countr_zero(pawnsBitboardTemp);
-        uint64_t backwardMask = EnginePrecompute::backwardPawnMaskTable[toIndex(colour)][square];
+        uint64_t backwardMask = EnginePrecompute::backwardPawnMaskTable[c][square];
 
         // Does not contain pawns on adjacent files either next to or behind ranks
         if (!(pawnsBitboard & backwardMask)) {
             double backwardPenalty = (phase * BACKWARD_PAWN_PENALTY + (1 - phase) * BACKWARD_PAWN_PENALTY_END_GAME);
-            eval += static_cast<int>(backwardPenalty);
+            eval += static_cast<int16_t>(backwardPenalty);
         }
 
-        uint64_t connectedMask = EnginePrecompute::connectedPawnMaskTable[toIndex(colour)][square];
+        uint64_t connectedMask = EnginePrecompute::connectedPawnMaskTable[c][square];
 
         // Has a connected pawn
         uint64_t connectedBitboard = pawnsBitboard & connectedMask;
         if (connectedBitboard) {
             int connectedCount = std::popcount(connectedBitboard);
             double connectedBonus = connectedCount * (phase * CONNECTED_PAWN_BONUS + (1 - phase) * CONNECTED_PAWN_BONUS_END_GAME);
-            eval += static_cast<int>(connectedBonus);
+            eval += static_cast<int16_t>(connectedBonus);
         }
 
         pawnsBitboardTemp &= (pawnsBitboardTemp - 1);
     }
+
+    // Major pawn shield bonus
+    Bitboard majorPawnsShieldBitboard = EnginePrecompute::majorPawnShieldTable[c][kingSquare] & pawnsBitboard;
+    double majorPawnShieldBonus = phase * std::popcount(majorPawnsShieldBitboard) * MAJOR_PAWN_SHIELD_BONUS;
+    eval += static_cast<int16_t>(majorPawnShieldBonus);
+
+    // Minor pawn shield bonus
+    Bitboard minorPawnsShieldBitboard = EnginePrecompute::minorPawnShieldTable[c][kingSquare] & pawnsBitboard;
+    double minorPawnShieldBonus = phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
+    eval += static_cast<int16_t>(minorPawnShieldBonus);
 
     return eval;
 }

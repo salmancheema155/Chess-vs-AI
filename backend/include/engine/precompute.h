@@ -79,6 +79,74 @@ namespace EnginePrecompute {
 
         return table;
     }();
+
+    inline const std::array<std::array<uint64_t, 64>, 2> majorPawnShieldTable = [] {
+        std::array<std::array<uint64_t, 64>, 2> table;
+
+        for (uint8_t colour = 0; colour < 2; colour++) {
+            for (uint8_t square = 0; square < 64; square++) {
+                uint8_t rank = square / 8, file = square % 8;
+                uint64_t mask = 0ULL;
+
+                if (colour == 0 && rank != 0 && rank != 1) continue; // White and rank is neither 0 nor 1 
+                if (colour == 1 && rank != 6 && rank != 7) continue; // Black and rank is neither 6 nor 7
+
+                // Pawn directly in front of king
+                uint8_t inFrontPawnDefenderSquare = (colour == 0) ? square + 8 : square - 8;
+                mask |= (1ULL << inFrontPawnDefenderSquare);
+
+                // Pawn on the left diagonal of the king
+                if (file > 0) {
+                    uint8_t leftDiagonalPawnDefenderSquare = (colour == 0) ? square + 7 : square - 9;
+                    mask |= (1ULL << leftDiagonalPawnDefenderSquare);
+                }
+
+                // Pawn on the right diagonal of the king
+                if (file < 7) {
+                    uint8_t rightDiagonalPawnDefenderSquare = (colour == 0) ? square + 9 : square - 7;
+                    mask |= (1ULL << rightDiagonalPawnDefenderSquare);
+                }
+
+                table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
+
+    inline const std::array<std::array<uint64_t, 64>, 2> minorPawnShieldTable = [] {
+        std::array<std::array<uint64_t, 64>, 2> table;
+
+        for (uint8_t colour = 0; colour < 2; colour++) {
+            for (uint8_t square = 0; square < 64; square++) {
+                uint8_t rank = square / 8, file = square % 8;
+                uint64_t mask = 0ULL;
+
+                if (colour == 0 && rank != 0) continue; // White and rank is not 0 
+                if (colour == 1 && rank != 7) continue; // Black and rank is not 7
+
+                // Pawn 2 ranks directly in front of king
+                uint8_t inFrontPawnDefenderSquare = (colour == 0) ? square + 16 : square - 16;
+                mask |= (1ULL << inFrontPawnDefenderSquare);
+
+                // Pawn on the left diagonal 2 ranks in front of the king
+                if (file > 0) {
+                    uint8_t leftDiagonalPawnDefenderSquare = (colour == 0) ? square + 15 : square - 17;
+                    mask |= (1ULL << leftDiagonalPawnDefenderSquare);
+                }
+
+                // Pawn on the right diagonal 2 ranks in front of the king
+                if (file < 7) {
+                    uint8_t rightDiagonalPawnDefenderSquare = (colour == 0) ? square + 17 : square - 15;
+                    mask |= (1ULL << rightDiagonalPawnDefenderSquare);
+                }
+
+                table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
 };
 
 #endif // ENGINE_PRECOMPUTE_H

@@ -135,6 +135,9 @@ private:
     static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
     static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
 
+    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 6;
+    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 3;
+
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 
     static Move killerMoves[256][2];
