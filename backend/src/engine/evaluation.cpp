@@ -115,6 +115,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
     // King tropism penalties
     constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+    double tropismBonus = 0;
     for (uint8_t i = 0; i < 4; i++) {
         Bitboard bitboard = board.getBitboard(tropismPieces[i], colour);
         while (bitboard) {
@@ -122,13 +123,13 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             uint8_t distance = EnginePrecompute::chebyshevDistanceTable[opposingKingSquare][square];
             
             if (distance < MAX_TROPISM_DISTANCE) {
-                double tropismPenalty = phase * KING_TROPISM_PENALTIES[i] * (MAX_TROPISM_DISTANCE - distance);
-                eval += static_cast<int16_t>(tropismPenalty);
+                tropismBonus += phase * KING_TROPISM_BONUSES[i] * (MAX_TROPISM_DISTANCE - distance);
             }
 
             bitboard &= bitboard - 1;
         }
     }
+    eval += static_cast<int16_t>(tropismBonus);
 
     return eval;
 }
