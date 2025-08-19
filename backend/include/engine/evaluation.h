@@ -135,14 +135,14 @@ private:
     static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
     static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
 
-    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 6;
-    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 3;
+    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 15;
+    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 8;
 
     static constexpr int16_t MAX_TROPISM_DISTANCE = 4;
-    static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 3;
-    static constexpr int16_t KING_TROPISM_ROOK_BONUS = 1;
-    static constexpr int16_t KING_TROPISM_KNIGHT_BONUS = 2;
-    static constexpr int16_t KING_TROPISM_BISHOP_BONUS = 1;
+    static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 20;
+    static constexpr int16_t KING_TROPISM_ROOK_BONUS = 10;
+    static constexpr int16_t KING_TROPISM_KNIGHT_BONUS = 12;
+    static constexpr int16_t KING_TROPISM_BISHOP_BONUS = 5;
     static constexpr int16_t KING_TROPISM_BONUSES[4] = {KING_TROPISM_KNIGHT_BONUS, KING_TROPISM_BISHOP_BONUS, 
                                                           KING_TROPISM_ROOK_BONUS, KING_TROPISM_QUEEN_BONUS};
 

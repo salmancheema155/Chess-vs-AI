@@ -90,21 +90,24 @@ namespace EnginePrecompute {
                 uint8_t rank = square / 8, file = square % 8;
                 uint64_t mask = 0ULL;
 
-                if (colour == 0 && rank != 0 && rank != 1) continue; // White and rank is neither 0 nor 1 
-                if (colour == 1 && rank != 6 && rank != 7) continue; // Black and rank is neither 6 nor 7
+                // Not at first 2 ranks
+                if (colour == 0 && rank != 0 && rank != 1) continue;
+                if (colour == 1 && rank != 6 && rank != 7) continue;
 
                 // Pawn directly in front of king
-                uint8_t inFrontPawnDefenderSquare = (colour == 0) ? square + 8 : square - 8;
-                mask |= (1ULL << inFrontPawnDefenderSquare);
+                if (file <= 2 || file >= 5) {
+                    uint8_t inFrontPawnDefenderSquare = (colour == 0) ? square + 8 : square - 8;
+                    mask |= (1ULL << inFrontPawnDefenderSquare);
+                }
 
                 // Pawn on the left diagonal of the king
-                if (file > 0) {
+                if (file > 0 && (file <= 2 || file >= 6)) {
                     uint8_t leftDiagonalPawnDefenderSquare = (colour == 0) ? square + 7 : square - 9;
                     mask |= (1ULL << leftDiagonalPawnDefenderSquare);
                 }
 
                 // Pawn on the right diagonal of the king
-                if (file < 7) {
+                if (file < 7 && (file <= 1 || file >= 4)) {
                     uint8_t rightDiagonalPawnDefenderSquare = (colour == 0) ? square + 9 : square - 7;
                     mask |= (1ULL << rightDiagonalPawnDefenderSquare);
                 }
@@ -124,8 +127,9 @@ namespace EnginePrecompute {
                 uint8_t rank = square / 8, file = square % 8;
                 uint64_t mask = 0ULL;
 
-                if (colour == 0 && rank != 0) continue; // White and rank is not 0 
-                if (colour == 1 && rank != 7) continue; // Black and rank is not 7
+                // Not at first rank or in central files
+                if (colour == 0 && (rank != 0 || file >= 3 && file <= 5)) continue;
+                if (colour == 1 && (rank != 7 || file >= 3 && file <= 5)) continue;
 
                 // Pawn 2 ranks directly in front of king
                 uint8_t inFrontPawnDefenderSquare = (colour == 0) ? square + 16 : square - 16;

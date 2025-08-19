@@ -21,7 +21,7 @@ int16_t Evaluation::historyHeuristics[2][6][64][64];
 
 namespace {
     double gamePhase(Board& board) {
-        constexpr int MAX_PHASE = 16;
+        constexpr int MAX_PHASE = 24;
         constexpr Piece pieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
         constexpr Colour colours[2] = {Colour::WHITE, Colour::BLACK};
         constexpr int phaseValues[6] = {0, 1, 1, 2, 4, 0};
