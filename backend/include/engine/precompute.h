@@ -38,8 +38,8 @@ namespace EnginePrecompute {
             for (uint8_t square = 8; square < 56; square++) {
                 uint8_t rank = square / 8;
                 uint64_t mask = (colour == 0) ? 
-                    (1ULL << (8 * (rank + 1))) - 1 : // 0s followed by 8 * (rank + 1) 1s
-                    ~((1ULL << (8 * rank)) - 1); // 8 * (rank + 1) 1s followed by 0s
+                    (1ULL << (8 * rank)) - 1 : // 0s followed by 8 * rank 1s
+                    ~((1ULL << (8 * (rank + 1))) - 1); // 8 * (7 - rank) 1s followed by 0s
 
                 mask &= isolatedPawnMaskTable[square % 8];
                 table[colour][square] = mask;

@@ -5,6 +5,7 @@
 #include <utility>
 #include "board/board.h"
 #include "move/move.h"
+#include "move/precompute_moves.h"
 #include "game/game.h"
 #include "chess_types.h"
 #include "engine/evaluation.h"
@@ -82,10 +83,12 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     Bitboard pawnsBitboardTemp = pawnsBitboard;
     while (pawnsBitboardTemp) {
         uint8_t square = std::countr_zero(pawnsBitboardTemp);
+        uint8_t nextSquare = (colour == Colour::WHITE) ? square + 8 : square - 8;
         uint64_t backwardMask = EnginePrecompute::backwardPawnMaskTable[c][square];
+        uint64_t pawnThreatMask = PrecomputeMoves::pawnThreatTable[toIndex(opposingColour)][nextSquare];
 
-        // Does not contain pawns on adjacent files either next to or behind ranks
-        if (!(pawnsBitboard & backwardMask)) {
+        // Is backward pawn
+        if (board.isEmpty(nextSquare) && !(pawnsBitboard & backwardMask) && (board.getBitboard(Piece::PAWN, opposingColour) & pawnThreatMask)) {
             double backwardPenalty = (phase * BACKWARD_PAWN_PENALTY + (1 - phase) * BACKWARD_PAWN_PENALTY_END_GAME);
             eval += static_cast<int16_t>(backwardPenalty);
         }
