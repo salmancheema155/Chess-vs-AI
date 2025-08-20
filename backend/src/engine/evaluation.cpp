@@ -93,13 +93,13 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             eval += static_cast<int16_t>(backwardPenalty);
         }
 
-        uint64_t connectedMask = EnginePrecompute::connectedPawnMaskTable[c][square];
+        uint64_t pawnChainMask = EnginePrecompute::pawnChainMaskTable[c][square];
 
         // Has a connected pawn
-        uint64_t connectedBitboard = pawnsBitboard & connectedMask;
+        uint64_t connectedBitboard = pawnsBitboard & pawnChainMask;
         if (connectedBitboard) {
-            int connectedCount = std::popcount(connectedBitboard);
-            double connectedBonus = connectedCount * (phase * CONNECTED_PAWN_BONUS + (1 - phase) * CONNECTED_PAWN_BONUS_END_GAME);
+            uint8_t chainsCount = std::popcount(connectedBitboard);
+            double connectedBonus = chainsCount * (phase * PAWN_CHAIN_BONUS + (1 - phase) * PAWN_CHAIN_BONUS_END_GAME);
             eval += static_cast<int16_t>(connectedBonus);
         }
 

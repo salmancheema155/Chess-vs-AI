@@ -49,7 +49,7 @@ namespace EnginePrecompute {
         return table;
     }();
 
-    inline const std::array<std::array<uint64_t, 64>, 2> connectedPawnMaskTable = [] {
+    inline const std::array<std::array<uint64_t, 64>, 2> pawnChainMaskTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table;
 
         for (uint8_t colour = 0; colour < 2; colour++) {

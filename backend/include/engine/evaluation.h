@@ -125,24 +125,24 @@ private:
 
     static constexpr int16_t PROMOTION_ORDERING_VALUE = 9000;
 
-    static constexpr int16_t DOUBLED_PAWN_PENALTY = -12;
-    static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -17;
-    static constexpr int16_t ISOLATED_PAWN_PENALTY = -8;
-    static constexpr int16_t ISOLATED_PAWN_PENALTY_END_GAME = -13;
+    static constexpr int16_t DOUBLED_PAWN_PENALTY = -8;
+    static constexpr int16_t DOUBLED_PAWN_PENALTY_END_GAME = -12;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY = -12;
+    static constexpr int16_t ISOLATED_PAWN_PENALTY_END_GAME = -20;
     static constexpr int16_t BACKWARD_PAWN_PENALTY = -10;
     static constexpr int16_t BACKWARD_PAWN_PENALTY_END_GAME = -15;
 
-    static constexpr int16_t CONNECTED_PAWN_BONUS = 5;
-    static constexpr int16_t CONNECTED_PAWN_BONUS_END_GAME = 10;
+    static constexpr int16_t PAWN_CHAIN_BONUS = 3;
+    static constexpr int16_t PAWN_CHAIN_BONUS_END_GAME = 6;
 
-    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 15;
-    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 8;
+    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 5;
+    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 3;
 
     static constexpr int16_t MAX_TROPISM_DISTANCE = 4;
-    static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 20;
-    static constexpr int16_t KING_TROPISM_ROOK_BONUS = 10;
-    static constexpr int16_t KING_TROPISM_KNIGHT_BONUS = 12;
-    static constexpr int16_t KING_TROPISM_BISHOP_BONUS = 5;
+    static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 8;
+    static constexpr int16_t KING_TROPISM_ROOK_BONUS = 4;
+    static constexpr int16_t KING_TROPISM_KNIGHT_BONUS = 5;
+    static constexpr int16_t KING_TROPISM_BISHOP_BONUS = 2;
     static constexpr int16_t KING_TROPISM_BONUSES[4] = {KING_TROPISM_KNIGHT_BONUS, KING_TROPISM_BISHOP_BONUS, 
                                                           KING_TROPISM_ROOK_BONUS, KING_TROPISM_QUEEN_BONUS};
 
