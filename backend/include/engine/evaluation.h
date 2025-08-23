@@ -156,6 +156,9 @@ private:
     static constexpr int16_t QUEEN_SEMI_OPEN_FILE_BONUS = 8;
     static constexpr int16_t QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME = 5;
 
+    static constexpr int16_t BISHOP_MOBILITY_BONUSES[14] = {-20, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
+    static constexpr int16_t BISHOP_MOBILITY_BONUSES_END_GAME[14] = {-25, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45};
+
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 
     static Move killerMoves[256][2];

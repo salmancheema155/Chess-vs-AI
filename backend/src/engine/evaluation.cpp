@@ -46,6 +46,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     const uint8_t kingSquare = board.getKingSquare(colour);
     const uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
 
+    const Bitboard bitboard = board.getBitboard(colour);
     const Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     const Bitboard opposingPawnsBitboard = board.getBitboard(Piece::PAWN, opposingColour);
     const Bitboard allPawnsBitboard = pawnsBitboard | opposingPawnsBitboard;
@@ -184,6 +185,18 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         queensBitboardTemp &= queensBitboardTemp - 1;
     }
     eval += static_cast<int16_t>(queenOpenFileBonus);
+
+    // Bishop mobility bonus
+    Bitboard bishopsBitboardTemp = board.getBitboard(Piece::BISHOP, colour);
+    double bishopMobilityBonus = 0.0;
+    while (bishopsBitboardTemp) {
+        uint8_t square = std::countr_zero(bishopsBitboardTemp);
+        Bitboard bishopMoves = PrecomputeMoves::getBishopMovesFromTable(square, board.getPiecesBitboard());
+        bishopMoves &= ~bitboard; // Remove squares which land onto same colour pieces
+        uint8_t mobility = std::popcount(bishopMoves); // Number of squares that the bishop can move to
+        bishopMobilityBonus += phase * BISHOP_MOBILITY_BONUSES[mobility] + (1 - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
+    }
+    eval += static_cast<int16_t>(bishopMobilityBonus);
 
     return eval;
 }
