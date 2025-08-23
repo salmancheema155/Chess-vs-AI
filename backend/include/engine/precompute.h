@@ -7,7 +7,7 @@
 #include <cmath>
 
 namespace EnginePrecompute {
-    inline constexpr std::array<uint64_t, 8> isolatedPawnMaskTable = [] {
+    inline constexpr std::array<uint64_t, 8> adjacentFileMaskTable = [] {
         std::array<uint64_t, 8> table;
         constexpr uint64_t leftMostFileMask = 0x0101010101010101ULL;
 
@@ -37,11 +37,12 @@ namespace EnginePrecompute {
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 8; square < 56; square++) {
                 uint8_t rank = square / 8;
+                // Behind ranks
                 uint64_t mask = (colour == 0) ? 
                     (1ULL << (8 * rank)) - 1 : // 0s followed by 8 * rank 1s
                     ~((1ULL << (8 * (rank + 1))) - 1); // 8 * (7 - rank) 1s followed by 0s
 
-                mask &= isolatedPawnMaskTable[square % 8];
+                mask &= adjacentFileMaskTable[square % 8]; // Only include adjacent files
                 table[colour][square] = mask;
             }
         }
@@ -146,6 +147,25 @@ namespace EnginePrecompute {
                     uint8_t rightDiagonalPawnDefenderSquare = (colour == 0) ? square + 17 : square - 15;
                     mask |= (1ULL << rightDiagonalPawnDefenderSquare);
                 }
+
+                table[colour][square] = mask;
+            }
+        }
+
+        return table;
+    }();
+
+    inline const std::array<std::array<uint64_t, 64>, 2> passedPawnMaskTable = [] {
+        std::array<std::array<uint64_t, 64>, 2> table;
+
+        for (uint8_t colour = 0; colour < 2; colour++) {
+            for (uint8_t square = 0; square < 64; square++) {
+                uint8_t rank = square / 8, file = square % 8;
+                uint64_t mask = 0x0101010101010101ULL << file; // Mask of current file
+                mask |= adjacentFileMaskTable[file]; // Add adjacent files
+
+                // Remove current and behind ranks
+                mask &= (colour == 0) ? ~((1ULL << (8 * (rank + 1))) - 1) : (1ULL << (8 * rank)) - 1;
 
                 table[colour][square] = mask;
             }

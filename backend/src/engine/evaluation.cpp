@@ -74,7 +74,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         eval += static_cast<int16_t>(doublingPenalty);
 
         // Penalty for isolated pawns
-        uint64_t isolatedMask = EnginePrecompute::isolatedPawnMaskTable[file];
+        uint64_t isolatedMask = EnginePrecompute::adjacentFileMaskTable[file];
         if (pawnsBitboard & isolatedMask) continue; // Contains pawn on either immediate left or right file
         double isolatedPenalty =  pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
         eval += static_cast<int16_t>(isolatedPenalty);
@@ -93,14 +93,23 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             eval += static_cast<int16_t>(backwardPenalty);
         }
 
+        // Is part of a pawn chain
         uint64_t pawnChainMask = EnginePrecompute::pawnChainMaskTable[c][square];
+        uint64_t pawnChainBitboard = pawnsBitboard & pawnChainMask;
+        if (pawnChainBitboard) {
+            uint8_t chainsCount = std::popcount(pawnChainBitboard); // Number of chains it is part of (1/2)
+            double pawnChainBonus = chainsCount * (phase * PAWN_CHAIN_BONUS + (1 - phase) * PAWN_CHAIN_BONUS_END_GAME);
+            eval += static_cast<int16_t>(pawnChainBonus);
+        }
 
-        // Has a connected pawn
-        uint64_t connectedBitboard = pawnsBitboard & pawnChainMask;
-        if (connectedBitboard) {
-            uint8_t chainsCount = std::popcount(connectedBitboard);
-            double connectedBonus = chainsCount * (phase * PAWN_CHAIN_BONUS + (1 - phase) * PAWN_CHAIN_BONUS_END_GAME);
-            eval += static_cast<int16_t>(connectedBonus);
+        // Is a passed pawn
+        uint64_t passedPawnMask = EnginePrecompute::passedPawnMaskTable[c][square];
+        if (!(passedPawnMask & board.getBitboard(Piece::PAWN, opposingColour))) {
+            uint8_t effectiveSquare = (colour == Colour::WHITE) ? square ^ 0x38 : square;
+            eval += static_cast<int16_t>(
+                PieceTables::passedPawnTables[0][effectiveSquare] * phase + 
+                PieceTables::passedPawnTables[1][effectiveSquare] * (1 - phase)
+            );
         }
 
         pawnsBitboardTemp &= (pawnsBitboardTemp - 1);
