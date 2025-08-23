@@ -42,9 +42,14 @@ namespace {
 
 int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double phase) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
-    Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-    uint8_t kingSquare = board.getKingSquare(colour);
-    uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
+    const Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
+    const uint8_t kingSquare = board.getKingSquare(colour);
+    const uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
+
+    const Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
+    const Bitboard opposingPawnsBitboard = board.getBitboard(Piece::PAWN, opposingColour);
+    const Bitboard allPawnsBitboard = pawnsBitboard | opposingPawnsBitboard;
+
     uint8_t c = toIndex(colour);
     int16_t eval = 0;
 
@@ -64,7 +69,6 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     }
 
     // Pawn structure penalties
-    Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     for (uint8_t file = 0; file < 8; file++) {
         uint64_t mask = 0x0101010101010101ULL << file; // Mask of the current file
         uint8_t pawnCount = std::popcount(pawnsBitboard & mask);
@@ -127,7 +131,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
     // King tropism penalties
     constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
-    double tropismBonus = 0;
+    double tropismBonus = 0.0;
     for (uint8_t i = 0; i < 4; i++) {
         Bitboard bitboard = board.getBitboard(tropismPieces[i], colour);
         while (bitboard) {
@@ -142,6 +146,44 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         }
     }
     eval += static_cast<int16_t>(tropismBonus);
+
+    // Rook open/semi-open file bonus
+    Bitboard rooksBitboardTemp = board.getBitboard(Piece::ROOK, colour);
+    double rookOpenFileBonus = 0.0;
+    while (rooksBitboardTemp) {
+        uint8_t square = std::countr_zero(rooksBitboardTemp);
+        Bitboard openFileMask = EnginePrecompute::openFileTable[square];
+        
+        // Open file
+        if (!(allPawnsBitboard & openFileMask)) {
+            rookOpenFileBonus += phase * ROOK_OPEN_FILE_BONUS + (1 - phase) * ROOK_OPEN_FILE_BONUS_END_GAME;
+        // Semi-open file
+        } else if (!(opposingPawnsBitboard & openFileMask)) {
+            rookOpenFileBonus += phase * ROOK_SEMI_OPEN_FILE_BONUS + (1 - phase) * ROOK_SEMI_OPEN_FILE_BONUS_END_GAME;
+        }
+
+        rooksBitboardTemp &= rooksBitboardTemp - 1;
+    }
+    eval += static_cast<int16_t>(rookOpenFileBonus);
+
+    // Queen open/semi-open file bonus
+    Bitboard queensBitboardTemp = board.getBitboard(Piece::QUEEN, colour);
+    double queenOpenFileBonus = 0.0;
+    while (queensBitboardTemp) {
+        uint8_t square = std::countr_zero(queensBitboardTemp);
+        Bitboard openFileMask = EnginePrecompute::openFileTable[square];
+        
+        // Open file
+        if (!(allPawnsBitboard & openFileMask)) {
+            queenOpenFileBonus += phase * QUEEN_OPEN_FILE_BONUS + (1 - phase) * QUEEN_OPEN_FILE_BONUS_END_GAME;
+        // Semi-open file
+        } else if (!(opposingPawnsBitboard & openFileMask)) {
+            queenOpenFileBonus += phase * QUEEN_SEMI_OPEN_FILE_BONUS + (1 - phase) * QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME;
+        }
+
+        queensBitboardTemp &= queensBitboardTemp - 1;
+    }
+    eval += static_cast<int16_t>(queenOpenFileBonus);
 
     return eval;
 }

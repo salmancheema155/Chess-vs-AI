@@ -146,6 +146,16 @@ private:
     static constexpr int16_t KING_TROPISM_BONUSES[4] = {KING_TROPISM_KNIGHT_BONUS, KING_TROPISM_BISHOP_BONUS, 
                                                           KING_TROPISM_ROOK_BONUS, KING_TROPISM_QUEEN_BONUS};
 
+    static constexpr int16_t ROOK_OPEN_FILE_BONUS = 30;
+    static constexpr int16_t ROOK_OPEN_FILE_BONUS_END_GAME = 20;
+    static constexpr int16_t ROOK_SEMI_OPEN_FILE_BONUS = 15;
+    static constexpr int16_t ROOK_SEMI_OPEN_FILE_BONUS_END_GAME = 10;
+
+    static constexpr int16_t QUEEN_OPEN_FILE_BONUS = 15;
+    static constexpr int16_t QUEEN_OPEN_FILE_BONUS_END_GAME = 10;
+    static constexpr int16_t QUEEN_SEMI_OPEN_FILE_BONUS = 8;
+    static constexpr int16_t QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME = 5;
+
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 
     static Move killerMoves[256][2];
