@@ -135,8 +135,8 @@ private:
     static constexpr int16_t PAWN_CHAIN_BONUS = 3;
     static constexpr int16_t PAWN_CHAIN_BONUS_END_GAME = 6;
 
-    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 5;
-    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 3;
+    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 15;
+    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 8;
 
     static constexpr int16_t MAX_TROPISM_DISTANCE = 4;
     static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 8;
@@ -161,6 +161,9 @@ private:
 
     static constexpr int16_t KNIGHT_MOBILITY_BONUSES[9] = {-25, -15, -10, -5, 0, 8, 15, 22, 30};
     static constexpr int16_t KNIGHT_MOBILITY_BONUSES_END_GAME[9] = {-30, -20, -15, -10, -5, 0, 8, 15, 25};
+
+    static constexpr int16_t CONNECTED_ROOK_BONUS = 20;
+    static constexpr int16_t CONNECTED_ROOK_BONUS_END_GAME = 30;
 
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 

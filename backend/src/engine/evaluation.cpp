@@ -46,6 +46,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     const uint8_t kingSquare = board.getKingSquare(colour);
     const uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
 
+    const Bitboard allPiecesBitboard = board.getPiecesBitboard();
     const Bitboard bitboard = board.getBitboard(colour);
     const Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     const Bitboard opposingPawnsBitboard = board.getBitboard(Piece::PAWN, opposingColour);
@@ -191,7 +192,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     double bishopMobilityBonus = 0.0;
     while (bishopsBitboardTemp) {
         uint8_t square = std::countr_zero(bishopsBitboardTemp);
-        Bitboard bishopMoves = PrecomputeMoves::getBishopMovesFromTable(square, board.getPiecesBitboard());
+        Bitboard bishopMoves = PrecomputeMoves::getBishopMovesFromTable(square, allPiecesBitboard);
         bishopMoves &= ~bitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(bishopMoves); // Number of squares that the bishop can move to
         bishopMobilityBonus += phase * BISHOP_MOBILITY_BONUSES[mobility] + (1 - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
@@ -213,6 +214,33 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         knightsBitboardTemp &= knightsBitboardTemp - 1;
     }
     eval += static_cast<int16_t>(knightMobilityBonus);
+
+    // Connected rooks bonus
+    Bitboard rooksBitboardTemp2 = board.getBitboard(Piece::ROOK, colour);
+    double connectedRookBonus = 0.0;
+    while (rooksBitboardTemp2) {
+        uint8_t square1 = std::countr_zero(rooksBitboardTemp2);
+        rooksBitboardTemp2 &= rooksBitboardTemp2 - 1;
+
+        Bitboard remainingRooksBitboard = rooksBitboardTemp2;
+        while (remainingRooksBitboard) {
+            uint8_t square2 = std::countr_zero(remainingRooksBitboard);
+            if (Board::getFile(square1) == Board::getFile(square2)) {
+                uint64_t squaresBetweenMask = EnginePrecompute::sameFileSquaresBetweenTable[square1][square2];
+                if (!(squaresBetweenMask & allPiecesBitboard)) {
+                    connectedRookBonus += phase * CONNECTED_ROOK_BONUS + (1 - phase) * CONNECTED_ROOK_BONUS_END_GAME;
+                }
+            } else if (Board::getRank(square1) == Board::getRank(square2)) {
+                uint64_t squaresBetweenMask = EnginePrecompute::sameRankSquaresBetweenTable[square1][square2];
+                if (!(squaresBetweenMask & allPiecesBitboard)) {
+                    connectedRookBonus += phase * CONNECTED_ROOK_BONUS + (1 - phase) * CONNECTED_ROOK_BONUS_END_GAME;
+                }
+            }
+
+            remainingRooksBitboard &= remainingRooksBitboard - 1;
+        }
+    }
+    eval += static_cast<int16_t>(connectedRookBonus);
 
     return eval;
 }

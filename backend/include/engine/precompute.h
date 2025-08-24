@@ -188,6 +188,62 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    inline const std::array<std::array<uint64_t, 64>, 64> sameFileSquaresBetweenTable = [] {
+        std::array<std::array<uint64_t, 64>, 64> table;
+
+        for (uint8_t i = 0; i < 64; i++) {
+            for (uint8_t j = 0; j < 64; j++) {
+                uint8_t iFile = i % 8;
+                uint8_t jFile = j % 8;
+                uint64_t mask = 0ULL;
+
+                if (iFile != jFile) {
+                    table[i][j] = 0ULL;
+                    continue;
+                }
+
+                uint8_t currSquare = std::min(i, j) + 8;
+                uint8_t endSquare = std::max(i, j);
+                while (currSquare < endSquare) {
+                    mask |= (1ULL << currSquare);
+                    currSquare += 8;
+                }
+
+                table[i][j] = mask;
+            }
+        }
+
+        return table;
+    }();
+
+    inline const std::array<std::array<uint64_t, 64>, 64> sameRankSquaresBetweenTable = [] {
+        std::array<std::array<uint64_t, 64>, 64> table;
+
+        for (uint8_t i = 0; i < 64; i++) {
+            for (uint8_t j = 0; j < 64; j++) {
+                uint8_t iRank = i / 8;
+                uint8_t jRank = j / 8;
+                uint64_t mask = 0ULL;
+
+                if (iRank != jRank) {
+                    table[i][j] = 0ULL;
+                    continue;
+                }
+
+                uint8_t currSquare = std::min(i, j) + 1;
+                uint8_t endSquare = std::max(i, j);
+                while (currSquare < endSquare) {
+                    mask |= (1ULL << currSquare);
+                    currSquare++;
+                }
+
+                table[i][j] = mask;
+            }
+        }
+
+        return table;
+    }();
+
     inline const std::array<std::array<uint8_t, 64>, 64> chebyshevDistanceTable = [] {
         std::array<std::array<uint8_t, 64>, 64> table;
 
