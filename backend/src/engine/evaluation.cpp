@@ -195,8 +195,24 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         bishopMoves &= ~bitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(bishopMoves); // Number of squares that the bishop can move to
         bishopMobilityBonus += phase * BISHOP_MOBILITY_BONUSES[mobility] + (1 - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
+
+        bishopsBitboardTemp &= bishopsBitboardTemp - 1;
     }
     eval += static_cast<int16_t>(bishopMobilityBonus);
+
+    // Knight mobility bonus
+    Bitboard knightsBitboardTemp = board.getBitboard(Piece::KNIGHT, colour);
+    double knightMobilityBonus = 0.0;
+    while (knightsBitboardTemp) {
+        uint8_t square = std::countr_zero(knightsBitboardTemp);
+        Bitboard knightMoves = PrecomputeMoves::knightMoveTable[square];
+        knightMoves &= ~bitboard; // Remove squares which land onto same colour pieces
+        uint8_t mobility = std::popcount(knightMoves); // Number of squares that the knight can move to
+        knightMobilityBonus += phase * KNIGHT_MOBILITY_BONUSES[mobility] + (1 - phase) * KNIGHT_MOBILITY_BONUSES_END_GAME[mobility];
+
+        knightsBitboardTemp &= knightsBitboardTemp - 1;
+    }
+    eval += static_cast<int16_t>(knightMobilityBonus);
 
     return eval;
 }
