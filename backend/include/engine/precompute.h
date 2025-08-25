@@ -8,7 +8,7 @@
 
 namespace EnginePrecompute {
     inline constexpr std::array<uint64_t, 8> adjacentFileMaskTable = [] {
-        std::array<uint64_t, 8> table;
+        std::array<uint64_t, 8> table {};
         constexpr uint64_t leftMostFileMask = 0x0101010101010101ULL;
 
         for (uint8_t file = 0; file < 8; file++) {
@@ -32,7 +32,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 2> backwardPawnMaskTable = [] {
-        std::array<std::array<uint64_t, 64>, 2> table;
+        std::array<std::array<uint64_t, 64>, 2> table {};
         
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 8; square < 56; square++) {
@@ -51,7 +51,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 2> pawnChainMaskTable = [] {
-        std::array<std::array<uint64_t, 64>, 2> table;
+        std::array<std::array<uint64_t, 64>, 2> table {};
 
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 8; square < 56; square++) {
@@ -84,7 +84,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 2> majorPawnShieldTable = [] {
-        std::array<std::array<uint64_t, 64>, 2> table;
+        std::array<std::array<uint64_t, 64>, 2> table {};
 
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 0; square < 64; square++) {
@@ -109,7 +109,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 2> minorPawnShieldTable = [] {
-        std::array<std::array<uint64_t, 64>, 2> table;
+        std::array<std::array<uint64_t, 64>, 2> table {};
 
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 0; square < 64; square++) {
@@ -140,7 +140,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 2> passedPawnMaskTable = [] {
-        std::array<std::array<uint64_t, 64>, 2> table;
+        std::array<std::array<uint64_t, 64>, 2> table {};
 
         for (uint8_t colour = 0; colour < 2; colour++) {
             for (uint8_t square = 0; square < 64; square++) {
@@ -159,7 +159,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<uint64_t, 64> openFileTable = [] {
-        std::array<uint64_t, 64> table;
+        std::array<uint64_t, 64> table {};
 
         for (uint8_t square = 0; square < 64; square++) {
             uint8_t file = square % 8;
@@ -173,7 +173,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 64> sameFileSquaresBetweenTable = [] {
-        std::array<std::array<uint64_t, 64>, 64> table;
+        std::array<std::array<uint64_t, 64>, 64> table {};
 
         for (uint8_t i = 0; i < 64; i++) {
             for (uint8_t j = 0; j < 64; j++) {
@@ -181,10 +181,7 @@ namespace EnginePrecompute {
                 uint8_t jFile = j % 8;
                 uint64_t mask = 0ULL;
 
-                if (iFile != jFile) {
-                    table[i][j] = 0ULL;
-                    continue;
-                }
+                if (iFile != jFile) continue;
 
                 uint8_t currSquare = std::min(i, j) + 8;
                 uint8_t endSquare = std::max(i, j);
@@ -201,7 +198,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint64_t, 64>, 64> sameRankSquaresBetweenTable = [] {
-        std::array<std::array<uint64_t, 64>, 64> table;
+        std::array<std::array<uint64_t, 64>, 64> table {};
 
         for (uint8_t i = 0; i < 64; i++) {
             for (uint8_t j = 0; j < 64; j++) {
@@ -209,10 +206,7 @@ namespace EnginePrecompute {
                 uint8_t jRank = j / 8;
                 uint64_t mask = 0ULL;
 
-                if (iRank != jRank) {
-                    table[i][j] = 0ULL;
-                    continue;
-                }
+                if (iRank != jRank) continue;
 
                 uint8_t currSquare = std::min(i, j) + 1;
                 uint8_t endSquare = std::max(i, j);
@@ -229,7 +223,7 @@ namespace EnginePrecompute {
     }();
 
     inline const std::array<std::array<uint8_t, 64>, 64> chebyshevDistanceTable = [] {
-        std::array<std::array<uint8_t, 64>, 64> table;
+        std::array<std::array<uint8_t, 64>, 64> table {};
 
         for (uint8_t i = 0; i < 64; i++) {
             for (uint8_t j = 0; j < 64; j++) {
