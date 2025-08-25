@@ -46,6 +46,8 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     const uint8_t kingSquare = board.getKingSquare(colour);
     const uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
     const uint8_t kingFile = Board::getFile(kingSquare);
+    const uint8_t opposingKingFile = Board::getFile(opposingKingSquare);
+    const uint8_t opposingKingRank = Board::getRank(opposingKingSquare);
 
     const Bitboard allPiecesBitboard = board.getPiecesBitboard();
     const Bitboard piecesBitboard = board.getBitboard(colour);
@@ -308,6 +310,60 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         }
     }
     eval += static_cast<int16_t>(connectedRookBonus);
+
+    double pawnStormBonus = 0.0;
+    for (uint8_t file = 0; file < 7; file++) {
+        uint64_t currentFileMask = 0x0101010101010101ULL << file;
+        uint64_t rightFileMask = 0x0101010101010101ULL << (file + 1);
+
+        Bitboard currentFilePawnsBitboard = pawnsBitboard & currentFileMask;
+        Bitboard rightFilePawnsBitboard = pawnsBitboard & rightFileMask;
+
+        if (!currentFilePawnsBitboard || !rightFilePawnsBitboard) continue;
+
+        uint8_t currentFilePawnSquare, rightFilePawnSquare;
+        if (colour == Colour::WHITE) {
+            currentFilePawnSquare = 63 - std::countl_zero(currentFilePawnsBitboard);
+            rightFilePawnSquare = 63 - std::countl_zero(rightFilePawnsBitboard);
+        } else {
+            currentFilePawnSquare = std::countr_zero(currentFilePawnsBitboard);
+            rightFilePawnSquare = std::countr_zero(rightFilePawnsBitboard);
+        }
+
+        uint8_t currentFilePawnRank = Board::getRank(currentFilePawnSquare);
+        uint8_t rightFilePawnRank = Board::getRank(rightFilePawnSquare);
+
+        uint8_t currentFilePawnAdvance = (colour == Colour::WHITE) ? currentFilePawnRank - 1 : 6 - currentFilePawnRank;
+        uint8_t rightFilePawnAdvance = (colour == Colour::WHITE) ? rightFilePawnRank - 1 : 6 - rightFilePawnRank;
+
+        // Pawns must be at least 3 squares forward from starting position to form a pawn storm
+        if (currentFilePawnAdvance >= 3 && rightFilePawnAdvance >= 3) {
+            // Pawns must be within 2 files of the king
+            if (opposingKingFile >= file - 1 && opposingKingFile <= file + 2) {
+                pawnStormBonus += phase * PAWN_STORM_BONUS;
+
+                uint8_t currentFilePawnRankDistance = (currentFilePawnRank >= opposingKingRank) ? 
+                                                        currentFilePawnRank - opposingKingRank :
+                                                        opposingKingRank - currentFilePawnRank;
+
+                uint8_t rightFilePawnRankDistance = (rightFilePawnRank >= opposingKingRank) ? 
+                                                        rightFilePawnRank - opposingKingRank :
+                                                        opposingKingRank - rightFilePawnRank;
+
+                uint8_t distance = (currentFilePawnRankDistance <= rightFilePawnRankDistance) ?
+                                    currentFilePawnRankDistance :
+                                    rightFilePawnRankDistance;
+
+                // Bonus for pawn storms close to the king
+                if (distance <= 2) {
+                    pawnStormBonus += phase * PAWN_STORM_PROXIMITY_BONUS * (3 - distance);
+                }
+
+                break; // Only include 1 pawn storm in evaluation
+            }
+        }
+    }
+    eval += static_cast<int16_t>(pawnStormBonus);
 
     return eval;
 }

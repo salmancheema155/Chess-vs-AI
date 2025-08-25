@@ -170,6 +170,9 @@ private:
     static constexpr int16_t CONNECTED_ROOK_BONUS = 20;
     static constexpr int16_t CONNECTED_ROOK_BONUS_END_GAME = 30;
 
+    static constexpr int16_t PAWN_STORM_BONUS = 50;
+    static constexpr int16_t PAWN_STORM_PROXIMITY_BONUS = 15;
+
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
 
     static Move killerMoves[256][2];
