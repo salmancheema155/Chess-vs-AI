@@ -158,13 +158,12 @@ namespace EnginePrecompute {
         return table;
     }();
 
-    inline const std::array<uint64_t, 64> openFileTable = [] {
+    inline const std::array<uint64_t, 64> fileTable = [] {
         std::array<uint64_t, 64> table {};
 
         for (uint8_t square = 0; square < 64; square++) {
             uint8_t file = square % 8;
             uint64_t mask = 0x0101010101010101ULL << file; // Mask of current file
-            mask &= ~(1ULL << square); // Remove current square bit
 
             table[square] = mask;
         }

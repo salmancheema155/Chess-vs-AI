@@ -45,6 +45,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     const Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     const uint8_t kingSquare = board.getKingSquare(colour);
     const uint8_t opposingKingSquare = board.getKingSquare(opposingColour);
+    const uint8_t kingFile = Board::getFile(kingSquare);
 
     const Bitboard allPiecesBitboard = board.getPiecesBitboard();
     const Bitboard bitboard = board.getBitboard(colour);
@@ -122,14 +123,18 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     }
 
     // Major pawn shield bonus
-    Bitboard majorPawnsShieldBitboard = EnginePrecompute::majorPawnShieldTable[c][kingSquare] & pawnsBitboard;
-    double majorPawnShieldBonus = phase * std::popcount(majorPawnsShieldBitboard) * MAJOR_PAWN_SHIELD_BONUS;
-    eval += static_cast<int16_t>(majorPawnShieldBonus);
+    {
+        Bitboard majorPawnsShieldBitboard = EnginePrecompute::majorPawnShieldTable[c][kingSquare] & pawnsBitboard;
+        double majorPawnShieldBonus = phase * std::popcount(majorPawnsShieldBitboard) * MAJOR_PAWN_SHIELD_BONUS;
+        eval += static_cast<int16_t>(majorPawnShieldBonus);
+    }
 
     // Minor pawn shield bonus
-    Bitboard minorPawnsShieldBitboard = EnginePrecompute::minorPawnShieldTable[c][kingSquare] & pawnsBitboard;
-    double minorPawnShieldBonus = phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
-    eval += static_cast<int16_t>(minorPawnShieldBonus);
+    {
+        Bitboard minorPawnsShieldBitboard = EnginePrecompute::minorPawnShieldTable[c][kingSquare] & pawnsBitboard;
+        double minorPawnShieldBonus = phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
+        eval += static_cast<int16_t>(minorPawnShieldBonus);
+    }
 
     // King tropism penalties
     constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
@@ -154,13 +159,13 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     double rookOpenFileBonus = 0.0;
     while (rooksBitboardTemp) {
         uint8_t square = std::countr_zero(rooksBitboardTemp);
-        Bitboard openFileMask = EnginePrecompute::openFileTable[square];
+        Bitboard openFileMask = EnginePrecompute::fileTable[square];
         
         // Open file
         if (!(allPawnsBitboard & openFileMask)) {
             rookOpenFileBonus += phase * ROOK_OPEN_FILE_BONUS + (1 - phase) * ROOK_OPEN_FILE_BONUS_END_GAME;
         // Semi-open file
-        } else if (!(opposingPawnsBitboard & openFileMask)) {
+        } else if (!(pawnsBitboard & openFileMask)) {
             rookOpenFileBonus += phase * ROOK_SEMI_OPEN_FILE_BONUS + (1 - phase) * ROOK_SEMI_OPEN_FILE_BONUS_END_GAME;
         }
 
@@ -173,19 +178,39 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     double queenOpenFileBonus = 0.0;
     while (queensBitboardTemp) {
         uint8_t square = std::countr_zero(queensBitboardTemp);
-        Bitboard openFileMask = EnginePrecompute::openFileTable[square];
+        Bitboard openFileMask = EnginePrecompute::fileTable[square];
         
         // Open file
         if (!(allPawnsBitboard & openFileMask)) {
             queenOpenFileBonus += phase * QUEEN_OPEN_FILE_BONUS + (1 - phase) * QUEEN_OPEN_FILE_BONUS_END_GAME;
         // Semi-open file
-        } else if (!(opposingPawnsBitboard & openFileMask)) {
+        } else if (!(pawnsBitboard & openFileMask)) {
             queenOpenFileBonus += phase * QUEEN_SEMI_OPEN_FILE_BONUS + (1 - phase) * QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME;
         }
 
         queensBitboardTemp &= queensBitboardTemp - 1;
     }
     eval += static_cast<int16_t>(queenOpenFileBonus);
+
+    // Open file near king penalty
+    {
+        double openFileNearKingPenalty = 0.0;
+        for (int offset = -1; offset <= 1; offset++) {
+            int file = kingFile + offset;
+            if (file < 0 || file > 7) continue;
+
+            Bitboard openFileMask = EnginePrecompute::fileTable[kingSquare + offset];
+
+            // Open file
+            if (!(allPawnsBitboard & openFileMask)) {
+                openFileNearKingPenalty += phase * OPEN_FILE_NEAR_KING_PENALTY;
+            // Semi-open file
+            } else if (!(pawnsBitboard & openFileMask)) {
+                openFileNearKingPenalty += phase * SEMI_OPEN_FILE_NEAR_KING_PENALTY;
+            }
+        }
+        eval += static_cast<int16_t>(openFileNearKingPenalty);
+    }
 
     // Bishop mobility bonus
     Bitboard bishopsBitboardTemp = board.getBitboard(Piece::BISHOP, colour);
