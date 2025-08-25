@@ -159,6 +159,8 @@ private:
     static constexpr int16_t OPEN_FILE_NEAR_KING_PENALTY = -25;
     static constexpr int16_t SEMI_OPEN_FILE_NEAR_KING_PENALTY = -15;
 
+    static constexpr int16_t KING_ZONE_ATTACK_PENALTIES[5] = {-10, -16, -12, -20, -30};
+
     static constexpr int16_t BISHOP_MOBILITY_BONUSES[14] = {-20, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50};
     static constexpr int16_t BISHOP_MOBILITY_BONUSES_END_GAME[14] = {-25, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45};
 

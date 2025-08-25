@@ -48,12 +48,13 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     const uint8_t kingFile = Board::getFile(kingSquare);
 
     const Bitboard allPiecesBitboard = board.getPiecesBitboard();
-    const Bitboard bitboard = board.getBitboard(colour);
+    const Bitboard piecesBitboard = board.getBitboard(colour);
     const Bitboard pawnsBitboard = board.getBitboard(Piece::PAWN, colour);
     const Bitboard opposingPawnsBitboard = board.getBitboard(Piece::PAWN, opposingColour);
     const Bitboard allPawnsBitboard = pawnsBitboard | opposingPawnsBitboard;
 
     uint8_t c = toIndex(colour);
+    uint8_t oc = toIndex(opposingColour);
     int16_t eval = 0;
 
     for (uint8_t i = 0; i < 6; i++) {
@@ -92,7 +93,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         uint8_t square = std::countr_zero(pawnsBitboardTemp);
         uint8_t nextSquare = (colour == Colour::WHITE) ? square + 8 : square - 8;
         uint64_t backwardMask = EnginePrecompute::backwardPawnMaskTable[c][square];
-        uint64_t pawnThreatMask = PrecomputeMoves::pawnThreatTable[toIndex(opposingColour)][nextSquare];
+        uint64_t pawnThreatMask = PrecomputeMoves::pawnThreatTable[oc][nextSquare];
 
         // Is backward pawn
         if (board.isEmpty(nextSquare) && !(pawnsBitboard & backwardMask) && (board.getBitboard(Piece::PAWN, opposingColour) & pawnThreatMask)) {
@@ -136,7 +137,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         eval += static_cast<int16_t>(minorPawnShieldBonus);
     }
 
-    // King tropism penalties
+    // King tropism bonuses
     constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
     double tropismBonus = 0.0;
     for (uint8_t i = 0; i < 4; i++) {
@@ -212,13 +213,54 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         eval += static_cast<int16_t>(openFileNearKingPenalty);
     }
 
+    // Opposing pieces attacking in king zone penalty
+    {
+        constexpr Piece kingZoneAttacksPieces[5] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+        Bitboard kingZone = PrecomputeMoves::kingMoveTable[kingSquare];
+        double kingZoneAttacksPenalty = 0.0;
+
+        for (uint8_t i = 0; i < 4; i++) {
+            Bitboard bitboard = board.getBitboard(kingZoneAttacksPieces[i], opposingColour);
+            while (bitboard) {
+                uint8_t square = std::countr_zero(bitboard);
+                Bitboard attacks = 0ULL;
+                switch (kingZoneAttacksPieces[i]) {
+                    case Piece::PAWN:
+                        attacks = PrecomputeMoves::pawnCaptureTable[oc][square];
+                        break;
+                    case Piece::KNIGHT:
+                        attacks = PrecomputeMoves::knightMoveTable[square];
+                        break;
+                    case Piece::BISHOP:
+                        attacks = PrecomputeMoves::getBishopMovesFromTable(square, allPiecesBitboard);
+                        break;
+                    case Piece::ROOK:
+                        attacks = PrecomputeMoves::getRookMovesFromTable(square, allPiecesBitboard);
+                        break;
+                    case Piece::QUEEN:
+                        attacks = PrecomputeMoves::getBishopMovesFromTable(square, allPiecesBitboard) |
+                                    PrecomputeMoves::getRookMovesFromTable(square, allPiecesBitboard);
+                        break;
+                    default:
+                        attacks = 0ULL;
+                }
+
+                Bitboard kingZoneAttacks = attacks & kingZone;
+                kingZoneAttacksPenalty += phase * std::popcount(kingZoneAttacks) * KING_ZONE_ATTACK_PENALTIES[i];
+
+                bitboard &= bitboard - 1;
+            }
+        }
+        eval += static_cast<int16_t>(kingZoneAttacksPenalty);
+    }
+
     // Bishop mobility bonus
     Bitboard bishopsBitboardTemp = board.getBitboard(Piece::BISHOP, colour);
     double bishopMobilityBonus = 0.0;
     while (bishopsBitboardTemp) {
         uint8_t square = std::countr_zero(bishopsBitboardTemp);
         Bitboard bishopMoves = PrecomputeMoves::getBishopMovesFromTable(square, allPiecesBitboard);
-        bishopMoves &= ~bitboard; // Remove squares which land onto same colour pieces
+        bishopMoves &= ~piecesBitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(bishopMoves); // Number of squares that the bishop can move to
         bishopMobilityBonus += phase * BISHOP_MOBILITY_BONUSES[mobility] + (1 - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
 
@@ -232,7 +274,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     while (knightsBitboardTemp) {
         uint8_t square = std::countr_zero(knightsBitboardTemp);
         Bitboard knightMoves = PrecomputeMoves::knightMoveTable[square];
-        knightMoves &= ~bitboard; // Remove squares which land onto same colour pieces
+        knightMoves &= ~piecesBitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(knightMoves); // Number of squares that the knight can move to
         knightMobilityBonus += phase * KNIGHT_MOBILITY_BONUSES[mobility] + (1 - phase) * KNIGHT_MOBILITY_BONUSES_END_GAME[mobility];
 
