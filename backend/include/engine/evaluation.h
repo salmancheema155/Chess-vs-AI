@@ -135,8 +135,8 @@ private:
     static constexpr int16_t PAWN_CHAIN_BONUS = 3;
     static constexpr int16_t PAWN_CHAIN_BONUS_END_GAME = 6;
 
-    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 15;
-    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 8;
+    static constexpr int16_t MAJOR_PAWN_SHIELD_BONUS = 30;
+    static constexpr int16_t MINOR_PAWN_SHIELD_BONUS = 20;
 
     static constexpr int16_t MAX_TROPISM_DISTANCE = 4;
     static constexpr int16_t KING_TROPISM_QUEEN_BONUS = 8;
