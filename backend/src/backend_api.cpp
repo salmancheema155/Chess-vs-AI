@@ -17,7 +17,7 @@
 #include "chess_types.h"
 
 static Game game;
-static Engine engine(30, 8);
+static Engine engine(2000, 30, 8);
 static std::string legalMovesJson;
 static std::string moveInfoJson;
 static std::string engineStatsJson;
@@ -159,7 +159,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void initialiseGame() {
         game = Game();
-        game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        //game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     EMSCRIPTEN_KEEPALIVE

@@ -14,10 +14,11 @@ class Engine {
 public:
     /**
      * Constructor
+     * @param timeLimit Maximum time for search in ms
      * @param maxDepth Max depth for engine search
      * @param quiescenceDepth Max depth for quiescence search
      */
-    Engine(uint8_t maxDepth, uint8_t quiescenceDepth);
+    Engine(int timeLimit, uint8_t maxDepth, uint8_t quiescenceDepth);
 
     /**
      * @brief Calculates the best move according to the engine
@@ -85,6 +86,7 @@ private:
     TranspositionTable transpositionTable;
     TranspositionTable quiescenceTranspositionTable;
 
+    const int TIME_LIMIT;
     const uint8_t MAX_DEPTH;
     const uint8_t QUIESCENCE_DEPTH;
 

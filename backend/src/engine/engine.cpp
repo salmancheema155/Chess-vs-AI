@@ -15,8 +15,6 @@
 #include "move/move_generator.h"
 #include "chess_types.h"
 
-#include <iostream>
-
 using Piece = Chess::PieceType;
 using Colour = Chess::PieceColour;
 using Chess::Bitboard;
@@ -44,7 +42,8 @@ namespace {
     }
 }
 
-Engine::Engine(uint8_t maxDepth, uint8_t quiescenceDepth) : 
+Engine::Engine(int timeLimit, uint8_t maxDepth, uint8_t quiescenceDepth) : 
+    TIME_LIMIT(timeLimit),
     MAX_DEPTH(maxDepth),
     QUIESCENCE_DEPTH(quiescenceDepth),
     transpositionTable(256),
@@ -64,19 +63,15 @@ Move Engine::getMove(Game& game) {
     maxDepthSearched = 0;
 
     auto start = std::chrono::steady_clock::now();
-    int timeLimit = 2000; // In ms
 
     auto timeUp = [&]() {
         auto now = std::chrono::steady_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= timeLimit;
+        return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= TIME_LIMIT;
     };
 
     probes = 0, hits = 0;
 
-    uint8_t depth;
-    for (depth = 1; depth <= MAX_DEPTH; depth++) {
-        auto profile_start = std::chrono::high_resolution_clock::now();
-
+    for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
         moveBuffer.clear();
         MoveGenerator::pseudoLegalMoves(board, colour, moveBuffer);
         if (bestMove != Move()) {
@@ -118,13 +113,7 @@ Move Engine::getMove(Game& game) {
 
         bestMove = currentBest;
         currentEvaluation = (game.getCurrentTurn() == Colour::WHITE) ? bestEval : -bestEval;
-
-        auto profile_end = std::chrono::high_resolution_clock::now();
-        std::cout << "Time taken at depth " << static_cast<int>(depth) << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(profile_end - profile_start) << std::endl;
     }
-
-    //std::cout << "Depth achieved: " << static_cast<int>(depth - 1) << std::endl;
-    std::cout << "Hit rate: " << 100 * (double)hits/(double)probes << "%" << std::endl;
 
     Evaluation::clearKillerMoveTable();
     Evaluation::ageHistoryHeuristicsTable();
