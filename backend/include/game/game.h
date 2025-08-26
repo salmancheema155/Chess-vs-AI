@@ -67,6 +67,13 @@ public:
     GameStateEvaluation getCurrentGameStateEvaluation();
 
     /**
+     * @brief Gets the current game state evaluation without checking for checkmate or stalemate
+     * @return Current game state evaluation
+     * @warning This function does not check for checkmates or stalemates and should be used cautiously
+     */
+    GameStateEvaluation quickGameStateEvaluation();
+
+    /**
      * @brief Makes a move updating the game state
      * @param move Move to make
      * @note Promotion flags are defined and documented in the Move class
@@ -134,13 +141,6 @@ public:
      * @warning This function should only be used for null move pruning and paired with a corresponding makeNullMove() call
      */
     void undoNullMove();
-
-    /**
-     * @brief Gets the current game state evaluation for the opposite player of the player who just made a null move
-     * @return Current game state evaluation of the game
-     * @attention This function must only be used for null move pruning and will not check for checkmates, stalemates or draw by insufficient material
-     */
-    GameStateEvaluation getNullMoveStateEvaluation();
 
     // // TESTING PURPOSES ONLY
     // /**
