@@ -20,8 +20,6 @@ using Colour = Chess::PieceColour;
 using Chess::Bitboard;
 using Chess::toIndex;
 
-uint64_t probes = 0, hits = 0;
-
 namespace {
     bool disableNullPruning(Board& board, Colour colour) {
         constexpr uint16_t DISABLE_NULL_PRUNING_VALUE = 1300;
@@ -69,8 +67,6 @@ Move Engine::getMove(Game& game) {
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= TIME_LIMIT;
     };
 
-    probes = 0, hits = 0;
-
     for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
         moveBuffer.clear();
         MoveGenerator::pseudoLegalMoves(board, colour, moveBuffer);
@@ -86,6 +82,7 @@ Move Engine::getMove(Game& game) {
         int16_t bestEval = std::numeric_limits<int16_t>::min();
         Move currentBest;
         
+        int moveCount = 0;
         for (const Move move : moveBuffer) {
             game.makeMove(move);
             bool inCheck = Check::isInCheck(board, colour);
@@ -97,8 +94,10 @@ Move Engine::getMove(Game& game) {
             }
 
             GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
-            int16_t eval = -negamax(game, depth - 1, -beta, -alpha, newState, timeUp);
+            bool allowNullMove = (moveCount != 0);
+            int16_t eval = -negamax(game, depth - 1, -beta, -alpha, newState, timeUp, 1, 0, allowNullMove);
             game.undo();
+            moveCount++;
 
             if (timeUp()) break;
 
@@ -129,9 +128,7 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
 
     uint64_t hash = game.getHash();
     TTEntry* entry = transpositionTable.getEntry(hash);
-    probes++;
     if (entry && entry->depth >= depth) {
-        hits++;
         if (entry->flag == TTFlag::EXACT ||
            (entry->flag == TTFlag::LOWER_BOUND && entry->eval >= beta) ||
            (entry->flag == TTFlag::UPPER_BOUND && entry->eval <= alpha)) {
@@ -207,7 +204,19 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
             if (moveCount >= 12) newDepth--;
         }
 
-        int16_t eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+        int16_t eval;
+        // PVS node
+        if (moveCount == 0) {
+            eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, false);
+        } else {
+            // Zero-width non-PVS node search
+            eval = -negamax(game, newDepth, -(alpha + 1), -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+
+            // Research if zero-width search fails
+            if (eval > alpha && eval < beta) {
+                eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+            }
+        }
 
         // Search again if Late Move Reduction fails
         if (doLateMoveReduction && eval > alpha && eval < beta) {
