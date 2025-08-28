@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <optional>
+#include <cctype>
 #include <array>
 #include <utility>
 #include <cassert>
