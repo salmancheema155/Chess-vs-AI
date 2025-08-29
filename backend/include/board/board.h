@@ -109,30 +109,30 @@ public:
      * @param square Square of the piece (0-63)
      * @return Colour of piece that occupies that square
      */
-    Colour getColour(uint8_t square) const;
+    inline Colour getColour(uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
+        return colourCache[square];
+    }
 
     /**
      * @brief Gets the piece that occupies the square
      * @param square Square of the piece (0-63)
      * @return Piece that occupies that square
      */
-    Piece getPiece(uint8_t square) const;
-
-    /**
-     * @brief Gets the piece that occupies the square
-     * @param colour Colour of the piece
-     * @param square Square of the piece (0-63)
-     * @return Piece that occupies the square if it exists
-     * else returns Chess::PieceType::NONE
-     */
-    Piece getPiece(Colour colour, uint8_t square) const;
+    inline Piece getPiece(uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
+        return pieceCache[square];
+    };
 
     /**
      * @brief Gets the piece that occupies the square and the colour of the piece
      * @param square Square on the board (0-63)
      * @return std::pair with first element being the Piece and the second being the colour
      */
-    std::pair<Piece, Colour> getPieceAndColour(uint8_t square) const;
+    inline std::pair<Piece, Colour> getPieceAndColour(uint8_t square) const {
+        assert(square < 64 && "square must be between 0-63");
+        return {getPiece(square), getColour(square)};
+    };
 
     /**
      * @brief Gets the square that the king occupies
@@ -403,6 +403,9 @@ private:
 
     /// Indexed as [colour][pieceType]
     std::array<std::array<Bitboard, 6>, 2> pieceBitboards;
+
+    std::array<Piece, 64> pieceCache;
+    std::array<Colour, 64> colourCache;
 
     /**
      * @brief Resets the pieces back to their original starting position

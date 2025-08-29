@@ -22,52 +22,8 @@ namespace {
     constexpr uint8_t afterCastleRookSquares[2][2] = {{5, 3}, {61, 59}}; // Indexed [colour][kingside/queenside]
 }
 
-Board::Board() : castlingRights{{{true, true}, {true, true}}},
-                 enPassantSquare(std::nullopt) {
-
-    resetPieces();
-}
-
-Colour Board::getColour(uint8_t square) const {
-    assert(square < 64 && "square must be between 0-63");
-    uint64_t mask = 1ULL << square;
-    if (whitePiecesBitboard & mask) {
-        return Colour::WHITE;
-    } else if (blackPiecesBitboard & mask) {
-        return Colour::BLACK;
-    }
-    return Colour::NONE;
-}
-
-std::pair<Piece, Colour> Board::getPieceAndColour(uint8_t square) const {
-    assert(square < 64 && "square must be between 0-63");
-    uint64_t mask = 1ULL << square;
-    for (uint8_t i = 0; i < 6; i++) {
-        for (uint8_t j = 0; j < 2; j++) {
-            if (getBitboard(fromIndex<Piece>(i), fromIndex<Colour>(j)) & mask) {
-                return {fromIndex<Piece>(i), 
-                        fromIndex<Colour>(j)};
-            }
-        }
-    }
-
-    return {Piece::NONE, Colour::NONE};
-}
-
-Piece Board::getPiece(uint8_t square) const {
-    return getPieceAndColour(square).first;
-}
-
-Piece Board::getPiece(Colour colour, uint8_t square) const {
-    assert(square < 64 && "square must be between 0-63");
-    uint64_t mask = 1ULL << square;
-    for (uint8_t i = 0; i < 6; i++) {
-        if (getBitboard(fromIndex<Piece>(i), colour) & mask) {
-            return fromIndex<Piece>(i);
-        }
-    }
-
-    return Piece::NONE;
+Board::Board() {
+    resetBoard();
 }
 
 void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
@@ -77,6 +33,8 @@ void Board::addPiece(Piece piece, Colour colour, uint8_t square) {
     board |= mask;
     pieceBitboards[toIndex(colour)][toIndex(piece)] |= mask;
     piecesBitboard |= mask;
+    pieceCache[square] = piece;
+    colourCache[square] = colour;
 }
 
 void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
@@ -86,12 +44,14 @@ void Board::removePiece(Piece piece, Colour colour, uint8_t square) {
     board &= mask;
     pieceBitboards[toIndex(colour)][toIndex(piece)] &= mask;
     piecesBitboard &= mask;
+    pieceCache[square] = Piece::NONE;
+    colourCache[square] = Colour::NONE;
 }
 
 void Board::removePiece(uint8_t square) {
     auto [piece, colour] = getPieceAndColour(square);
-    assert(piece != Piece::NONE && "No piece seems to occupy fromSquare");
-    assert(colour != Colour::NONE && "No colour seems to occupy fromSquare");
+    assert(piece != Piece::NONE && "No piece seems to occupy square");
+    assert(colour != Colour::NONE && "No colour seems to occupy square");
     removePiece(piece, colour, square);
 }
 
@@ -230,6 +190,29 @@ void Board::resetBoard() {
             castlingRights[i][j] = true;
         }
     }
+    
+    pieceCache = {
+        Piece::ROOK, Piece::KNIGHT, Piece::BISHOP, Piece::QUEEN, Piece::KING, Piece::BISHOP, Piece::KNIGHT, Piece::ROOK,
+        Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN,
+        Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE,
+        Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE,
+        Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE,
+        Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE, Piece::NONE,
+        Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN, Piece::PAWN,
+        Piece::ROOK, Piece::KNIGHT, Piece::BISHOP, Piece::QUEEN, Piece::KING, Piece::BISHOP, Piece::KNIGHT, Piece::ROOK
+    };
+
+    colourCache = {
+        Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE,
+        Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE, Colour::WHITE,
+        Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE,
+        Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE,
+        Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE,
+        Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE, Colour::NONE,
+        Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK,
+        Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK, Colour::BLACK
+    };
+
     enPassantSquare = std::nullopt;
     resetPieces();
 }
