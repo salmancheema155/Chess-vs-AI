@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cctype>
 #include <optional>
 #include <utility>
 #include <bit>
@@ -17,7 +18,6 @@ namespace {
 }
 
 namespace Zobrist {
-    
     uint64_t computeInitialHash(const Board& board, const Chess::PieceColour playerTurn) {
         uint64_t hash = 0;
         // Pieces hash
@@ -124,5 +124,83 @@ namespace Zobrist {
         currentHash ^= zobristPlayerTurn;
         
         return currentHash;
+    }
+
+    uint64_t computeHash(const char* fen) {
+        uint8_t rank = 7;
+        uint8_t file = 0;
+        uint64_t hash = 0ULL;
+
+        int i = 0;
+        while (fen[i] != ' ') {
+            if (fen[i] == '/') {
+                rank--;
+                file = 0;
+            } else if (isdigit(fen[i])) {
+                file += (fen[i] - '0');
+            } else {
+                uint8_t colour = isupper(fen[i]) ? toIndex(Colour::WHITE) : toIndex(Colour::BLACK);
+
+                char c = tolower(fen[i]);
+                uint8_t piece;
+                switch (c) {
+                    case 'p':
+                        piece = toIndex(Piece::PAWN);
+                        break;
+                    case 'n':
+                        piece = toIndex(Piece::KNIGHT);
+                        break;
+                    case 'b':
+                        piece = toIndex(Piece::BISHOP);
+                        break;
+                    case 'r':
+                        piece = toIndex(Piece::ROOK);
+                        break;
+                    case 'q':
+                        piece = toIndex(Piece::QUEEN);
+                        break;
+                    case 'k':
+                        piece = toIndex(Piece::KING);
+                        break;
+                }
+
+                uint8_t square = 8 * rank + file;
+                hash ^= zobristTable[colour][piece][square];
+                file++;
+            }
+
+            i++;
+        }
+
+        i++; // Jump to player turn field
+        if (fen[i] == 'b') hash ^= zobristPlayerTurn;
+
+        i += 2; // Jump to castling rights
+        while (fen[i] != ' ') {
+            switch (fen[i]) {
+                case 'K':
+                    hash ^= zobristCastling[0];
+                    break;
+                case 'Q':
+                    hash ^= zobristCastling[1];
+                    break;
+                case 'k':
+                    hash ^= zobristCastling[2];
+                    break;
+                case 'q':
+                    hash ^= zobristCastling[3];
+                    break;
+            }
+
+            i++;
+        }
+
+        i++; // Jump to en passant square
+        if (fen[i] != '-') {
+            uint8_t file = fen[i] - 'a';
+            hash ^= zobristEnPassant[file];
+        }
+
+        return hash;
     }
 }

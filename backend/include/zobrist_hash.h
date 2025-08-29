@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <string>
 #include "board/board.h"
 #include "game/game_state.h"
 #include "chess_types.h"
@@ -45,6 +46,13 @@ namespace Zobrist {
      * @warning This function must only be used for null moves during null move pruning
      */
     uint64_t updateNullMoveHash(uint64_t currentHash, const std::optional<uint8_t> oldEnPassantSquare);
+
+    /**
+     * @brief Computes the zobrist hash of the game state
+     * @param fen FEN representation of the current game state
+     * @return Zobrist hash of the current game state
+     */
+    uint64_t computeHash(const char* fen);
 }
 
 #endif // ZOBRIST_HASH_H
