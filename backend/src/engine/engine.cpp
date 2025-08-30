@@ -13,6 +13,7 @@
 #include "game/game.h"
 #include "check/check.h"
 #include "move/move_generator.h"
+#include "book/opening_book.h"
 #include "chess_types.h"
 
 using Piece = Chess::PieceType;
@@ -66,6 +67,12 @@ Move Engine::getMove(Game& game) {
         auto now = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= TIME_LIMIT;
     };
+
+    Move bookMove = OpeningBook::getMove(game.getHash(), board);
+    if (bookMove != Move()) {
+        previousMove = bookMove;
+        return bookMove;
+    }
 
     for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
         moveBuffer.clear();

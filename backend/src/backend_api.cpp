@@ -13,6 +13,7 @@
 #include "board/board.h"
 #include "game/game.h"
 #include "engine/engine.h"
+#include "book/opening_book.h"
 #include "check/check.h"
 #include "chess_types.h"
 
@@ -159,6 +160,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void initialiseGame() {
         game = Game();
+        OpeningBook::loadBook();
         //game.setCustomGameState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
