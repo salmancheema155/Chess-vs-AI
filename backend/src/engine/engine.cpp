@@ -1,5 +1,6 @@
 #include <vector>
 #include <cstdint>
+#include <cmath>
 #include <limits>
 #include <algorithm>
 #include <functional>
@@ -198,7 +199,8 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
         int newDepth = depth + extension - 1;
 
         // Late Move Reduction
-        bool doLateMoveReduction = (newState != GameStateEvaluation::CHECK &&
+        bool doLateMoveReduction = (state != GameStateEvaluation::CHECK &&
+                                    newState != GameStateEvaluation::CHECK &&
                                     depth >= 3 &&
                                     moveCount >= 4 &&
                                     move.getCapturedPiece() == Move::NO_CAPTURE &&
@@ -206,9 +208,10 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
                                     !Evaluation::isKillerMove(move, ply));
 
         if (doLateMoveReduction) {
-            newDepth--;
-            if (moveCount >= 6) newDepth--;
-            if (moveCount >= 12) newDepth--;
+            int reduction = 0.33 + std::log(depth) * std::log(moveCount) / 2.25;
+            newDepth -= reduction;
+
+            doLateMoveReduction = reduction > 0;
         }
 
         int16_t eval;
