@@ -73,7 +73,8 @@ namespace {
 
 Game::Game() : currentTurn(Colour::WHITE) {
     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
-    positionHistory[hash] = 1;
+    positionHistory.push_back(hash);
+    irreversiblePositionIndices.push_back(0);
     GameState currentState = createGameState(currentTurn, board.getEnPassantSquare(), board.getCastlingRights(), 0, 1, hash);
     gameStateHistory.push(currentState);
 }
@@ -113,8 +114,9 @@ void Game::makeMove(const Move move) {
     uint64_t newHash = Zobrist::updateHash(currentState.hash, move, currentState.enPassantSquare, newEnPassantSquare,
                                             currentState.castleRights, newCastlingRights, colour, piece);
 
-    GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, newCastlingRights, newHalfMoves, newFullMoves, newHash);
-    positionHistory[newHash]++;
+    if (isIrreversibleMove(piece, move)) irreversiblePositionIndices.push_back(positionHistory.size());
+    GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, newCastlingRights, newHalfMoves, newFullMoves, newHash);    
+    positionHistory.push_back(newHash);
     moveHistory.push(move);
     gameStateHistory.push(newState);
     currentTurn = newPlayerTurn;
@@ -136,24 +138,23 @@ bool Game::makeMove(uint8_t fromSquare, uint8_t toSquare, uint8_t promotion) {
     return true;
 }
 
-bool Game::undo() {       
-    if (gameStateHistory.size() == 1 || moveHistory.size() == 0) return false;
-
-    undoHash(gameStateHistory.top().hash);
+void Game::undo() {
+    undoHash();
     gameStateHistory.pop();
     const Move previousMove = moveHistory.top();
     const GameState& previousState = gameStateHistory.top();
     board.undo(previousMove, previousState.playerTurn, previousState.castleRights, previousState.enPassantSquare);
 
     currentTurn = previousState.playerTurn;
-    moveHistory.pop();
-
-    return true;    
+    moveHistory.pop();   
 }
 
-void Game::undoHash(uint64_t hash) {
-    if (positionHistory[hash] == 1) positionHistory.erase(hash);
-    else positionHistory[hash]--;
+void Game::undoHash() {
+    if (irreversiblePositionIndices.back() == positionHistory.size() - 1) {
+        irreversiblePositionIndices.pop_back();
+    }
+
+    positionHistory.pop_back();
 }
 
 bool Game::isCurrentPlayerOccupies(uint8_t square) {
@@ -208,7 +209,21 @@ bool Game::isDrawByFiftyMoveRule() {
 }
 
 bool Game::isDrawByRepetition() {
-    return (positionHistory[gameStateHistory.top().hash] >= 3);
+    uint16_t end = positionHistory.size() - 1;
+    uint16_t start = irreversiblePositionIndices.back();
+
+    if (end - start < 8) return false; // Must have at least 9 positions to get a 3 fold repetition (1 + 4 + 4)
+
+    uint64_t target = positionHistory[end];
+    uint8_t count = 1;
+    for (int i = end - 2; i >= start; i -= 2) { // Only consider positions with the same side to move
+        if (positionHistory[i] == target) {
+            count++;
+            if (count >= 3) return true;
+        }
+    }
+
+    return false;
 }
 
 bool Game::isDrawByInsufficientMaterial() {
@@ -257,18 +272,27 @@ void Game::makeNullMove() {
     uint64_t newHash = Zobrist::updateNullMoveHash(currentState.hash, currentState.enPassantSquare);
 
     GameState newState = createGameState(newPlayerTurn, newEnPassantSquare, currentState.castleRights, newHalfMoves, newFullMoves, newHash);
-    positionHistory[newHash]++;
+    positionHistory.push_back(newHash);
     gameStateHistory.push(newState);
     currentTurn = newPlayerTurn;
 }
 
 void Game::undoNullMove() {
-    undoHash(gameStateHistory.top().hash);
+    undoHash();
     gameStateHistory.pop();
     const GameState& previousState = gameStateHistory.top();
     board.setEnPassantSquare(previousState.enPassantSquare);
 
     currentTurn = previousState.playerTurn;
+}
+
+bool Game::isIrreversibleMove(Piece piece, Move move) {
+    return (
+        piece == Piece::PAWN ||
+        move.getCapturedPiece() != Move::NO_CAPTURE ||
+        move.getPromotionPiece() != Move::NO_PROMOTION ||
+        move.getCastling() != Move::NO_CASTLE
+    );
 }
 
 // // TESTING PURPOSES ONLY
@@ -300,11 +324,11 @@ void Game::undoNullMove() {
 //         index++;
 //     }
 
-//     positionHistory.erase(gameStateHistory.top().hash);
+//     positionHistory.pop_back();
 //     gameStateHistory.pop();
 
 //     uint64_t hash = Zobrist::computeInitialHash(board, currentTurn);
-//     positionHistory[hash] = 1;
+//     positionHistory.push_back(hash);
 //     GameState currentState = createGameState(currentTurn, board.getEnPassantSquare(), 
 //                                             board.getCastlingRights(), halfMoveClock, fullMoves, hash);
 //     gameStateHistory.push(currentState);

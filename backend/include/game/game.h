@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <optional>
-#include <unordered_map>
 #include "board/board.h"
 #include "game_state.h"
 #include "move/move.h"
@@ -93,9 +92,9 @@ public:
 
     /**
      * @brief Reverts the game state to the previous position before the most recent move
-     * @return True if there is a move to undo, false otherwise (board is at the starting position)
+     * @warning There must be a corresponding makeMove call before calling this function
      */
-    bool undo();
+    void undo();
 
     /**
      * @brief Checks if the current player's turn piece occupies the square
@@ -154,7 +153,6 @@ private:
     Board board;
     std::stack<GameState> gameStateHistory;
     std::stack<Move> moveHistory;
-    std::unordered_map<uint64_t, uint8_t> positionHistory;
     Colour currentTurn;
 
     /**
@@ -176,13 +174,33 @@ private:
     bool isDrawByInsufficientMaterial();
 
     /**
-     * @brief Removes a hash from the positionHistory
+     * @brief Removes the most previous hash from the positionHistory
      */
-    void undoHash(uint64_t hash);
+    void undoHash();
+
+    /**
+     * @brief Checks if a move is an irreversible move
+     * @param piece Piece that is moving
+     * @param move Move to check if it is irreversible
+     * @return True if the move is irreversible (pawn push, capture, castling or promotion)
+     */
+    bool isIrreversibleMove(Piece piece, Move move);
 
     inline static std::vector<Move> moveBuffer = [] {
         std::vector<Move> v;
         v.reserve(256);
+        return v;
+    }();
+
+    inline static std::vector<uint64_t> positionHistory = [] {
+        std::vector<uint64_t> v;
+        v.reserve(400);
+        return v;
+    }();
+
+    inline static std::vector<uint16_t> irreversiblePositionIndices = [] {
+        std::vector<uint16_t> v;
+        v.reserve(150);
         return v;
     }();
 };
