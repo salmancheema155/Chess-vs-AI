@@ -283,37 +283,56 @@ void Board::setCustomBoardState(const char* fen) {
     blackPiecesBitboard = 0ULL;
     piecesBitboard = 0ULL;
 
-    std::unordered_map<char, Bitboard*> charMap;
-    charMap['P'] = &pieceBitboards[0][0];
-    charMap['N'] = &pieceBitboards[0][1];
-    charMap['B'] = &pieceBitboards[0][2];
-    charMap['R'] = &pieceBitboards[0][3];
-    charMap['Q'] = &pieceBitboards[0][4];
-    charMap['K'] = &pieceBitboards[0][5];
-    charMap['p'] = &pieceBitboards[1][0];
-    charMap['n'] = &pieceBitboards[1][1];
-    charMap['b'] = &pieceBitboards[1][2];
-    charMap['r'] = &pieceBitboards[1][3];
-    charMap['q'] = &pieceBitboards[1][4];
-    charMap['k'] = &pieceBitboards[1][5];
+    for (int i = 0; i < 64; i++) {
+        pieceCache[i] = Piece::NONE;
+        colourCache[i] = Colour::NONE;
+    }
 
     uint8_t index = 0;
     uint8_t row = 7;
     uint8_t col = 0;
+    
     while (fen[index] != ' ') {
         if (fen[index] == '/') {
             row--;
             col = 0;
-        } else if (std::isdigit(fen[index])) {
-            uint8_t digit = fen[index] - '0';
-            col += digit;
+        } else if (isdigit(fen[index])) {
+            col += (fen[index] - '0');
         } else {
+            uint8_t colour = isupper(fen[index]) ? toIndex(Colour::WHITE) : toIndex(Colour::BLACK);
+            uint8_t piece;
+
+            char c = tolower(fen[index]);
+            switch (c) {
+                case 'p':
+                    piece = toIndex(Piece::PAWN);
+                    break;
+                case 'n':
+                    piece = toIndex(Piece::KNIGHT);
+                    break;
+                case 'b':
+                    piece = toIndex(Piece::BISHOP);
+                    break;
+                case 'r':
+                    piece = toIndex(Piece::ROOK);
+                    break;
+                case 'q':
+                    piece = toIndex(Piece::QUEEN);
+                    break;
+                case 'k':
+                    piece = toIndex(Piece::KING);
+                    break;
+            }
+
             uint8_t square = 8 * row + col;
-            Bitboard* pPieceBitboard = charMap[fen[index]];
-            setBit(*pPieceBitboard, square);
+            Bitboard& bitboard = pieceBitboards[colour][piece];
+            setBit(bitboard, square);
             std::isupper(fen[index]) ? setBit(whitePiecesBitboard, square) : setBit(blackPiecesBitboard, square);
+            pieceCache[square] = fromIndex<Piece>(piece);
+            colourCache[square] = fromIndex<Colour>(colour);
             col++;
         }
+
         index++;
     }
     piecesBitboard = whitePiecesBitboard | blackPiecesBitboard;
