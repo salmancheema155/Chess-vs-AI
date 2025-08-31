@@ -23,22 +23,13 @@ using Chess::Bitboard;
 using Chess::toIndex;
 
 namespace {
-    bool disableNullPruning(Board& board, Colour colour) {
-        constexpr uint16_t DISABLE_NULL_PRUNING_VALUE = 1300;
-        constexpr uint16_t KNIGHT_VALUE = 300;
-        constexpr uint16_t BISHOP_VALUE = 300;
-        constexpr uint16_t ROOK_VALUE = 500;
-        constexpr uint16_t QUEEN_VALUE = 900;
-        constexpr Piece pieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
-        constexpr uint16_t values[4] = {KNIGHT_VALUE, BISHOP_VALUE, ROOK_VALUE, QUEEN_VALUE};
+    bool notZugzwangNullMovePruningCheck(Board& board, Colour colour) {
+        Bitboard bitboard = board.getBitboard(Piece::KNIGHT, colour) |
+                            board.getBitboard(Piece::BISHOP, colour) |
+                            board.getBitboard(Piece::ROOK, colour) |
+                            board.getBitboard(Piece::QUEEN, colour);
 
-        uint16_t total = 0;
-        for (uint8_t i = 0; i < 4; i++) {
-            uint8_t count = std::popcount(board.getBitboard(pieces[i], colour));
-            total += count * values[i];
-        }
-
-        return (total <= DISABLE_NULL_PRUNING_VALUE);
+        return bitboard;
     }
 }
 
@@ -157,17 +148,21 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
     Colour colour = game.getCurrentTurn();
 
     // Null move pruning
-    bool inCheck = (state == GameStateEvaluation::CHECK);
-    if (allowNullMove && !inCheck && depth >= 3 && !disableNullPruning(board, colour)) {
-        game.makeNullMove();
-        GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
-        const int NULL_MOVE_REDUCTION = (depth >= 6) ? 3 : 2;
-        int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, timeUp, ply + 1, extensionCount, false);
-        game.undoNullMove();
+    if (allowNullMove) {
+        int16_t staticEval = Evaluation::evaluate(game, state, ply);
+        bool inCheck = (state == GameStateEvaluation::CHECK);
 
-        if (nullEval >= beta) {
-            return beta;
-        }
+        if (!inCheck && depth >= 3 && staticEval >= beta && notZugzwangNullMovePruningCheck(board, colour)) {
+            game.makeNullMove();
+            GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
+            const int NULL_MOVE_REDUCTION = (depth >= 6) ? 3 : 2;
+            int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, timeUp, ply + 1, extensionCount, false);
+            game.undoNullMove();
+
+            if (nullEval >= beta) {
+                return beta;
+            }
+        }   
     }
 
     int16_t originalAlpha = alpha;
