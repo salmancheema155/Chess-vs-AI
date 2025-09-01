@@ -63,13 +63,14 @@ private:
      * @param alpha Minimax alpha variable for alpha-beta pruning
      * @param beta Minimax beta variable for alpha-beta pruning
      * @param state The current game state evaluation
+     * @param isPVNode True if the parent call was a PV node, false otherwise
      * @param timeUp Function to check if current search time has exceeded
      * @param ply Number of half moves elapsed since the start of the search
      * @param extensionCount Number of extensions made
      * @param allowNullMove Allow null pruning
      * @return Evaluation of current game state at a specified depth
      */
-    int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, 
+    int16_t negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, bool isPVNode,
                     const std::function<bool()>& timeUp, uint8_t ply = 1, int extensionCount = 0, bool allowNullMove = true);
 
     /**

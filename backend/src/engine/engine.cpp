@@ -93,8 +93,9 @@ Move Engine::getMove(Game& game) {
             }
 
             GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
-            bool allowNullMove = (moveCount != 0);
-            int16_t eval = -negamax(game, depth - 1, -beta, -alpha, newState, timeUp, 1, 0, allowNullMove);
+            bool isPVNode = (moveCount == 0);
+            bool allowNullMove = !isPVNode;
+            int16_t eval = -negamax(game, depth - 1, -beta, -alpha, newState, isPVNode, timeUp, 1, 0, allowNullMove);
             game.undo();
             moveCount++;
 
@@ -122,7 +123,7 @@ Move Engine::getMove(Game& game) {
     return bestMove;
 }
 
-int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, 
+int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, GameStateEvaluation state, bool isPVNode,
                         const std::function<bool()>& timeUp, uint8_t ply, int extensionCount, bool allowNullMove) {
 
     uint64_t hash = game.getHash();
@@ -156,7 +157,7 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
             game.makeNullMove();
             GameStateEvaluation newState = game.getCurrentGameStateEvaluation();
             const int NULL_MOVE_REDUCTION = (depth >= 6) ? 3 : 2;
-            int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, timeUp, ply + 1, extensionCount, false);
+            int16_t nullEval = -negamax(game, depth - NULL_MOVE_REDUCTION - 1, -beta, -(beta - 1), newState, isPVNode, timeUp, ply + 1, extensionCount, false);
             game.undoNullMove();
 
             if (nullEval >= beta) {
@@ -211,21 +212,21 @@ int16_t Engine::negamax(Game& game, int depth, int16_t alpha, int16_t beta, Game
 
         int16_t eval;
         // PVS node
-        if (moveCount == 0) {
-            eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, false);
+        if (isPVNode || moveCount == 0) {
+            eval = -negamax(game, newDepth, -beta, -alpha, newState, true, timeUp, ply + 1, extensionCount + extension, false);
         } else {
             // Zero-width non-PVS node search
-            eval = -negamax(game, newDepth, -(alpha + 1), -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+            eval = -negamax(game, newDepth, -(alpha + 1), -alpha, newState, false, timeUp, ply + 1, extensionCount + extension, allowNullMove);
 
             // Research if zero-width search fails
             if (eval > alpha && eval < beta) {
-                eval = -negamax(game, newDepth, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+                eval = -negamax(game, newDepth, -beta, -alpha, newState, false, timeUp, ply + 1, extensionCount + extension, allowNullMove);
             }
         }
 
         // Search again if Late Move Reduction fails
         if (doLateMoveReduction && eval > alpha && eval < beta) {
-            eval = -negamax(game, depth - 1 + extension, -beta, -alpha, newState, timeUp, ply + 1, extensionCount + extension, allowNullMove);
+            eval = -negamax(game, depth - 1 + extension, -beta, -alpha, newState, isPVNode, timeUp, ply + 1, extensionCount + extension, allowNullMove);
         }
 
         game.undo();
