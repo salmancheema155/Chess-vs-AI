@@ -20,27 +20,23 @@ using Chess::toIndex;
 Move Evaluation::killerMoves[256][2];
 int16_t Evaluation::historyHeuristics[2][6][64][64];
 
-namespace {
-    double gamePhase(Board& board) {
-        constexpr int MAX_PHASE = 24;
-        constexpr Piece pieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
-        constexpr Colour colours[2] = {Colour::WHITE, Colour::BLACK};
-        constexpr int phaseValues[6] = {0, 1, 1, 2, 4, 0};
-        
-        int totalPhase = 0;
-        for (Colour colour : colours) {
-            for (Piece piece : pieces) {
-                Bitboard bitboard = board.getBitboard(piece, colour);
-                totalPhase += std::popcount(bitboard) * phaseValues[toIndex(piece)];
-            }
+int16_t Evaluation::gamePhase(Board& board) {
+    constexpr Piece pieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
+    constexpr Colour colours[2] = {Colour::WHITE, Colour::BLACK};
+    constexpr int phaseValues[6] = {0, 1, 1, 2, 4, 0};
+    
+    int totalPhase = 0;
+    for (Colour colour : colours) {
+        for (Piece piece : pieces) {
+            Bitboard bitboard = board.getBitboard(piece, colour);
+            totalPhase += std::popcount(bitboard) * phaseValues[toIndex(piece)];
         }
-        
-        if (totalPhase >= MAX_PHASE) return 1.0;
-        return ((double)totalPhase) / MAX_PHASE;
     }
+    
+    return std::min(totalPhase, Evaluation::MAX_PHASE);
 }
 
-int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double phase) {
+int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, int16_t phase) {
     constexpr Piece pieces[6] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN, Piece::KING};
     const Colour opposingColour = (colour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
     const uint8_t kingSquare = board.getKingSquare(colour);
@@ -57,6 +53,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
     uint8_t c = toIndex(colour);
     uint8_t oc = toIndex(opposingColour);
+    int32_t phasedEval = 0;
     int16_t eval = 0;
 
     for (uint8_t i = 0; i < 6; i++) {
@@ -68,7 +65,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             // Piece Square Table evaluation
             uint8_t square = std::countr_zero(bitboard);
             if (colour == Colour::WHITE) square ^= 0x38; // Flip square from black to white's perspective
-            eval += static_cast<int16_t>(PieceTables::tables[i][square] * phase + PieceTables::endgameTables[i][square] * (1 - phase));
+            phasedEval += PieceTables::tables[i][square] * phase + PieceTables::endgameTables[i][square] * (MAX_PHASE - phase);
 
             bitboard &= (bitboard - 1);
         }
@@ -80,14 +77,12 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         uint8_t pawnCount = std::popcount(pawnsBitboard & mask);
 
         // Penalty for doubling pawns
-        double doublingPenalty = (pawnCount - 1) * (phase * DOUBLED_PAWN_PENALTY + (1 - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int16_t>(doublingPenalty);
+        phasedEval += (pawnCount - 1) * (phase * DOUBLED_PAWN_PENALTY + (MAX_PHASE - phase) * DOUBLED_PAWN_PENALTY_END_GAME);
 
         // Penalty for isolated pawns
         uint64_t isolatedMask = EnginePrecompute::adjacentFileMaskTable[file];
         if (pawnsBitboard & isolatedMask) continue; // Contains pawn on either immediate left or right file
-        double isolatedPenalty =  pawnCount * (phase * ISOLATED_PAWN_PENALTY + (1 - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
-        eval += static_cast<int16_t>(isolatedPenalty);
+        phasedEval += pawnCount * (phase * ISOLATED_PAWN_PENALTY + (MAX_PHASE - phase) * ISOLATED_PAWN_PENALTY_END_GAME);
     }
 
     Bitboard pawnsBitboardTemp = pawnsBitboard;
@@ -99,26 +94,24 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
         // Is backward pawn
         if (board.isEmpty(nextSquare) && !(pawnsBitboard & backwardMask) && (board.getBitboard(Piece::PAWN, opposingColour) & pawnThreatMask)) {
-            double backwardPenalty = (phase * BACKWARD_PAWN_PENALTY + (1 - phase) * BACKWARD_PAWN_PENALTY_END_GAME);
-            eval += static_cast<int16_t>(backwardPenalty);
+            phasedEval += phase * BACKWARD_PAWN_PENALTY + (MAX_PHASE - phase) * BACKWARD_PAWN_PENALTY_END_GAME;
         }
 
         // Is part of a pawn chain
         uint64_t pawnChainMask = EnginePrecompute::pawnChainMaskTable[c][square];
         uint64_t pawnChainBitboard = pawnsBitboard & pawnChainMask;
         if (pawnChainBitboard) {
-            uint8_t chainsCount = std::popcount(pawnChainBitboard); // Number of chains it is part of (1/2)
-            double pawnChainBonus = chainsCount * (phase * PAWN_CHAIN_BONUS + (1 - phase) * PAWN_CHAIN_BONUS_END_GAME);
-            eval += static_cast<int16_t>(pawnChainBonus);
+            uint8_t chainsCount = std::popcount(pawnChainBitboard); // Number of chains it is part of (1 or 2)
+            phasedEval += chainsCount * (phase * PAWN_CHAIN_BONUS + (MAX_PHASE - phase) * PAWN_CHAIN_BONUS_END_GAME);
         }
 
         // Is a passed pawn
         uint64_t passedPawnMask = EnginePrecompute::passedPawnMaskTable[c][square];
         if (!(passedPawnMask & board.getBitboard(Piece::PAWN, opposingColour))) {
             uint8_t effectiveSquare = (colour == Colour::WHITE) ? square ^ 0x38 : square;
-            eval += static_cast<int16_t>(
+            phasedEval += (
                 PieceTables::passedPawnTables[0][effectiveSquare] * phase + 
-                PieceTables::passedPawnTables[1][effectiveSquare] * (1 - phase)
+                PieceTables::passedPawnTables[1][effectiveSquare] * (MAX_PHASE - phase)
             );
         }
 
@@ -128,20 +121,17 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
     // Major pawn shield bonus
     {
         Bitboard majorPawnsShieldBitboard = EnginePrecompute::majorPawnShieldTable[c][kingSquare] & pawnsBitboard;
-        double majorPawnShieldBonus = phase * std::popcount(majorPawnsShieldBitboard) * MAJOR_PAWN_SHIELD_BONUS;
-        eval += static_cast<int16_t>(majorPawnShieldBonus);
+        phasedEval += phase * std::popcount(majorPawnsShieldBitboard) * MAJOR_PAWN_SHIELD_BONUS;
     }
 
     // Minor pawn shield bonus
     {
         Bitboard minorPawnsShieldBitboard = EnginePrecompute::minorPawnShieldTable[c][kingSquare] & pawnsBitboard;
-        double minorPawnShieldBonus = phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
-        eval += static_cast<int16_t>(minorPawnShieldBonus);
+        phasedEval += phase * std::popcount(minorPawnsShieldBitboard) * MINOR_PAWN_SHIELD_BONUS;
     }
 
     // King tropism bonuses
     constexpr Piece tropismPieces[4] = {Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
-    double tropismBonus = 0.0;
     for (uint8_t i = 0; i < 4; i++) {
         Bitboard bitboard = board.getBitboard(tropismPieces[i], colour);
         while (bitboard) {
@@ -149,55 +139,49 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             uint8_t distance = EnginePrecompute::chebyshevDistanceTable[opposingKingSquare][square];
             
             if (distance < MAX_TROPISM_DISTANCE) {
-                tropismBonus += phase * KING_TROPISM_BONUSES[i] * (MAX_TROPISM_DISTANCE - distance);
+                phasedEval += phase * KING_TROPISM_BONUSES[i] * (MAX_TROPISM_DISTANCE - distance);
             }
 
             bitboard &= bitboard - 1;
         }
     }
-    eval += static_cast<int16_t>(tropismBonus);
 
     // Rook open/semi-open file bonus
     Bitboard rooksBitboardTemp = board.getBitboard(Piece::ROOK, colour);
-    double rookOpenFileBonus = 0.0;
     while (rooksBitboardTemp) {
         uint8_t square = std::countr_zero(rooksBitboardTemp);
         Bitboard openFileMask = EnginePrecompute::fileTable[square];
         
         // Open file
         if (!(allPawnsBitboard & openFileMask)) {
-            rookOpenFileBonus += phase * ROOK_OPEN_FILE_BONUS + (1 - phase) * ROOK_OPEN_FILE_BONUS_END_GAME;
+            phasedEval += phase * ROOK_OPEN_FILE_BONUS + (MAX_PHASE - phase) * ROOK_OPEN_FILE_BONUS_END_GAME;
         // Semi-open file
         } else if (!(pawnsBitboard & openFileMask)) {
-            rookOpenFileBonus += phase * ROOK_SEMI_OPEN_FILE_BONUS + (1 - phase) * ROOK_SEMI_OPEN_FILE_BONUS_END_GAME;
+            phasedEval += phase * ROOK_SEMI_OPEN_FILE_BONUS + (MAX_PHASE - phase) * ROOK_SEMI_OPEN_FILE_BONUS_END_GAME;
         }
 
         rooksBitboardTemp &= rooksBitboardTemp - 1;
     }
-    eval += static_cast<int16_t>(rookOpenFileBonus);
 
     // Queen open/semi-open file bonus
     Bitboard queensBitboardTemp = board.getBitboard(Piece::QUEEN, colour);
-    double queenOpenFileBonus = 0.0;
     while (queensBitboardTemp) {
         uint8_t square = std::countr_zero(queensBitboardTemp);
         Bitboard openFileMask = EnginePrecompute::fileTable[square];
         
         // Open file
         if (!(allPawnsBitboard & openFileMask)) {
-            queenOpenFileBonus += phase * QUEEN_OPEN_FILE_BONUS + (1 - phase) * QUEEN_OPEN_FILE_BONUS_END_GAME;
+            phasedEval += phase * QUEEN_OPEN_FILE_BONUS + (MAX_PHASE - phase) * QUEEN_OPEN_FILE_BONUS_END_GAME;
         // Semi-open file
         } else if (!(pawnsBitboard & openFileMask)) {
-            queenOpenFileBonus += phase * QUEEN_SEMI_OPEN_FILE_BONUS + (1 - phase) * QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME;
+            phasedEval += phase * QUEEN_SEMI_OPEN_FILE_BONUS + (MAX_PHASE - phase) * QUEEN_SEMI_OPEN_FILE_BONUS_END_GAME;
         }
 
         queensBitboardTemp &= queensBitboardTemp - 1;
     }
-    eval += static_cast<int16_t>(queenOpenFileBonus);
 
     // Open file near king penalty
     {
-        double openFileNearKingPenalty = 0.0;
         for (int offset = -1; offset <= 1; offset++) {
             int file = kingFile + offset;
             if (file < 0 || file > 7) continue;
@@ -206,20 +190,18 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
             // Open file
             if (!(allPawnsBitboard & openFileMask)) {
-                openFileNearKingPenalty += phase * OPEN_FILE_NEAR_KING_PENALTY;
+                phasedEval += phase * OPEN_FILE_NEAR_KING_PENALTY;
             // Semi-open file
             } else if (!(pawnsBitboard & openFileMask)) {
-                openFileNearKingPenalty += phase * SEMI_OPEN_FILE_NEAR_KING_PENALTY;
+                phasedEval += phase * SEMI_OPEN_FILE_NEAR_KING_PENALTY;
             }
         }
-        eval += static_cast<int16_t>(openFileNearKingPenalty);
     }
 
     // Opposing pieces attacking in king zone penalty
     {
         constexpr Piece kingZoneAttacksPieces[5] = {Piece::PAWN, Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN};
         Bitboard kingZone = PrecomputeMoves::kingMoveTable[kingSquare];
-        double kingZoneAttacksPenalty = 0.0;
 
         for (uint8_t i = 0; i < 4; i++) {
             Bitboard bitboard = board.getBitboard(kingZoneAttacksPieces[i], opposingColour);
@@ -248,45 +230,39 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
                 }
 
                 Bitboard kingZoneAttacks = attacks & kingZone;
-                kingZoneAttacksPenalty += phase * std::popcount(kingZoneAttacks) * KING_ZONE_ATTACK_PENALTIES[i];
+                phasedEval += phase * std::popcount(kingZoneAttacks) * KING_ZONE_ATTACK_PENALTIES[i];
 
                 bitboard &= bitboard - 1;
             }
         }
-        eval += static_cast<int16_t>(kingZoneAttacksPenalty);
     }
 
     // Bishop mobility bonus
     Bitboard bishopsBitboardTemp = board.getBitboard(Piece::BISHOP, colour);
-    double bishopMobilityBonus = 0.0;
     while (bishopsBitboardTemp) {
         uint8_t square = std::countr_zero(bishopsBitboardTemp);
         Bitboard bishopMoves = PrecomputeMoves::getBishopMovesFromTable(square, allPiecesBitboard);
         bishopMoves &= ~piecesBitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(bishopMoves); // Number of squares that the bishop can move to
-        bishopMobilityBonus += phase * BISHOP_MOBILITY_BONUSES[mobility] + (1 - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
+        phasedEval += phase * BISHOP_MOBILITY_BONUSES[mobility] + (MAX_PHASE - phase) * BISHOP_MOBILITY_BONUSES_END_GAME[mobility];
 
         bishopsBitboardTemp &= bishopsBitboardTemp - 1;
     }
-    eval += static_cast<int16_t>(bishopMobilityBonus);
 
     // Knight mobility bonus
     Bitboard knightsBitboardTemp = board.getBitboard(Piece::KNIGHT, colour);
-    double knightMobilityBonus = 0.0;
     while (knightsBitboardTemp) {
         uint8_t square = std::countr_zero(knightsBitboardTemp);
         Bitboard knightMoves = PrecomputeMoves::knightMoveTable[square];
         knightMoves &= ~piecesBitboard; // Remove squares which land onto same colour pieces
         uint8_t mobility = std::popcount(knightMoves); // Number of squares that the knight can move to
-        knightMobilityBonus += phase * KNIGHT_MOBILITY_BONUSES[mobility] + (1 - phase) * KNIGHT_MOBILITY_BONUSES_END_GAME[mobility];
+        phasedEval += phase * KNIGHT_MOBILITY_BONUSES[mobility] + (MAX_PHASE - phase) * KNIGHT_MOBILITY_BONUSES_END_GAME[mobility];
 
         knightsBitboardTemp &= knightsBitboardTemp - 1;
     }
-    eval += static_cast<int16_t>(knightMobilityBonus);
 
     // Connected rooks bonus
     Bitboard rooksBitboardTemp2 = board.getBitboard(Piece::ROOK, colour);
-    double connectedRookBonus = 0.0;
     while (rooksBitboardTemp2) {
         uint8_t square1 = std::countr_zero(rooksBitboardTemp2);
         rooksBitboardTemp2 &= rooksBitboardTemp2 - 1;
@@ -297,21 +273,19 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
             if (Board::getFile(square1) == Board::getFile(square2)) {
                 uint64_t squaresBetweenMask = EnginePrecompute::sameFileSquaresBetweenTable[square1][square2];
                 if (!(squaresBetweenMask & allPiecesBitboard)) {
-                    connectedRookBonus += phase * CONNECTED_ROOK_BONUS + (1 - phase) * CONNECTED_ROOK_BONUS_END_GAME;
+                    phasedEval += phase * CONNECTED_ROOK_BONUS + (MAX_PHASE - phase) * CONNECTED_ROOK_BONUS_END_GAME;
                 }
             } else if (Board::getRank(square1) == Board::getRank(square2)) {
                 uint64_t squaresBetweenMask = EnginePrecompute::sameRankSquaresBetweenTable[square1][square2];
                 if (!(squaresBetweenMask & allPiecesBitboard)) {
-                    connectedRookBonus += phase * CONNECTED_ROOK_BONUS + (1 - phase) * CONNECTED_ROOK_BONUS_END_GAME;
+                    phasedEval += phase * CONNECTED_ROOK_BONUS + (MAX_PHASE - phase) * CONNECTED_ROOK_BONUS_END_GAME;
                 }
             }
 
             remainingRooksBitboard &= remainingRooksBitboard - 1;
         }
     }
-    eval += static_cast<int16_t>(connectedRookBonus);
 
-    double pawnStormBonus = 0.0;
     for (uint8_t file = 0; file < 7; file++) {
         uint64_t currentFileMask = 0x0101010101010101ULL << file;
         uint64_t rightFileMask = 0x0101010101010101ULL << (file + 1);
@@ -340,7 +314,7 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
         if (currentFilePawnAdvance >= 3 && rightFilePawnAdvance >= 3) {
             // Pawns must be within 2 files of the king
             if (opposingKingFile >= file - 1 && opposingKingFile <= file + 2) {
-                pawnStormBonus += phase * PAWN_STORM_BONUS;
+                phasedEval += phase * PAWN_STORM_BONUS;
 
                 uint8_t currentFilePawnRankDistance = (currentFilePawnRank >= opposingKingRank) ? 
                                                         currentFilePawnRank - opposingKingRank :
@@ -356,14 +330,15 @@ int16_t Evaluation::pieceValueEvaluation(Board& board, Colour colour, double pha
 
                 // Bonus for pawn storms close to the king
                 if (distance <= 2) {
-                    pawnStormBonus += phase * PAWN_STORM_PROXIMITY_BONUS * (3 - distance);
+                    phasedEval += phase * PAWN_STORM_PROXIMITY_BONUS * (3 - distance);
                 }
 
                 break; // Only include 1 pawn storm in evaluation
             }
         }
     }
-    eval += static_cast<int16_t>(pawnStormBonus);
+
+    eval += phasedEval / MAX_PHASE;
 
     return eval;
 }
@@ -408,7 +383,7 @@ int16_t Evaluation::evaluate(Game& game, GameStateEvaluation state, uint8_t ply)
     Board& board = game.getBoard();
     Colour currentColour = game.getCurrentTurn();
     Colour opposingColour = (currentColour == Colour::WHITE) ? Colour::BLACK : Colour::WHITE;
-    double phase = gamePhase(board);
+    int16_t phase = gamePhase(board);
     int16_t eval = pieceValueEvaluation(board, currentColour, phase) - pieceValueEvaluation(board, opposingColour, phase);
 
     return eval;

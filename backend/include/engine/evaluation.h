@@ -26,10 +26,10 @@ public:
      * @brief Calculates the evaluation of the players pieces
      * @param board Board object representing current board state
      * @param colour Colour of player
-     * @param phase Current game phase (0-1) with 1 = early game, 0 = end game
+     * @param phase Current game phase (0-24) with 24 = early game, 0 = end game
      * @return Evaluation of players pieces
      */
-    static int16_t pieceValueEvaluation(Board& board, Colour colour, double phase);
+    static int16_t pieceValueEvaluation(Board& board, Colour colour, int16_t phase);
 
     /**
      * @brief Orders moves by predicted best to worse for normal negamax search
@@ -112,6 +112,7 @@ public:
 private:
     static std::pair<MoveType, int16_t> orderingScore(const Move move, Board& board, uint8_t ply, Colour colour, const Move* bestMove = nullptr);
     static int16_t orderingQuiescenceScore(const Move move, Board& board);
+    static int16_t gamePhase(Board& board);
 
     static constexpr int16_t CHECKMATE_VALUE = 30000;
 
@@ -174,6 +175,8 @@ private:
     static constexpr int16_t PAWN_STORM_PROXIMITY_BONUS = 15;
 
     static constexpr int16_t MAX_HISTORY_VALUE = 128;
+
+    static constexpr int MAX_PHASE = 24;
 
     static Move killerMoves[256][2];
     static int16_t historyHeuristics[2][6][64][64];
