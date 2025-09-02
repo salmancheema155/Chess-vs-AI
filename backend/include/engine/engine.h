@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <string>
 #include <unordered_map>
 #include "engine/transposition_table.h"
 #include "move/move.h"
@@ -99,7 +100,7 @@ private:
     std::vector<std::vector<Move>> quiescenceMoveBuffers;
 
     uint8_t maxDepthSearched = 0;
-    int16_t currentEvaluation = 0.0;
+    int16_t currentEvaluation = 0;
     Move previousMove;
 };
 

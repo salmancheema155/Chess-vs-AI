@@ -60,12 +60,6 @@ Move Engine::getMove(Game& game) {
         return std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() >= TIME_LIMIT;
     };
 
-    Move bookMove = OpeningBook::getMove(game.getHash(), board);
-    if (bookMove != Move()) {
-        previousMove = bookMove;
-        return bookMove;
-    }
-
     for (uint8_t depth = 1; depth <= MAX_DEPTH; depth++) {
         moveBuffer.clear();
         MoveGenerator::pseudoLegalMoves(board, colour, moveBuffer);
@@ -119,6 +113,12 @@ Move Engine::getMove(Game& game) {
     transpositionTable.incrementGeneration();
     quiescenceTranspositionTable.incrementGeneration();
     previousMove = bestMove;
+
+    Move bookMove = OpeningBook::getMove(game.getHash(), board);
+    if (bookMove != Move()) {
+        previousMove = bookMove;
+        return bookMove;
+    }
 
     return bestMove;
 }
