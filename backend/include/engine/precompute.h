@@ -7,6 +7,9 @@
 #include <cmath>
 
 namespace EnginePrecompute {
+    /**
+     * @brief Stores a mask for each file with set bits indicating squares that are in adjacent files
+     */
     inline constexpr std::array<uint64_t, 8> adjacentFileMaskTable = [] {
         std::array<uint64_t, 8> table {};
         constexpr uint64_t leftMostFileMask = 0x0101010101010101ULL;
@@ -31,6 +34,10 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each square and colour with set bits indicating squares that are in behind ranks and in adjaceent files
+     * Indexed as [colour][square]
+     */
     inline const std::array<std::array<uint64_t, 64>, 2> backwardPawnMaskTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table {};
         
@@ -50,6 +57,10 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each square and colour with set bits indicating squares that a pawn on that square defends
+     * Indexed as [colour][square]
+     */
     inline const std::array<std::array<uint64_t, 64>, 2> pawnChainMaskTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table {};
 
@@ -83,6 +94,11 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each king square and colour of the square that is directly in front of the king given that the king is in an appropriate rank and file
+     * @attention For king squares not on the first 2 ranks of its side of the board or squares on central files, the mask stored is 0ULL to represent no (weak) protection
+     * Indexed as [colour][king square]
+     */
     inline const std::array<std::array<uint64_t, 64>, 2> majorPawnShieldTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table {};
 
@@ -108,6 +124,11 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each king square and colour of the squares that are 1 square diagonally in front of the king given that the king is in an appropriate rank and file
+     * @attention For king squares that are not on the first rank of its side of the board or diagonal squares that are in central files, the mask will not include these squares to indicate weaker protection
+     * Indexed as [colour][king square]
+     */
     inline const std::array<std::array<uint64_t, 64>, 2> minorPawnShieldTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table {};
 
@@ -139,6 +160,10 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each square and colour of the squares that are both in ahead ranks and in adjacent files
+     * Indexed as [colour][square]
+     */
     inline const std::array<std::array<uint64_t, 64>, 2> passedPawnMaskTable = [] {
         std::array<std::array<uint64_t, 64>, 2> table {};
 
@@ -158,6 +183,9 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Stores a mask for each square of the squares in that file
+     */
     inline const std::array<uint64_t, 64> fileTable = [] {
         std::array<uint64_t, 64> table {};
 
@@ -171,6 +199,11 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Given 2 squares on the same file, stores a mask with set bits representing the squares on this file in between these 2 squares
+     * @note For 2 squares not on the same file, the mask stored is 0ULL
+     * Indexed as [square1][square2]
+     */
     inline const std::array<std::array<uint64_t, 64>, 64> sameFileSquaresBetweenTable = [] {
         std::array<std::array<uint64_t, 64>, 64> table {};
 
@@ -196,6 +229,11 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Given 2 squares on the same rank, stores a mask with set bits representing the squares on this rank in between these 2 squares
+     * @note For 2 squares not on the same rank, the mask stored is 0ULL
+     * Indexed as [square1][square2]
+     */
     inline const std::array<std::array<uint64_t, 64>, 64> sameRankSquaresBetweenTable = [] {
         std::array<std::array<uint64_t, 64>, 64> table {};
 
@@ -221,6 +259,10 @@ namespace EnginePrecompute {
         return table;
     }();
 
+    /**
+     * @brief Given 2 squares, stores the chebyshev distance between those 2 squares
+     * Indexed as [square1][square2]
+     */
     inline const std::array<std::array<uint8_t, 64>, 64> chebyshevDistanceTable = [] {
         std::array<std::array<uint8_t, 64>, 64> table {};
 
