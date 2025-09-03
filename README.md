@@ -43,3 +43,10 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Generating Documentation
+This project supports Doxygen documentation for C++ backend\
+To generate documentation:
+```bash
+doxygen Doxyfile
+```
